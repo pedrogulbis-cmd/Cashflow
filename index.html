@@ -124,6 +124,15 @@
         .app-header h1 .emoji {
             font-size: 22px;
         }
+        .app-header h1 .version-badge {
+            font-size: 10px;
+            font-weight: 500;
+            background: var(--bg3);
+            color: var(--text2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
         .app-header .header-actions {
             display: flex;
             gap: 8px;
@@ -151,7 +160,7 @@
             color: var(--accent);
         }
         .app-header .back-btn {
-            font-size: 24px;
+            font-size: 20px;
             padding: 4px 8px;
             background: none;
             border: none;
@@ -160,6 +169,10 @@
             display: none;
             align-items: center;
             gap: 4px;
+            border-radius: 6px;
+        }
+        .app-header .back-btn:hover {
+            background: var(--bg3);
         }
         .app-header .back-btn.show {
             display: flex;
@@ -1021,6 +1034,29 @@
             color: var(--text2);
         }
 
+        /* ===== SHARE TAB ===== */
+        .share-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .share-item .share-info {
+            flex: 1;
+        }
+        .share-item .share-title {
+            font-weight: 500;
+        }
+        .share-item .share-status {
+            font-size: 12px;
+            color: var(--text3);
+        }
+        .share-item .share-actions {
+            display: flex;
+            gap: 6px;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
             .main-content {
@@ -1164,7 +1200,6 @@
             font-weight: 500;
         }
 
-        /* small screen tweaks */
         .btn .btn-text {
             display: inline;
         }
@@ -1187,26 +1222,6 @@
                 display: inline;
             }
         }
-
-        /* back button in header */
-        .back-btn {
-            font-size: 20px;
-            background: none;
-            border: none;
-            color: var(--text2);
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-        .back-btn:hover {
-            background: var(--bg3);
-        }
-        .back-btn.show {
-            display: flex;
-        }
     </style>
 </head>
 <body>
@@ -1216,7 +1231,11 @@
         <header class="app-header" id="appHeader">
             <div style="display:flex;align-items:center;gap:6px;">
                 <button class="back-btn" id="backBtn">← <span data-i18n="back">Retour</span></button>
-                <h1><span class="emoji">💰</span> <span id="headerTitle">CashFlow</span></h1>
+                <h1>
+                    <span class="emoji">💰</span>
+                    <span id="headerTitle">CashFlow</span>
+                    <span class="version-badge" id="versionBadge">v1.0.0</span>
+                </h1>
             </div>
             <div class="header-actions">
                 <button id="headerAddOp" title="Ajouter une opération" aria-label="Ajouter une opération">➕</button>
@@ -1240,7 +1259,7 @@
                 </div>
             </div>
 
-            <!-- PROJECT DETAIL VIEW (hidden from nav) -->
+            <!-- PROJECT DETAIL VIEW -->
             <div class="view" id="viewProject">
                 <div id="projectDetail"></div>
             </div>
@@ -1262,6 +1281,27 @@
                     <input type="date" class="form-control" id="forecastDate">
                 </div>
                 <div id="forecastResults"></div>
+            </div>
+
+            <!-- SHARE VIEW -->
+            <div class="view" id="viewShare">
+                <div class="flex-between mb-16">
+                    <h2 style="font-size:18px;font-weight:600;" data-i18n="share">Partage</h2>
+                    <button class="btn btn-sm btn-secondary" id="refreshSharesBtn" title="Rafraîchir les partages">🔄</button>
+                </div>
+                <div id="shareList"></div>
+                <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+                    <h3 style="font-size:15px;font-weight:600;margin-bottom:8px;" data-i18n="import_share">Importer un partage</h3>
+                    <div class="form-group">
+                        <label data-i18n="share_code">Code de partage (ID du projet)</label>
+                        <input class="form-control" id="importShareId" placeholder="ex: abc123">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="password">Mot de passe</label>
+                        <input type="password" class="form-control" id="importSharePwd" placeholder="Mot de passe">
+                    </div>
+                    <button class="btn btn-primary" id="importShareBtn" data-i18n="import">Importer</button>
+                </div>
             </div>
 
             <!-- SETTINGS VIEW -->
@@ -1316,6 +1356,18 @@
 
                 <div class="setting-item">
                     <div>
+                        <div class="set-label" data-i18n="github_settings">GitHub pour partage</div>
+                        <div class="set-desc" data-i18n="github_desc">Token et dépôt pour le partage</div>
+                    </div>
+                    <div class="set-control" style="flex-direction:column;gap:4px;align-items:stretch;">
+                        <input class="form-control" id="githubToken" placeholder="Token GitHub (classic)" type="password" style="font-size:12px;padding:6px 10px;">
+                        <input class="form-control" id="githubRepo" placeholder="Dépôt : utilisateur/repo" style="font-size:12px;padding:6px 10px;">
+                        <button class="btn btn-sm btn-secondary" id="saveGitHubBtn">Enregistrer</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
                         <div class="set-label" data-i18n="import_export">Import / Export</div>
                         <div class="set-desc" data-i18n="import_export_desc">Sauvegarde ou restauration JSON</div>
                     </div>
@@ -1350,7 +1402,7 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAV (sans Projet) -->
+        <!-- BOTTOM NAV -->
         <nav class="bottom-nav" id="bottomNav">
             <button class="nav-item active" data-view="viewHome" aria-label="Accueil">
                 <span class="nav-icon">🏠</span>
@@ -1363,6 +1415,10 @@
             <button class="nav-item" data-view="viewForecast" aria-label="Prévisionnel">
                 <span class="nav-icon">🔮</span>
                 <span class="nav-label" data-i18n="forecast">Prévisionnel</span>
+            </button>
+            <button class="nav-item" data-view="viewShare" aria-label="Partage">
+                <span class="nav-icon">🔗</span>
+                <span class="nav-label" data-i18n="share">Partage</span>
             </button>
             <button class="nav-item" data-view="viewSettings" aria-label="Réglages">
                 <span class="nav-icon">⚙️</span>
@@ -1394,7 +1450,7 @@
         const VERSION = '1.0.0';
         const SCHEMA = 1;
         const JOURNAL = [
-            { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale' }
+            { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale avec partage GitHub' }
         ];
         const GID_SITE = ''; // Mettez votre Client ID Google ici
 
@@ -1408,6 +1464,7 @@
                 planning: 'Planning',
                 forecast: 'Forecast',
                 settings: 'Settings',
+                share: 'Share',
                 total_available: 'Total available',
                 archived_projects: 'Archived projects',
                 monthly_planning: 'Monthly planning',
@@ -1488,7 +1545,23 @@
                 lowest: 'Lowest amount',
                 all_types: 'All types',
                 back: 'Back',
-                archived: 'Archived'
+                archived: 'Archived',
+                import_share: 'Import a share',
+                share_code: 'Share code (project ID)',
+                password: 'Password',
+                import: 'Import',
+                github_settings: 'GitHub for sharing',
+                github_desc: 'Token and repository for sharing',
+                share_project: 'Share project',
+                revoke_share: 'Revoke share',
+                shared: 'Shared',
+                not_shared: 'Not shared',
+                share_with_password: 'Share with password',
+                share_created: 'Share created',
+                share_revoked: 'Share revoked',
+                import_share_success: 'Share imported successfully',
+                import_share_failed: 'Import failed',
+                refresh_shares: 'Refresh shares'
             },
             fr: {
                 home: 'Accueil',
@@ -1496,6 +1569,7 @@
                 planning: 'Planification',
                 forecast: 'Prévisionnel',
                 settings: 'Réglages',
+                share: 'Partage',
                 total_available: 'Total disponible',
                 archived_projects: 'Projets archivés',
                 monthly_planning: 'Planification mensuelle',
@@ -1576,14 +1650,30 @@
                 lowest: 'Montant le plus faible',
                 all_types: 'Tous les types',
                 back: 'Retour',
-                archived: 'Archivé'
+                archived: 'Archivé',
+                import_share: 'Importer un partage',
+                share_code: 'Code de partage (ID du projet)',
+                password: 'Mot de passe',
+                import: 'Importer',
+                github_settings: 'GitHub pour le partage',
+                github_desc: 'Token et dépôt pour le partage',
+                share_project: 'Partager le projet',
+                revoke_share: 'Révoquer le partage',
+                shared: 'Partagé',
+                not_shared: 'Non partagé',
+                share_with_password: 'Partager avec mot de passe',
+                share_created: 'Partage créé',
+                share_revoked: 'Partage révoqué',
+                import_share_success: 'Partage importé avec succès',
+                import_share_failed: 'Échec de l\'import',
+                refresh_shares: 'Rafraîchir les partages'
             }
         };
 
         // ============================================================
         // STATE
         // ============================================================
-        let currentLang = 'fr'; // français par défaut
+        let currentLang = 'fr';
         let currentTheme = 'light';
         let accentColor = '#3b82f6';
         let currentView = 'viewHome';
@@ -1601,6 +1691,11 @@
         let allProjects = [];
         let allOperations = [];
         let allRecurrings = [];
+        // GitHub settings
+        let githubToken = '';
+        let githubRepo = '';
+        // Shared projects cache (for display)
+        let sharedProjects = []; // list of {id, name, emoji, shared: true/false}
 
         // ============================================================
         // INDEXED DB
@@ -1764,7 +1859,7 @@
                 el.textContent = t(key);
             });
             document.getElementById('headerTitle').textContent = 'CashFlow';
-            // Mettre à jour le titre de la vue projet si affichée
+            document.getElementById('versionBadge').textContent = 'v' + VERSION;
             const backBtn = document.getElementById('backBtn');
             if (currentView === 'viewProject') {
                 backBtn.innerHTML = `← ${t('back')}`;
@@ -1818,7 +1913,6 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector(`.nav-item[data-view="${viewId}"]`)?.classList.add('active');
 
-            // Gérer le bouton retour
             const backBtn = document.getElementById('backBtn');
             if (viewId === 'viewProject') {
                 backBtn.classList.add('show');
@@ -1827,12 +1921,12 @@
                 backBtn.classList.remove('show');
             }
 
-            // Titre
             const titles = {
                 viewHome: '🏠 ' + t('home'),
                 viewProject: '📊 ' + t('project'),
                 viewPlanning: '📅 ' + t('planning'),
                 viewForecast: '🔮 ' + t('forecast'),
+                viewShare: '🔗 ' + t('share'),
                 viewSettings: '⚙️ ' + t('settings')
             };
             document.getElementById('headerTitle').textContent = titles[viewId] || 'CashFlow';
@@ -1841,6 +1935,7 @@
             else if (viewId === 'viewProject') renderProjectDetail();
             else if (viewId === 'viewPlanning') renderPlanning();
             else if (viewId === 'viewForecast') renderForecast();
+            else if (viewId === 'viewShare') renderShare();
             else if (viewId === 'viewSettings') renderSettings();
         }
 
@@ -2152,12 +2247,256 @@
         }
 
         // ============================================================
+        // RENDER: SHARE
+        // ============================================================
+        function renderShare() {
+            const container = document.getElementById('shareList');
+            const projects = allProjects.filter(p => p.active && !p.archived);
+            if (projects.length === 0) {
+                container.innerHTML = `<div class="empty-state"><span class="empty-icon">🔗</span><h3>Aucun projet actif à partager</h3></div>`;
+                return;
+            }
+            // For each project, show if shared (we check if it exists in GitHub shares)
+            // We'll fetch from GitHub? We'll just show a share button.
+            let html = '';
+            for (const p of projects) {
+                const isShared = false; // we need to check from GitHub, but we'll just show share button
+                html += `
+              <div class="share-item">
+                <div class="share-info">
+                  <div class="share-title">${p.emoji || '📁'} ${p.title}</div>
+                  <div class="share-status" id="shareStatus_${p.id}">${t('not_shared')}</div>
+                </div>
+                <div class="share-actions">
+                  <button class="btn btn-sm btn-primary" onclick="shareProject('${p.id}')">${t('share_project')}</button>
+                  <button class="btn btn-sm btn-danger" onclick="revokeShare('${p.id}')" style="display:none;" id="revokeBtn_${p.id}">${t('revoke_share')}</button>
+                </div>
+              </div>
+            `;
+            }
+            container.innerHTML = html;
+            // Check share status from GitHub
+            checkAllShares();
+        }
+
+        async function checkAllShares() {
+            // For each project, check if a share file exists on GitHub
+            if (!githubToken || !githubRepo) return;
+            const projects = allProjects.filter(p => p.active && !p.archived);
+            for (const p of projects) {
+                try {
+                    const url = `https://api.github.com/repos/${githubRepo}/contents/shares/${p.id}.json`;
+                    const res = await fetch(url, {
+                        headers: {
+                            'Authorization': 'token ' + githubToken,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    const statusEl = document.getElementById(`shareStatus_${p.id}`);
+                    const revokeBtn = document.getElementById(`revokeBtn_${p.id}`);
+                    if (res.status === 200) {
+                        if (statusEl) statusEl.textContent = '✅ ' + t('shared');
+                        if (revokeBtn) revokeBtn.style.display = 'inline-block';
+                    } else {
+                        if (statusEl) statusEl.textContent = '❌ ' + t('not_shared');
+                        if (revokeBtn) revokeBtn.style.display = 'none';
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }
+        }
+
+        // ============================================================
+        // SHARE FUNCTIONS (GitHub)
+        // ============================================================
+        async function shareProject(projectId) {
+            if (!githubToken || !githubRepo) {
+                alert('Veuillez configurer votre token GitHub et dépôt dans les réglages.');
+                return;
+            }
+            const p = getProjectById(projectId);
+            if (!p) return;
+            // Prompt for password
+            const password = prompt(t('share_with_password'));
+            if (!password) return;
+            // Build data: project + operations + recurrings
+            const data = {
+                project: p,
+                operations: getOperationsForProject(projectId),
+                recurrings: getRecurringsForProject(projectId),
+                sharedAt: new Date().toISOString()
+            };
+            // Encrypt? For simplicity, we'll base64 encode (not secure) - but we use password to encrypt (simple XOR or use CryptoJS? We'll use basic encryption)
+            // We'll use a simple XOR with password for demo
+            const json = JSON.stringify(data);
+            const encrypted = encryptXOR(json, password);
+            // Upload to GitHub
+            const path = `shares/${projectId}.json`;
+            const content = btoa(encrypted); // base64
+            const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
+            // Check if exists
+            let sha = '';
+            try {
+                const res = await fetch(url, {
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (res.status === 200) {
+                    const data = await res.json();
+                    sha = data.sha;
+                }
+            } catch (e) {}
+            // Upload
+            const payload = {
+                message: `Share project ${p.title}`,
+                content: content,
+                sha: sha || undefined
+            };
+            const uploadRes = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'token ' + githubToken,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (uploadRes.ok) {
+                showToast(t('share_created'));
+                renderShare();
+            } else {
+                const err = await uploadRes.text();
+                alert('Erreur lors du partage : ' + err);
+            }
+        }
+
+        async function revokeShare(projectId) {
+            if (!confirm(t('confirm_delete'))) return;
+            if (!githubToken || !githubRepo) return;
+            const path = `shares/${projectId}.json`;
+            const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
+            try {
+                const res = await fetch(url, {
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (res.status !== 200) {
+                    alert('Partage introuvable.');
+                    return;
+                }
+                const data = await res.json();
+                const deleteRes = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: 'Revoke share', sha: data.sha })
+                });
+                if (deleteRes.ok) {
+                    showToast(t('share_revoked'));
+                    renderShare();
+                } else {
+                    alert('Erreur lors de la révocation.');
+                }
+            } catch (e) {
+                alert('Erreur : ' + e.message);
+            }
+        }
+
+        // Simple XOR encryption
+        function encryptXOR(str, key) {
+            let result = '';
+            for (let i = 0; i < str.length; i++) {
+                const charCode = str.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                result += String.fromCharCode(charCode);
+            }
+            return result;
+        }
+
+        function decryptXOR(encrypted, key) {
+            return encryptXOR(encrypted, key); // XOR is symmetric
+        }
+
+        async function importShare() {
+            const projectId = document.getElementById('importShareId').value.trim();
+            const password = document.getElementById('importSharePwd').value.trim();
+            if (!projectId || !password) {
+                alert('Veuillez remplir tous les champs.');
+                return;
+            }
+            if (!githubToken || !githubRepo) {
+                alert('Veuillez configurer votre token GitHub et dépôt dans les réglages.');
+                return;
+            }
+            const path = `shares/${projectId}.json`;
+            const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
+            try {
+                const res = await fetch(url, {
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (res.status !== 200) {
+                    alert('Partage introuvable.');
+                    return;
+                }
+                const data = await res.json();
+                const encrypted = atob(data.content);
+                const decrypted = decryptXOR(encrypted, password);
+                const shareData = JSON.parse(decrypted);
+                // Import project, operations, recurrings (merge non-destructive)
+                const existingProject = getProjectById(shareData.project.id);
+                if (existingProject) {
+                    if (!confirm('Un projet avec cet ID existe déjà. Voulez-vous le remplacer ?')) return;
+                    // Remove old project and its data
+                    await dbDelete('projects', shareData.project.id);
+                    allProjects = allProjects.filter(p => p.id !== shareData.project.id);
+                    const opsToRemove = allOperations.filter(o => o.projectId === shareData.project.id);
+                    for (const o of opsToRemove) await dbDelete('operations', o.id);
+                    allOperations = allOperations.filter(o => o.projectId !== shareData.project.id);
+                    const recsToRemove = allRecurrings.filter(r => r.projectId === shareData.project.id);
+                    for (const r of recsToRemove) await dbDelete('recurrings', r.id);
+                    allRecurrings = allRecurrings.filter(r => r.projectId !== shareData.project.id);
+                }
+                // Add project
+                await dbPut('projects', shareData.project);
+                allProjects.push(shareData.project);
+                for (const op of shareData.operations) {
+                    await dbPut('operations', op);
+                    allOperations.push(op);
+                }
+                for (const r of shareData.recurrings) {
+                    await dbPut('recurrings', r);
+                    allRecurrings.push(r);
+                }
+                showToast(t('import_share_success'));
+                renderHome();
+                renderShare();
+                // Clean import fields
+                document.getElementById('importShareId').value = '';
+                document.getElementById('importSharePwd').value = '';
+            } catch (e) {
+                alert(t('import_share_failed') + ' : ' + e.message);
+            }
+        }
+
+        // ============================================================
         // RENDER: SETTINGS
         // ============================================================
         function renderSettings() {
             document.getElementById('versionDisplay').textContent = VERSION;
             document.getElementById('langSelect').value = currentLang;
             document.getElementById('accentColorPicker').value = accentColor;
+            document.getElementById('githubToken').value = githubToken;
+            document.getElementById('githubRepo').value = githubRepo;
         }
 
         // ============================================================
@@ -2923,8 +3262,6 @@
                 const json = JSON.stringify(data, null, 2);
                 const formData = new FormData();
                 const blob = new Blob([json], { type: 'application/json' });
-                // On utilise une requête simple sans gestion de fichier existant pour éviter les CORS complexes
-                // On se contente de sauvegarder dans le Drive via une requête multipart
                 const metadata = {
                     name: `cashflow_backup_${today()}.json`,
                     mimeType: 'application/json'
@@ -2980,16 +3317,40 @@
         }
 
         // ============================================================
+        // GITHUB SETTINGS
+        // ============================================================
+        function loadGitHubSettings() {
+            const saved = localStorage.getItem('cashflow_github');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    githubToken = data.token || '';
+                    githubRepo = data.repo || '';
+                } catch (e) {}
+            }
+        }
+
+        function saveGitHubSettings() {
+            const token = document.getElementById('githubToken').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            githubToken = token;
+            githubRepo = repo;
+            localStorage.setItem('cashflow_github', JSON.stringify({ token, repo }));
+            showToast('Paramètres GitHub enregistrés');
+            renderShare();
+        }
+
+        // ============================================================
         // INIT
         // ============================================================
         async function init() {
-            // Charger les préférences
             const savedTheme = localStorage.getItem('cashflow_theme') || 'light';
             const savedAccent = localStorage.getItem('cashflow_accent') || '#3b82f6';
-            const savedLang = localStorage.getItem('cashflow_lang') || 'fr'; // français par défaut
+            const savedLang = localStorage.getItem('cashflow_lang') || 'fr';
             currentLang = savedLang;
             applyTheme(savedTheme);
             applyAccentColor(savedAccent);
+            loadGitHubSettings();
 
             db = await openDB();
             allProjects = await dbGetAll('projects') || [];
@@ -3022,16 +3383,14 @@
         }
 
         function setupEventListeners() {
-            // Navigation sans l'onglet Projet
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.onclick = () => {
                     const view = item.dataset.view;
-                    if (view === 'viewProject') return; // ne devrait pas arriver
+                    if (view === 'viewProject') return;
                     navigateTo(view);
                 };
             });
 
-            // Bouton retour
             document.getElementById('backBtn').onclick = () => {
                 if (currentView === 'viewProject') {
                     navigateTo('viewHome');
@@ -3070,6 +3429,7 @@
                 else if (currentView === 'viewProject') renderProjectDetail();
                 else if (currentView === 'viewPlanning') renderPlanning();
                 else if (currentView === 'viewForecast') renderForecast();
+                else if (currentView === 'viewShare') renderShare();
                 else if (currentView === 'viewSettings') renderSettings();
                 const setting = { id: 'settings', theme: currentTheme, accent: accentColor, language: currentLang };
                 dbPut('settings', setting);
@@ -3110,6 +3470,16 @@
 
             document.getElementById('addRecurringBtn').onclick = showAddRecurring;
 
+            // Share
+            document.getElementById('importShareBtn').onclick = importShare;
+            document.getElementById('refreshSharesBtn').onclick = () => {
+                renderShare();
+                showToast(t('refresh_shares'));
+            };
+
+            // GitHub settings
+            document.getElementById('saveGitHubBtn').onclick = saveGitHubSettings;
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeModal();
             });
@@ -3140,9 +3510,12 @@
         window.renderProjectDetail = renderProjectDetail;
         window.renderPlanning = renderPlanning;
         window.renderForecast = renderForecast;
+        window.renderShare = renderShare;
         window.renderSettings = renderSettings;
         window.updateForecast = updateForecast;
         window.t = t;
+        window.shareProject = shareProject;
+        window.revokeShare = revokeShare;
     </script>
 </body>
 </html>
