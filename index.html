@@ -535,17 +535,7 @@
         .emoji-grid .emoji-option:active {
             transform: scale(0.92);
         }
-        .emoji-picker-scroll {
-            max-height: 180px;
-            height: auto;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 4px;
-            background: var(--bg);
-            display: block;
-            position: relative;
-        }
+        /* Plus de classe .emoji-picker-scroll, on utilise un style inline */
         .selected-emoji-display {
             font-size: 40px;
             text-align: center;
@@ -1559,7 +1549,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.7.0</span>
+                    <span class="version-badge" id="versionBadge">v1.8.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1748,6 +1738,7 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.8.0</span><span>2026-02-08 · Correction définitive du scroll des émoticônes (approche inline)</span></div>
                         <div class="journal-entry"><span class="jv">v1.7.0</span><span>2026-02-07 · Correction prévisionnel, icônes thème, scroll émojis</span></div>
                         <div class="journal-entry"><span class="jv">v1.6.0</span><span>2026-02-06 · Correction solde projeté, scroll émojis, icônes thème</span></div>
                         <div class="journal-entry"><span class="jv">v1.5.0</span><span>2026-02-05 · Réorganisation projets, planification directe, prévisions par défaut, + rapide</span></div>
@@ -1758,7 +1749,7 @@
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.7.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.8.0</span>
                     </div>
                 </div>
             </div>
@@ -1809,9 +1800,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.7.0';
+        const VERSION = '1.8.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.8.0', date: '2026-02-08', changes: 'Correction définitive du scroll des émoticônes (approche inline)' },
             { version: '1.7.0', date: '2026-02-07', changes: 'Correction prévisionnel, icônes thème, scroll émojis' },
             { version: '1.6.0', date: '2026-02-06', changes: 'Correction solde projeté, scroll émojis, icônes thème' },
             { version: '1.5.0', date: '2026-02-05', changes: 'Réorganisation projets, planification directe, prévisions par défaut, + rapide' },
@@ -2250,7 +2242,6 @@
             return Math.round(balance * 100) / 100;
         }
 
-        // Solde projeté total (réel + toutes les récurrences futures)
         function getProjectTotalProjectedBalance(projectId) {
             let balance = getProjectBalance(projectId);
             const recs = getRecurringsForProject(projectId);
@@ -2275,7 +2266,6 @@
             return Math.round(balance * 100) / 100;
         }
 
-        // Solde projeté à une date donnée (incluant les récurrences jusqu'à cette date)
         function getProjectProjectedBalanceAtDate(projectId, targetDate) {
             let balance = getProjectBalance(projectId);
             const recs = getRecurringsForProject(projectId);
@@ -2380,7 +2370,6 @@
             } else {
                 toggle.classList.remove('active');
             }
-            // Labels fixes : ☀️ à gauche, 🌙 à droite
             document.getElementById('themeLabel').textContent = '☀️';
             document.getElementById('themeLabel2').textContent = '🌙';
             localStorage.setItem('cashflow_theme', theme);
@@ -2716,9 +2705,21 @@
         }
 
         // ============================================================
-        // EMOJI PICKER
+        // EMOJI PICKER (version corrigée avec approche inline)
         // ============================================================
         function renderEmojiPicker(selectedEmoji, onSelect) {
+            // Conteneur principal avec style inline pour garantir le scroll
+            const wrapper = document.createElement('div');
+            wrapper.style.maxHeight = '180px';
+            wrapper.style.overflowY = 'auto';
+            wrapper.style.display = 'block';
+            wrapper.style.border = '1px solid var(--border)';
+            wrapper.style.borderRadius = '8px';
+            wrapper.style.padding = '4px';
+            wrapper.style.background = 'var(--bg)';
+            // Ajouter une hauteur minimale pour forcer le scroll même si peu d'éléments (mais il y en a beaucoup)
+            wrapper.style.minHeight = '60px';
+
             const container = document.createElement('div');
             container.className = 'emoji-grid';
             EMOJIS.forEach(emoji => {
@@ -2732,8 +2733,6 @@
                 };
                 container.appendChild(el);
             });
-            const wrapper = document.createElement('div');
-            wrapper.className = 'emoji-picker-scroll';
             wrapper.appendChild(container);
             return wrapper;
         }
@@ -3258,12 +3257,11 @@
         }
 
         // ============================================================
-        // RENDER: FORECAST (corrigé pour correspondre à l'accueil)
+        // RENDER: FORECAST
         // ============================================================
         function renderForecast() {
             const container = document.getElementById('forecastResults');
             const dateInput = document.getElementById('forecastDate');
-            // Par défaut, on met la date à aujourd'hui pour afficher le solde projeté total
             if (!dateInput.value) {
                 dateInput.value = today();
             }
@@ -3284,8 +3282,6 @@
             }
 
             const todayStr = today();
-            // Si la date sélectionnée est aujourd'hui ou une date passée, on utilise le solde projeté total (toutes les récurrences futures)
-            // Sinon, on calcule le solde à la date sélectionnée
             const useTotalProjected = (dateStr <= todayStr);
 
             let total = 0;
@@ -4786,7 +4782,6 @@
 
             initDrive();
 
-            // Initialiser la date du prévisionnel à aujourd'hui
             document.getElementById('forecastDate').value = today();
             document.getElementById('forecastDate').onchange = updateForecast;
 
