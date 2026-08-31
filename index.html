@@ -504,15 +504,15 @@
         .emoji-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
-            padding: 8px 0;
+            gap: 4px;
+            padding: 6px 0;
         }
         .emoji-grid .emoji-option {
-            font-size: 28px;
+            font-size: 26px;
             text-align: center;
             cursor: pointer;
-            padding: 6px 0;
-            border-radius: 8px;
+            padding: 4px 0;
+            border-radius: 6px;
             transition: background 0.15s, transform 0.1s;
             background: var(--bg2);
             border: 2px solid transparent;
@@ -520,24 +520,24 @@
         }
         .emoji-grid .emoji-option:hover {
             background: var(--bg3);
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
         .emoji-grid .emoji-option.selected {
             border-color: var(--accent);
             background: var(--accent-light);
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
         .emoji-grid .emoji-option:active {
             transform: scale(0.92);
         }
         .selected-emoji-display {
-            font-size: 36px;
+            font-size: 40px;
             text-align: center;
             padding: 6px 0;
             background: var(--bg2);
             border-radius: 8px;
             border: 2px dashed var(--border);
-            min-height: 56px;
+            min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -547,8 +547,8 @@
                 grid-template-columns: repeat(6, 1fr);
             }
             .emoji-grid .emoji-option {
-                font-size: 24px;
-                padding: 4px 0;
+                font-size: 22px;
+                padding: 3px 0;
             }
         }
 
@@ -1137,6 +1137,35 @@
             min-width: 24px;
         }
 
+        /* ===== PROJECT CHOOSER ===== */
+        .project-chooser .pc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid var(--border);
+            margin-bottom: 6px;
+            background: var(--bg);
+        }
+        .project-chooser .pc-item:hover {
+            background: var(--bg3);
+        }
+        .project-chooser .pc-item .pc-emoji {
+            font-size: 24px;
+        }
+        .project-chooser .pc-item .pc-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        .project-chooser .pc-item .pc-balance {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text2);
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
             .main-content {
@@ -1166,8 +1195,8 @@
                 grid-template-columns: repeat(6, 1fr);
             }
             .emoji-grid .emoji-option {
-                font-size: 24px;
-                padding: 4px 0;
+                font-size: 22px;
+                padding: 3px 0;
             }
         }
         @media (min-width: 601px) {
@@ -1309,6 +1338,36 @@
                 display: inline;
             }
         }
+
+        /* error box */
+        .error-box {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin: 8px 0;
+            border: 1px solid #fca5a5;
+        }
+        [data-theme="dark"] .error-box {
+            background: #3a1a1a;
+            color: #f87171;
+            border-color: #7f1d1d;
+        }
+        .success-box {
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin: 8px 0;
+            border: 1px solid #86efac;
+        }
+        [data-theme="dark"] .success-box {
+            background: #1a3a2a;
+            color: #4ade80;
+            border-color: #166534;
+        }
     </style>
 </head>
 <body>
@@ -1321,7 +1380,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.0.0</span>
+                    <span class="version-badge" id="versionBadge">v1.1.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1388,6 +1447,7 @@
                         <input type="password" class="form-control" id="importSharePwd" placeholder="Mot de passe">
                     </div>
                     <button class="btn btn-primary" id="importShareBtn" data-i18n="import">Importer</button>
+                    <div id="shareImportFeedback" style="margin-top:8px;"></div>
                 </div>
             </div>
 
@@ -1450,6 +1510,7 @@
                         <input class="form-control" id="githubToken" placeholder="Token GitHub (classic)" type="password" style="font-size:12px;padding:6px 10px;">
                         <input class="form-control" id="githubRepo" placeholder="Dépôt : utilisateur/repo" style="font-size:12px;padding:6px 10px;">
                         <button class="btn btn-sm btn-secondary" id="saveGitHubBtn">Enregistrer</button>
+                        <div id="githubFeedback" style="margin-top:4px;font-size:12px;color:var(--text3);"></div>
                     </div>
                 </div>
 
@@ -1490,10 +1551,11 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.1.0</span><span>2026-02-01 · + émojis, bouton + intelligent, partage amélioré</span></div>
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.0.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.1.0</span>
                     </div>
                 </div>
             </div>
@@ -1544,23 +1606,72 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.0.0';
+        const VERSION = '1.1.0';
         const SCHEMA = 1;
         const JOURNAL = [
-            { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale avec partage GitHub' }
+            { version: '1.1.0', date: '2026-02-01', changes: '+ émojis, bouton + intelligent, partage amélioré' },
+            { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale' }
         ];
         const GID_SITE = ''; // Mettez votre Client ID Google ici
 
+        // === ÉMOJIS : beaucoup plus nombreux ! ===
         const EMOJIS = [
-            '📁', '💰', '📈', '🏠', '🚀', '🌟', '💡', '🔥',
-            '🎯', '🎨', '🏖️', '🌈', '🎉', '💎', '📊', '🏆',
-            '🎁', '🍀', '⚡', '🛒', '🏪', '💼', '📱', '💻',
-            '🖥️', '⌚', '🎧', '📷', '🎮', '📚', '✈️', '🚗',
-            '🏥', '🎓', '🏫', '🏢', '🌿', '🌊', '☀️', '🌙'
+            // Smileys & visages
+            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+            '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐',
+            '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢',
+            '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️',
+            '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞',
+            '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺',
+            '👻', '👽', '👾', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾',
+            // Animaux
+            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵',
+            '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗',
+            '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕',
+            '🐙', '🦑', '🦐', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊',
+            // Nourriture
+            '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝',
+            '🍅', '🍆', '🥑', '🫑', '🌽', '🥕', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐',
+            '🥖', '🫓', '🥨', '🥯', '🥞', '🧇', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪',
+            '🌮', '🌯', '🫔', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🫕', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫',
+            '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠',
+            '🥡', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '☕',
+            '🍵', '🥤', '🧃', '🧉', '🧊', '🥂', '🥃', '🍷', '🍸', '🍹', '🍺', '🍻', '🥄', '🔪', '🏺',
+            // Sports & activités
+            '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍',
+            '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂',
+            '🏋️', '🤼', '🤸', '⛹️', '🤾', '🏌️', '🏇', '🧘', '🏄', '🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏃',
+            '💃', '🕺', '🕴️', '👯', '🧖', '🧑‍🦯', '🦮', '🐕‍🦺',
+            // Nature
+            '🌳', '🌲', '🌴', '🌵', '🌾', '🌿', '☘️', '🍀', '🎍', '🪴', '🌱', '🌺', '🌸', '🌼', '🌻', '🌹',
+            '🥀', '🌷', '🪷', '🌞', '🌝', '🌚', '🌛', '🌜', '🌙', '⭐', '🌟', '✨', '☄️', '💫', '🌈', '☀️',
+            '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️',
+            '🌫️', '🌊', '💧', '☔', '🔥', '💦',
+            // Voyages & lieux
+            '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏯', '🏰', '💒',
+            '🗼', '🗽', '⛪', '🕌', '🕍', '⛩️', '🛕', '🕋', '⛲', '⛺', '🌋', '🗻', '🏔️', '⛰️', '🏕️', '🛖',
+            '🏗️', '🧱', '🪨', '🪵', '🏘️', '🏚️', '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪',
+            '🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼', '🗽', '⛪', '🕌', '🕍', '⛩️', '🛕', '🕋', '⛲', '⛺',
+            '🌋', '🗻', '🏔️', '⛰️', '🏕️', '🛖', '🏗️', '🧱', '🪨', '🪵', '🏘️', '🏚️',
+            // Objets
+            '⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '🧮',
+            '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏰', '⏳', '⌛',
+            '📡', '🔋', '🪫', '💡', '🔦', '🕯️', '🧯', '🪣', '🧹', '🧺', '🧻', '🚽', '🚿', '🛁', '🪥', '🪒',
+            '🧴', '🧷', '🧸', '🪆', '🎈', '🎉', '🎊', '🎀', '🎁', '🎂', '🎃', '🎄', '🎅', '🧑‍🎄', '🪔', '🕎',
+            '✡️', '☸️', '☯️', '🕉️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐',
+            '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️',
+            // Drapeaux & symboles
+            '🏁', '🚩', '🎌', '🏴', '🏳️', '🏳️‍🌈', '🏳️‍⚧️', '🇫🇷', '🇪🇺', '🇺🇸', '🇬🇧', '🇩🇪', '🇮🇹', '🇪🇸', '🇵🇹', '🇧🇪',
+            '🇨🇭', '🇯🇵', '🇨🇳', '🇷🇺', '🇧🇷', '🇦🇷', '🇲🇽', '🇨🇦', '🇦🇺', '🇳🇿', '🇿🇦', '🇮🇳', '🇰🇷', '🇸🇦', '🇦🇪', '🇮🇱',
+            // Divers
+            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖',
+            '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '♈', '♉', '♊', '♋', '♌',
+            '♍', '♎', '♏', '♐', '♑', '♒', '♓', '⛎', '🔀', '🔁', '🔂', '🔄', '🔃', '🎵', '🎶', '🎼',
+            '🎤', '🎧', '🎷', '🎸', '🎹', '🎺', '🎻', '🥁', '🪘', '🎬', '🎭', '🎨', '🧵', '🪡', '🧶', '🪢'
         ];
 
         // ============================================================
-        // TRANSLATIONS (français par défaut)
+        // TRANSLATIONS
         // ============================================================
         const LANG = {
             en: {
@@ -1668,7 +1779,16 @@
                 import_share_failed: 'Import failed',
                 refresh_shares: 'Refresh shares',
                 initial_amount: 'Initial amount (optional)',
-                initial_amount_desc: 'Added as an income when creating the project'
+                initial_amount_desc: 'Added as an income when creating the project',
+                choose_project: 'Choose a project',
+                choose_project_desc: 'Select the project where you want to add the operation:',
+                no_project_selected: 'No project selected',
+                add_to_project: 'Add to project',
+                github_error: 'GitHub error',
+                github_unauthorized: 'Unauthorized. Check your token and permissions (repo scope required).',
+                github_not_found: 'Repository or file not found. Check your repo name.',
+                github_network: 'Network error. Check your internet connection.',
+                github_unknown: 'Unknown error. See console for details.'
             },
             fr: {
                 home: 'Accueil',
@@ -1775,7 +1895,16 @@
                 import_share_failed: 'Échec de l\'import',
                 refresh_shares: 'Rafraîchir les partages',
                 initial_amount: 'Montant initial (optionnel)',
-                initial_amount_desc: 'Ajouté comme un revenu lors de la création du projet'
+                initial_amount_desc: 'Ajouté comme un revenu lors de la création du projet',
+                choose_project: 'Choisir un projet',
+                choose_project_desc: 'Sélectionnez le projet dans lequel ajouter l\'opération :',
+                no_project_selected: 'Aucun projet sélectionné',
+                add_to_project: 'Ajouter au projet',
+                github_error: 'Erreur GitHub',
+                github_unauthorized: 'Non autorisé. Vérifiez votre token et les permissions (repo requis).',
+                github_not_found: 'Dépôt ou fichier introuvable. Vérifiez le nom du dépôt.',
+                github_network: 'Erreur réseau. Vérifiez votre connexion internet.',
+                github_unknown: 'Erreur inconnue. Consultez la console pour plus de détails.'
             }
         };
 
@@ -1973,7 +2102,7 @@
         }
 
         // ============================================================
-        // THEME
+        // THEME & ACCENT
         // ============================================================
         function applyTheme(theme) {
             currentTheme = theme;
@@ -1991,9 +2120,6 @@
             localStorage.setItem('cashflow_theme', theme);
         }
 
-        // ============================================================
-        // ACCENT COLOR
-        // ============================================================
         function applyAccentColor(color) {
             accentColor = color;
             document.documentElement.style.setProperty('--accent', color);
@@ -2086,7 +2212,7 @@
         }
 
         // ============================================================
-        // UNDO SYSTEM
+        // UNDO
         // ============================================================
         function pushUndo(action, data) {
             undoStack.push({ action, data });
@@ -2112,7 +2238,6 @@
                 el.className = 'emoji-option' + (emoji === selectedEmoji ? ' selected' : '');
                 el.textContent = emoji;
                 el.onclick = () => {
-                    // Remove selected from all
                     container.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('selected'));
                     el.classList.add('selected');
                     onSelect(emoji);
@@ -2123,7 +2248,7 @@
         }
 
         // ============================================================
-        // RENDER: HOME
+        // RENDER FUNCTIONS
         // ============================================================
         function renderHome() {
             const total = getTotalActiveBalance();
@@ -2198,9 +2323,6 @@
             };
         }
 
-        // ============================================================
-        // RENDER: PROJECT DETAIL
-        // ============================================================
         function renderProjectDetail() {
             const container = document.getElementById('projectDetail');
             if (!selectedProjectId) {
@@ -2276,9 +2398,6 @@
           `;
         }
 
-        // ============================================================
-        // RENDER: PLANNING
-        // ============================================================
         function renderPlanning() {
             const container = document.getElementById('recurringList');
             if (allRecurrings.length === 0) {
@@ -2322,9 +2441,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================================
-        // RENDER: FORECAST
-        // ============================================================
         function renderForecast() {
             const container = document.getElementById('forecastResults');
             const dateInput = document.getElementById('forecastDate');
@@ -2373,9 +2489,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================================
-        // RENDER: SHARE
-        // ============================================================
         function renderShare() {
             const container = document.getElementById('shareList');
             const projects = allProjects.filter(p => p.active && !p.archived);
@@ -2402,6 +2515,24 @@
             checkAllShares();
         }
 
+        // ============================================================
+        // SHARE FUNCTIONS (GitHub) avec messages d'erreur améliorés
+        // ============================================================
+        function setShareFeedback(message, isError = true) {
+            const el = document.getElementById('shareImportFeedback');
+            if (!el) return;
+            if (isError) {
+                el.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
+            } else {
+                el.innerHTML = `<div class="success-box">✅ ${message}</div>`;
+            }
+        }
+
+        function clearShareFeedback() {
+            const el = document.getElementById('shareImportFeedback');
+            if (el) el.innerHTML = '';
+        }
+
         async function checkAllShares() {
             if (!githubToken || !githubRepo) return;
             const projects = allProjects.filter(p => p.active && !p.archived);
@@ -2423,16 +2554,16 @@
                         if (statusEl) statusEl.textContent = '❌ ' + t('not_shared');
                         if (revokeBtn) revokeBtn.style.display = 'none';
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn('Check share error:', e);
+                }
             }
         }
 
-        // ============================================================
-        // SHARE FUNCTIONS (GitHub)
-        // ============================================================
         async function shareProject(projectId) {
+            clearShareFeedback();
             if (!githubToken || !githubRepo) {
-                alert('Veuillez configurer votre token GitHub et dépôt dans les réglages.');
+                setShareFeedback('❌ ' + t('github_settings') + ' : token et dépôt requis.');
                 return;
             }
             const p = getProjectById(projectId);
@@ -2459,36 +2590,63 @@
                     }
                 });
                 if (res.status === 200) {
-                    const data = await res.json();
-                    sha = data.sha;
+                    const d = await res.json();
+                    sha = d.sha;
+                } else if (res.status === 401) {
+                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                    return;
+                } else if (res.status === 404) {
+                    // File doesn't exist, will create
+                } else {
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')');
+                    return;
                 }
-            } catch (e) {}
+            } catch (e) {
+                setShareFeedback('❌ ' + t('github_network'));
+                console.error(e);
+                return;
+            }
+
             const payload = {
                 message: `Share project ${p.title}`,
                 content: content,
                 sha: sha || undefined
             };
-            const uploadRes = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': 'token ' + githubToken,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (uploadRes.ok) {
-                showToast(t('share_created'));
-                renderShare();
-            } else {
-                const err = await uploadRes.text();
-                alert('Erreur lors du partage : ' + err);
+            try {
+                const uploadRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (uploadRes.ok) {
+                    setShareFeedback('✅ ' + t('share_created'), false);
+                    showToast(t('share_created'));
+                    renderShare();
+                } else if (uploadRes.status === 401) {
+                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                } else if (uploadRes.status === 404) {
+                    setShareFeedback('❌ ' + t('github_not_found'));
+                } else {
+                    const errText = await uploadRes.text();
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + uploadRes.status + ')');
+                    console.error('GitHub upload error:', errText);
+                }
+            } catch (e) {
+                setShareFeedback('❌ ' + t('github_network'));
+                console.error(e);
             }
         }
 
         async function revokeShare(projectId) {
             if (!confirm(t('confirm_delete'))) return;
-            if (!githubToken || !githubRepo) return;
+            if (!githubToken || !githubRepo) {
+                alert(t('github_settings') + ' requis.');
+                return;
+            }
             const path = `shares/${projectId}.json`;
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
             try {
@@ -2499,7 +2657,7 @@
                     }
                 });
                 if (res.status !== 200) {
-                    alert('Partage introuvable.');
+                    alert(t('share_not_found') || 'Partage introuvable.');
                     return;
                 }
                 const data = await res.json();
@@ -2516,7 +2674,7 @@
                     showToast(t('share_revoked'));
                     renderShare();
                 } else {
-                    alert('Erreur lors de la révocation.');
+                    alert('Erreur lors de la révocation (HTTP ' + deleteRes.status + ')');
                 }
             } catch (e) {
                 alert('Erreur : ' + e.message);
@@ -2537,14 +2695,15 @@
         }
 
         async function importShare() {
+            clearShareFeedback();
             const projectId = document.getElementById('importShareId').value.trim();
             const password = document.getElementById('importSharePwd').value.trim();
             if (!projectId || !password) {
-                alert('Veuillez remplir tous les champs.');
+                setShareFeedback('⚠️ ' + t('share_code') + ' et ' + t('password') + ' requis.');
                 return;
             }
             if (!githubToken || !githubRepo) {
-                alert('Veuillez configurer votre token GitHub et dépôt dans les réglages.');
+                setShareFeedback('❌ ' + t('github_settings') + ' requis.');
                 return;
             }
             const path = `shares/${projectId}.json`;
@@ -2556,17 +2715,45 @@
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                if (res.status !== 200) {
-                    alert('Partage introuvable.');
+                if (res.status === 401) {
+                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                    return;
+                }
+                if (res.status === 404) {
+                    setShareFeedback('❌ ' + t('github_not_found'));
+                    return;
+                }
+                if (!res.ok) {
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')');
                     return;
                 }
                 const data = await res.json();
                 const encrypted = atob(data.content);
-                const decrypted = decryptXOR(encrypted, password);
-                const shareData = JSON.parse(decrypted);
+                let decrypted;
+                try {
+                    decrypted = decryptXOR(encrypted, password);
+                } catch (e) {
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : mot de passe incorrect ?');
+                    return;
+                }
+                let shareData;
+                try {
+                    shareData = JSON.parse(decrypted);
+                } catch (e) {
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : données corrompues.');
+                    return;
+                }
+                // Vérifier que les données sont valides
+                if (!shareData.project || !shareData.operations) {
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : format invalide.');
+                    return;
+                }
                 const existingProject = getProjectById(shareData.project.id);
                 if (existingProject) {
-                    if (!confirm('Un projet avec cet ID existe déjà. Voulez-vous le remplacer ?')) return;
+                    if (!confirm('Un projet avec cet ID existe déjà. Voulez-vous le remplacer ?')) {
+                        setShareFeedback('⏸️ Import annulé.', false);
+                        return;
+                    }
                     await dbDelete('projects', shareData.project.id);
                     allProjects = allProjects.filter(p => p.id !== shareData.project.id);
                     const opsToRemove = allOperations.filter(o => o.projectId === shareData.project.id);
@@ -2586,18 +2773,20 @@
                     await dbPut('recurrings', r);
                     allRecurrings.push(r);
                 }
+                setShareFeedback('✅ ' + t('import_share_success'), false);
                 showToast(t('import_share_success'));
                 renderHome();
                 renderShare();
                 document.getElementById('importShareId').value = '';
                 document.getElementById('importSharePwd').value = '';
             } catch (e) {
-                alert(t('import_share_failed') + ' : ' + e.message);
+                setShareFeedback('❌ ' + t('github_network'));
+                console.error(e);
             }
         }
 
         // ============================================================
-        // RENDER: SETTINGS
+        // SETTINGS
         // ============================================================
         function renderSettings() {
             document.getElementById('versionDisplay').textContent = VERSION;
@@ -2605,6 +2794,69 @@
             document.getElementById('accentColorPicker').value = accentColor;
             document.getElementById('githubToken').value = githubToken;
             document.getElementById('githubRepo').value = githubRepo;
+        }
+
+        function loadGitHubSettings() {
+            const saved = localStorage.getItem('cashflow_github');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    githubToken = data.token || '';
+                    githubRepo = data.repo || '';
+                } catch (e) {}
+            }
+        }
+
+        function saveGitHubSettings() {
+            const token = document.getElementById('githubToken').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            githubToken = token;
+            githubRepo = repo;
+            localStorage.setItem('cashflow_github', JSON.stringify({ token, repo }));
+            const fb = document.getElementById('githubFeedback');
+            if (fb) {
+                fb.textContent = '✅ Paramètres enregistrés (' + (repo || 'aucun dépôt') + ')';
+                fb.style.color = 'var(--success)';
+            }
+            showToast('Paramètres GitHub enregistrés');
+            renderShare();
+        }
+
+        // ============================================================
+        // BOUTON "+" INTELLIGENT
+        // ============================================================
+        function handleAddOperation() {
+            const activeProjects = allProjects.filter(p => p.active && !p.archived);
+            if (activeProjects.length === 0) {
+                // Pas de projet → créer un projet
+                showCreateProject();
+                return;
+            }
+            if (activeProjects.length === 1) {
+                // Un seul projet → ajouter directement une opération
+                showAddOperation(activeProjects[0].id, 'add');
+                return;
+            }
+            // Plusieurs projets → afficher un choix
+            openModal(t('choose_project'), `
+            <p style="margin-bottom:12px;">${t('choose_project_desc')}</p>
+            <div class="project-chooser">
+              ${activeProjects.map(p => `
+                <div class="pc-item" onclick="selectProjectForAdd('${p.id}')">
+                  <span class="pc-emoji">${p.emoji || '📁'}</span>
+                  <span class="pc-name">${p.title}</span>
+                  <span class="pc-balance">${formatCurrency(getProjectBalance(p.id))}</span>
+                </div>
+              `).join('')}
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+          `);
+        }
+
+        function selectProjectForAdd(projectId) {
+            closeModal();
+            showAddOperation(projectId, 'add');
         }
 
         // ============================================================
@@ -2643,7 +2895,6 @@
             <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
           `);
 
-            // Re-attach events for emoji picker in modal
             const grid = document.querySelector('#modalBody .emoji-grid');
             if (grid) {
                 grid.querySelectorAll('.emoji-option').forEach(el => {
@@ -2674,7 +2925,6 @@
                 await dbPut('projects', project);
                 allProjects.push(project);
 
-                // If initial amount > 0, create an "add" operation
                 if (initialAmount > 0) {
                     const op = {
                         id: generateId(),
@@ -2829,7 +3079,7 @@
             const bal = getProjectBalance(projectId);
             const isExpense = type === 'expense';
             const title = isExpense ? t('expense') : t('income');
-            openModal(t('add_operation') + ' — ' + title, `
+            openModal(t('add_operation') + ' — ' + title + ' (' + (project ? project.title : '') + ')', `
             <div class="form-group">
               <label>${t('type')}</label>
               <select class="form-control" id="opTypeSelect">
@@ -3498,30 +3748,6 @@
         }
 
         // ============================================================
-        // GITHUB SETTINGS
-        // ============================================================
-        function loadGitHubSettings() {
-            const saved = localStorage.getItem('cashflow_github');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    githubToken = data.token || '';
-                    githubRepo = data.repo || '';
-                } catch (e) {}
-            }
-        }
-
-        function saveGitHubSettings() {
-            const token = document.getElementById('githubToken').value.trim();
-            const repo = document.getElementById('githubRepo').value.trim();
-            githubToken = token;
-            githubRepo = repo;
-            localStorage.setItem('cashflow_github', JSON.stringify({ token, repo }));
-            showToast('Paramètres GitHub enregistrés');
-            renderShare();
-        }
-
-        // ============================================================
         // INIT
         // ============================================================
         async function init() {
@@ -3579,20 +3805,8 @@
             };
 
             document.getElementById('headerAddProject').onclick = () => showCreateProject();
-            document.getElementById('headerAddOp').onclick = () => {
-                if (selectedProjectId) {
-                    showAddOperation(selectedProjectId, 'add');
-                } else {
-                    const active = allProjects.filter(p => p.active && !p.archived);
-                    if (active.length > 0) {
-                        selectedProjectId = active[0].id;
-                        navigateTo('viewProject');
-                        setTimeout(() => showAddOperation(selectedProjectId, 'add'), 100);
-                    } else {
-                        showCreateProject();
-                    }
-                }
-            };
+            // Bouton "+" intelligent
+            document.getElementById('headerAddOp').onclick = handleAddOperation;
 
             document.getElementById('modalClose').onclick = closeModal;
 
@@ -3659,6 +3873,12 @@
 
             document.getElementById('saveGitHubBtn').onclick = saveGitHubSettings;
 
+            // Recharger les settings GitHub au chargement
+            const tokenInput = document.getElementById('githubToken');
+            const repoInput = document.getElementById('githubRepo');
+            if (tokenInput) tokenInput.value = githubToken;
+            if (repoInput) repoInput.value = githubRepo;
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeModal();
             });
@@ -3695,6 +3915,8 @@
         window.t = t;
         window.shareProject = shareProject;
         window.revokeShare = revokeShare;
+        window.selectProjectForAdd = selectProjectForAdd;
+        window.handleAddOperation = handleAddOperation;
     </script>
 </body>
 </html>
