@@ -817,6 +817,18 @@
         .op-item .op-actions button:hover {
             background: var(--bg3);
         }
+        /* Style pour les opérations planifiées (prévision) */
+        .op-item.planned {
+            opacity: 0.5;
+            border-bottom-style: dashed;
+            border-bottom-color: var(--text3);
+        }
+        .op-item.planned .op-label::after {
+            content: " (planifié)";
+            font-size: 11px;
+            color: var(--text3);
+            font-weight: 400;
+        }
         /* ==== RECURRING ITEMS ==== */
         .rec-item {
             background: var(--bg2);
@@ -977,17 +989,25 @@
         }
         .color-picker-wrap {
             display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+            width: 100%;
+        }
+        .color-picker-wrap .color-row {
+            display: flex;
             align-items: center;
             gap: 10px;
         }
         .color-picker-wrap input[type="color"] {
-            width: 36px;
-            height: 36px;
+            width: 48px;
+            height: 48px;
             border: 2px solid var(--border);
             border-radius: 50%;
             padding: 2px;
             cursor: pointer;
             background: none;
+            flex-shrink: 0;
         }
         .color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
@@ -995,6 +1015,37 @@
         .color-picker-wrap input[type="color"]::-webkit-color-swatch {
             border: none;
             border-radius: 50%;
+        }
+        .color-picker-wrap .color-hex {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 6px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            color: var(--text);
+            width: 100px;
+        }
+        .color-picker-wrap .color-hex:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .color-picker-wrap .color-swatches {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .color-picker-wrap .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .color-picker-wrap .color-swatch:hover {
+            transform: scale(1.1);
         }
         .toggle-wrap {
             display: flex;
@@ -1074,9 +1125,12 @@
             align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 6px;
         }
         .share-item .share-info {
             flex: 1;
+            min-width: 120px;
         }
         .share-item .share-title {
             font-weight: 500;
@@ -1088,6 +1142,27 @@
         .share-item .share-actions {
             display: flex;
             gap: 6px;
+            flex-wrap: wrap;
+        }
+        .share-link-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            width: 100%;
+        }
+        .share-link-box input {
+            flex: 1;
+            font-size: 12px;
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            color: var(--text);
+            min-width: 0;
+        }
+        .share-link-box button {
+            flex-shrink: 0;
         }
         /* ==== HELP / GUIDE ==== */
         .help-box {
@@ -1175,6 +1250,9 @@
             .emoji-grid .emoji-option {
                 font-size: 22px;
                 padding: 3px 0;
+            }
+            .color-picker-wrap .color-row {
+                flex-wrap: wrap;
             }
         }
         @media (min-width: 601px) {
@@ -1341,6 +1419,12 @@
             color: #4ade80;
             border-color: #166534;
         }
+        /* Toggle des prévisions dans l'historique */
+        .toggle-forecast-btn {
+            font-size: 13px;
+            padding: 4px 12px;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -1353,7 +1437,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.2.0</span>
+                    <span class="version-badge" id="versionBadge">v1.3.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1459,7 +1543,20 @@
                         <div class="set-desc" data-i18n="accent_desc">Personnalisez votre couleur d'accent</div>
                     </div>
                     <div class="set-control color-picker-wrap">
-                        <input type="color" id="accentColorPicker" value="#3b82f6">
+                        <div class="color-row">
+                            <input type="color" id="accentColorPicker" value="#3b82f6">
+                            <input type="text" class="color-hex" id="accentHexInput" value="#3b82f6" maxlength="7">
+                        </div>
+                        <div class="color-swatches">
+                            <span class="color-swatch" style="background:#3b82f6;" data-color="#3b82f6"></span>
+                            <span class="color-swatch" style="background:#ef4444;" data-color="#ef4444"></span>
+                            <span class="color-swatch" style="background:#22c55e;" data-color="#22c55e"></span>
+                            <span class="color-swatch" style="background:#8b5cf6;" data-color="#8b5cf6"></span>
+                            <span class="color-swatch" style="background:#f59e0b;" data-color="#f59e0b"></span>
+                            <span class="color-swatch" style="background:#ec4899;" data-color="#ec4899"></span>
+                            <span class="color-swatch" style="background:#14b8a6;" data-color="#14b8a6"></span>
+                            <span class="color-swatch" style="background:#f97316;" data-color="#f97316"></span>
+                        </div>
                     </div>
                 </div>
 
@@ -1524,12 +1621,13 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.3.0</span><span>2026-02-03 · Lien de partage, prévisions dans historique, picker couleur amélioré</span></div>
                         <div class="journal-entry"><span class="jv">v1.2.0</span><span>2026-02-02 · Correction manifeste, URL GitHub, encodage UTF-8</span></div>
                         <div class="journal-entry"><span class="jv">v1.1.0</span><span>2026-02-01 · + émojis, bouton + intelligent, partage amélioré</span></div>
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.2.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.3.0</span>
                     </div>
                 </div>
             </div>
@@ -1580,9 +1678,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.2.0';
+        const VERSION = '1.3.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.3.0', date: '2026-02-03', changes: 'Lien de partage, prévisions dans historique, picker couleur amélioré' },
             { version: '1.2.0', date: '2026-02-02', changes: 'Correction manifeste, URL GitHub, encodage UTF-8' },
             { version: '1.1.0', date: '2026-02-01', changes: '+ émojis, bouton + intelligent, partage amélioré' },
             { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale' }
@@ -1755,7 +1854,12 @@
                 github_not_found: 'Repository or file not found. Check your repo name.',
                 github_network: 'Network error. Check your internet connection.',
                 github_unknown: 'Unknown error. See console for details.',
-                repo_format: 'Repository must be in format "username/repo" (without https://)'
+                repo_format: 'Repository must be in format "username/repo" (without https://)',
+                share_link: 'Share link',
+                copy_link: 'Copy link',
+                link_copied: 'Link copied!',
+                show_forecast: 'Show forecast',
+                hide_forecast: 'Hide forecast'
             },
             fr: {
                 home: 'Accueil',
@@ -1872,7 +1976,12 @@
                 github_not_found: 'Dépôt ou fichier introuvable. Vérifiez le nom du dépôt.',
                 github_network: 'Erreur réseau. Vérifiez votre connexion internet.',
                 github_unknown: 'Erreur inconnue. Consultez la console pour plus de détails.',
-                repo_format: 'Le dépôt doit être au format "utilisateur/repo" (sans https://)'
+                repo_format: 'Le dépôt doit être au format "utilisateur/repo" (sans https://)',
+                share_link: 'Lien de partage',
+                copy_link: 'Copier le lien',
+                link_copied: 'Lien copié !',
+                show_forecast: 'Afficher les prévisions',
+                hide_forecast: 'Masquer les prévisions'
             }
         };
 
@@ -1899,6 +2008,7 @@
         let allRecurrings = [];
         let githubToken = '';
         let githubRepo = '';
+        let showForecastInHistory = false; // bascule pour afficher les prévisions dans l'historique
 
         // ============================================================
         // INDEXED DB
@@ -2078,10 +2188,12 @@
             const toggle = document.getElementById('themeToggle');
             if (theme === 'dark') {
                 toggle.classList.add('active');
+                // Inverser les labels : en mode sombre, on affiche ☀️ (pour revenir en clair)
                 document.getElementById('themeLabel').textContent = '☀️';
                 document.getElementById('themeLabel2').textContent = '🌙';
             } else {
                 toggle.classList.remove('active');
+                // En mode clair, on affiche 🌙 (pour passer en sombre)
                 document.getElementById('themeLabel').textContent = '🌙';
                 document.getElementById('themeLabel2').textContent = '☀️';
             }
@@ -2100,6 +2212,7 @@
             document.documentElement.style.setProperty('--accent-light', light);
             localStorage.setItem('cashflow_accent', color);
             document.getElementById('accentColorPicker').value = color;
+            document.getElementById('accentHexInput').value = color;
         }
 
         // ============================================================
@@ -2291,6 +2404,9 @@
             };
         }
 
+        // ============================================================
+        // RENDER PROJECT DETAIL avec prévisions
+        // ============================================================
         function renderProjectDetail() {
             const container = document.getElementById('projectDetail');
             if (!selectedProjectId) {
@@ -2312,36 +2428,92 @@
             const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
             const ops = getOperationsForProject(project.id);
 
-            let opsHTML = ops.length === 0 ? `
-            <div class="text-muted text-sm" style="padding:12px 0;">Aucune opération.</div>
-          ` : ops.map(op => {
+            // Construire la liste des opérations (réelles)
+            let items = ops.map(op => {
                 const isTransfer = op.type === 'transfer_in' || op.type === 'transfer_out';
                 const icon = op.type === 'add' ? '➕' : (op.type === 'expense' ? '➖' : (op.type === 'transfer_in' ? '⬅️' :
-                '➡️'));
+                    '➡️'));
                 const amtClass = op.type === 'add' || op.type === 'transfer_in' ? 'positive' : (op.type === 'expense' ||
                     op.type === 'transfer_out' ? 'negative' : '');
                 const label = op.label || (op.type === 'add' ? t('income') : (op.type === 'expense' ? t('expense') : t(
-                'transfer_op')));
+                    'transfer_op')));
                 let linked = '';
                 if (isTransfer && op.linkedProjectId) {
                     const lp = getProjectById(op.linkedProjectId);
                     linked = lp ? ` → ${lp.emoji || '📁'} ${lp.title}` : '';
                 }
-                return `
-              <div class="op-item">
-                <span class="op-icon">${icon}</span>
-                <div class="op-body">
-                  <div class="op-label">${label}${linked}</div>
-                  <div class="op-meta">${op.date} ${op.isRecurring ? '🔄' : ''}</div>
+                return {
+                    type: 'real',
+                    html: `
+                <div class="op-item">
+                  <span class="op-icon">${icon}</span>
+                  <div class="op-body">
+                    <div class="op-label">${label}${linked}</div>
+                    <div class="op-meta">${op.date} ${op.isRecurring ? '🔄' : ''}</div>
+                  </div>
+                  <span class="op-amount ${amtClass}">${formatCurrency(op.amount)}</span>
+                  <div class="op-actions">
+                    <button onclick="showEditOperation('${op.id}')" title="${t('edit_operation')}">✏️</button>
+                    <button onclick="showDeleteOperation('${op.id}')" title="${t('delete_operation')}">🗑️</button>
+                  </div>
                 </div>
-                <span class="op-amount ${amtClass}">${formatCurrency(op.amount)}</span>
-                <div class="op-actions">
-                  <button onclick="showEditOperation('${op.id}')" title="${t('edit_operation')}">✏️</button>
-                  <button onclick="showDeleteOperation('${op.id}')" title="${t('delete_operation')}">🗑️</button>
-                </div>
-              </div>
-            `;
-            }).join('');
+              `,
+                    date: op.date
+                };
+            });
+
+            // Ajouter les prévisions (occurrences planifiées non encore réalisées)
+            if (showForecastInHistory) {
+                const recs = getRecurringsForProject(project.id);
+                const todayStr = today();
+                const forecastItems = [];
+                for (const rec of recs) {
+                    const dates = getRecurringOccurrenceDates(rec.startDate, rec.occurrences);
+                    for (const d of dates) {
+                        if (d > todayStr) {
+                            // Vérifier si une opération réelle existe déjà pour cette date (normalement non car d>today)
+                            const exists = allOperations.some(o =>
+                                o.projectId === project.id &&
+                                o.recurringId === rec.id &&
+                                o.date === d &&
+                                o.type === rec.type
+                            );
+                            if (!exists) {
+                                const icon = rec.type === 'add' ? '➕' : '➖';
+                                const amtClass = rec.type === 'add' ? 'positive' : 'negative';
+                                const label = rec.label || (rec.type === 'add' ? t('income') : t('expense'));
+                                forecastItems.push({
+                                    type: 'planned',
+                                    html: `
+                                <div class="op-item planned">
+                                  <span class="op-icon">${icon}</span>
+                                  <div class="op-body">
+                                    <div class="op-label">${label}</div>
+                                    <div class="op-meta">${d} 🔮 ${t('planned')}</div>
+                                  </div>
+                                  <span class="op-amount ${amtClass}">${formatCurrency(rec.amount)}</span>
+                                  <div class="op-actions">
+                                    <span style="font-size:11px;color:var(--text3);">${t('planned')}</span>
+                                  </div>
+                                </div>
+                              `,
+                                    date: d
+                                });
+                            }
+                        }
+                    }
+                }
+                // Fusionner et trier par date (les plus récentes d'abord)
+                items = items.concat(forecastItems);
+                items.sort((a, b) => a.date < b.date ? 1 : -1);
+            }
+
+            const opsHTML = items.length === 0 ? `
+            <div class="text-muted text-sm" style="padding:12px 0;">Aucune opération.</div>
+          ` : items.map(item => item.html).join('');
+
+            // Bouton bascule prévisions
+            const toggleLabel = showForecastInHistory ? t('hide_forecast') : t('show_forecast');
 
             container.innerHTML = `
             <div class="card" style="margin-bottom:12px;">
@@ -2357,6 +2529,7 @@
                 <button class="btn btn-sm btn-danger" onclick="showAddOperation('${project.id}','expense')">➖ ${t('expense')}</button>
                 <button class="btn btn-sm btn-secondary" onclick="showTransferModal('${project.id}')">↔️ ${t('transfer')}</button>
                 <button class="btn btn-sm btn-secondary" onclick="showEditProject('${project.id}')">✏️</button>
+                <button class="btn btn-sm btn-secondary toggle-forecast-btn" id="toggleForecastBtn">${toggleLabel}</button>
               </div>
             </div>
             <div class="card">
@@ -2364,8 +2537,17 @@
               ${opsHTML}
             </div>
           `;
+
+            // Gérer le bouton bascule
+            document.getElementById('toggleForecastBtn')?.addEventListener('click', () => {
+                showForecastInHistory = !showForecastInHistory;
+                renderProjectDetail();
+            });
         }
 
+        // ============================================================
+        // RENDER: PLANNING
+        // ============================================================
         function renderPlanning() {
             const container = document.getElementById('recurringList');
             if (allRecurrings.length === 0) {
@@ -2409,6 +2591,9 @@
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // RENDER: FORECAST
+        // ============================================================
         function renderForecast() {
             const container = document.getElementById('forecastResults');
             const dateInput = document.getElementById('forecastDate');
@@ -2458,7 +2643,7 @@
         }
 
         // ============================================================
-        // SHARE FUNCTIONS (GitHub) avec feedback amélioré
+        // SHARE FUNCTIONS (GitHub) avec feedback amélioré et lien de partage
         // ============================================================
         function setShareFeedback(message, isError = true) {
             const el = document.getElementById('shareImportFeedback');
@@ -2488,11 +2673,16 @@
             }
             let html = '';
             for (const p of projects) {
+                const shareUrl = window.location.href.split('?')[0] + '?share=' + p.id;
                 html += `
               <div class="share-item">
                 <div class="share-info">
                   <div class="share-title">${p.emoji || '📁'} ${p.title}</div>
                   <div class="share-status" id="shareStatus_${p.id}">${t('not_shared')}</div>
+                  <div class="share-link-box">
+                    <input type="text" readonly value="${shareUrl}" id="shareLink_${p.id}" class="form-control" style="font-size:12px;padding:4px 8px;">
+                    <button class="btn btn-sm btn-secondary" onclick="copyShareLink('${p.id}')">📋 ${t('copy_link')}</button>
+                  </div>
                 </div>
                 <div class="share-actions">
                   <button class="btn btn-sm btn-primary" onclick="shareProject('${p.id}')">${t('share_project')}</button>
@@ -2505,13 +2695,44 @@
             checkAllShares();
         }
 
+        function copyShareLink(projectId) {
+            const input = document.getElementById('shareLink_' + projectId);
+            if (input) {
+                input.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(t('link_copied'));
+                } catch (e) {
+                    // Fallback
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        showToast(t('link_copied'));
+                    }).catch(() => {});
+                }
+            }
+        }
+
+        // Détecter le paramètre ?share= dans l'URL pour pré-remplir l'import
+        function checkShareParam() {
+            const params = new URLSearchParams(window.location.search);
+            const shareId = params.get('share');
+            if (shareId) {
+                // Naviguer vers l'onglet Partage et pré-remplir le champ
+                document.getElementById('importShareId').value = shareId;
+                navigateTo('viewShare');
+                // Mettre le focus sur le mot de passe
+                setTimeout(() => {
+                    document.getElementById('importSharePwd').focus();
+                }, 300);
+                // Nettoyer l'URL pour ne pas garder le paramètre visible
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+
         async function checkAllShares() {
             if (!githubToken || !githubRepo) return;
-            // Vérifier que githubRepo est au bon format
-            if (!githubRepo.includes('/')) {
-                console.warn('Repo format invalid:', githubRepo);
-                return;
-            }
+            if (!githubRepo.includes('/')) return;
             const projects = allProjects.filter(p => p.active && !p.archived);
             for (const p of projects) {
                 try {
@@ -2537,7 +2758,6 @@
             }
         }
 
-        // Fonction pour encoder en base64 une chaîne UTF-8
         function utf8ToBase64(str) {
             const bytes = new TextEncoder().encode(str);
             let binary = '';
@@ -2586,7 +2806,6 @@
             };
             const json = JSON.stringify(data);
             const encrypted = encryptXOR(json, password);
-            // Encodage base64 UTF-8
             const content = utf8ToBase64(encrypted);
             const path = `shares/${projectId}.json`;
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
@@ -2811,6 +3030,7 @@
             document.getElementById('versionDisplay').textContent = VERSION;
             document.getElementById('langSelect').value = currentLang;
             document.getElementById('accentColorPicker').value = accentColor;
+            document.getElementById('accentHexInput').value = accentColor;
             document.getElementById('githubToken').value = githubToken;
             document.getElementById('githubRepo').value = githubRepo;
         }
@@ -2829,7 +3049,6 @@
         function saveGitHubSettings() {
             const token = document.getElementById('githubToken').value.trim();
             let repo = document.getElementById('githubRepo').value.trim();
-            // Nettoyer l'URL si l'utilisateur a collé une URL complète
             if (repo.startsWith('https://github.com/')) {
                 repo = repo.replace('https://github.com/', '');
             }
@@ -3817,6 +4036,9 @@
 
             setupEventListeners();
 
+            // Détecter paramètre ?share=
+            checkShareParam();
+
             console.log('CashFlow initialisé v' + VERSION);
         }
 
@@ -3860,11 +4082,38 @@
                 dbPut('settings', setting);
             };
 
+            // Picker couleur avec synchronisation
             document.getElementById('accentColorPicker').oninput = (e) => {
                 applyAccentColor(e.target.value);
+                document.getElementById('accentHexInput').value = e.target.value;
                 const setting = { id: 'settings', theme: currentTheme, accent: e.target.value, language: currentLang };
                 dbPut('settings', setting);
             };
+            document.getElementById('accentHexInput').onchange = (e) => {
+                let val = e.target.value.trim();
+                if (val.startsWith('#')) {
+                    if (/^#[0-9a-f]{6}$/i.test(val)) {
+                        applyAccentColor(val);
+                        document.getElementById('accentColorPicker').value = val;
+                        const setting = { id: 'settings', theme: currentTheme, accent: val, language: currentLang };
+                        dbPut('settings', setting);
+                        return;
+                    }
+                }
+                // Sinon, réinitialiser avec la couleur actuelle
+                e.target.value = accentColor;
+            };
+            // Swatches
+            document.querySelectorAll('.color-swatch').forEach(el => {
+                el.onclick = () => {
+                    const color = el.dataset.color;
+                    applyAccentColor(color);
+                    document.getElementById('accentColorPicker').value = color;
+                    document.getElementById('accentHexInput').value = color;
+                    const setting = { id: 'settings', theme: currentTheme, accent: color, language: currentLang };
+                    dbPut('settings', setting);
+                };
+            });
 
             document.getElementById('exportBtn').onclick = exportData;
             document.getElementById('importBtn').onclick = () => {
@@ -3946,6 +4195,8 @@
         window.revokeShare = revokeShare;
         window.selectProjectForAdd = selectProjectForAdd;
         window.handleAddOperation = handleAddOperation;
+        window.copyShareLink = copyShareLink;
+        window.checkShareParam = checkShareParam;
     </script>
 </body>
 </html>
