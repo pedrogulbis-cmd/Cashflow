@@ -500,6 +500,58 @@
             flex: 1;
         }
 
+        /* ===== EMOJI PICKER ===== */
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            padding: 8px 0;
+        }
+        .emoji-grid .emoji-option {
+            font-size: 28px;
+            text-align: center;
+            cursor: pointer;
+            padding: 6px 0;
+            border-radius: 8px;
+            transition: background 0.15s, transform 0.1s;
+            background: var(--bg2);
+            border: 2px solid transparent;
+            line-height: 1.4;
+        }
+        .emoji-grid .emoji-option:hover {
+            background: var(--bg3);
+            transform: scale(1.05);
+        }
+        .emoji-grid .emoji-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+        .emoji-grid .emoji-option:active {
+            transform: scale(0.92);
+        }
+        .selected-emoji-display {
+            font-size: 36px;
+            text-align: center;
+            padding: 6px 0;
+            background: var(--bg2);
+            border-radius: 8px;
+            border: 2px dashed var(--border);
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 480px) {
+            .emoji-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .emoji-grid .emoji-option {
+                font-size: 24px;
+                padding: 4px 0;
+            }
+        }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed;
@@ -1057,6 +1109,34 @@
             gap: 6px;
         }
 
+        /* ===== HELP / GUIDE ===== */
+        .help-box {
+            background: var(--bg2);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-top: 12px;
+            border-left: 3px solid var(--accent);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .help-box code {
+            background: var(--bg3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        .help-box .step {
+            display: flex;
+            gap: 8px;
+            margin: 4px 0;
+        }
+        .help-box .step-num {
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 24px;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
             .main-content {
@@ -1081,6 +1161,13 @@
             }
             .app-header {
                 padding: 8px 14px;
+            }
+            .emoji-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .emoji-grid .emoji-option {
+                font-size: 24px;
+                padding: 4px 0;
             }
         }
         @media (min-width: 601px) {
@@ -1356,14 +1443,24 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="github_settings">GitHub pour partage</div>
+                        <div class="set-label" data-i18n="github_settings">GitHub pour le partage</div>
                         <div class="set-desc" data-i18n="github_desc">Token et dépôt pour le partage</div>
                     </div>
-                    <div class="set-control" style="flex-direction:column;gap:4px;align-items:stretch;">
+                    <div class="set-control" style="flex-direction:column;gap:4px;align-items:stretch;width:100%;">
                         <input class="form-control" id="githubToken" placeholder="Token GitHub (classic)" type="password" style="font-size:12px;padding:6px 10px;">
                         <input class="form-control" id="githubRepo" placeholder="Dépôt : utilisateur/repo" style="font-size:12px;padding:6px 10px;">
                         <button class="btn btn-sm btn-secondary" id="saveGitHubBtn">Enregistrer</button>
                     </div>
+                </div>
+
+                <div class="help-box" id="githubHelp">
+                    <div style="font-weight:600;margin-bottom:6px;">📘 Comment configurer le partage GitHub :</div>
+                    <div class="step"><span class="step-num">1.</span> Créez un <strong>token GitHub classique</strong> : allez dans <code>Settings → Developer settings → Personal access tokens → Tokens (classic)</code>.</div>
+                    <div class="step"><span class="step-num">2.</span> Cochez la permission <code>repo</code> (plein accès aux dépôts privés).</div>
+                    <div class="step"><span class="step-num">3.</span> Créez un dépôt vide sur GitHub (ex: <code>cashflow-shares</code>).</div>
+                    <div class="step"><span class="step-num">4.</span> Copiez le token et le nom du dépôt (<code>utilisateur/repo</code>) dans les champs ci-dessus.</div>
+                    <div class="step"><span class="step-num">5.</span> Cliquez sur <strong>Enregistrer</strong> puis allez dans l'onglet <strong>Partage</strong>.</div>
+                    <div style="margin-top:6px;font-size:12px;color:var(--text3);">💡 Le token est stocké localement dans votre navigateur.</div>
                 </div>
 
                 <div class="setting-item">
@@ -1453,6 +1550,14 @@
             { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale avec partage GitHub' }
         ];
         const GID_SITE = ''; // Mettez votre Client ID Google ici
+
+        const EMOJIS = [
+            '📁', '💰', '📈', '🏠', '🚀', '🌟', '💡', '🔥',
+            '🎯', '🎨', '🏖️', '🌈', '🎉', '💎', '📊', '🏆',
+            '🎁', '🍀', '⚡', '🛒', '🏪', '💼', '📱', '💻',
+            '🖥️', '⌚', '🎧', '📷', '🎮', '📚', '✈️', '🚗',
+            '🏥', '🎓', '🏫', '🏢', '🌿', '🌊', '☀️', '🌙'
+        ];
 
         // ============================================================
         // TRANSLATIONS (français par défaut)
@@ -1561,7 +1666,9 @@
                 share_revoked: 'Share revoked',
                 import_share_success: 'Share imported successfully',
                 import_share_failed: 'Import failed',
-                refresh_shares: 'Refresh shares'
+                refresh_shares: 'Refresh shares',
+                initial_amount: 'Initial amount (optional)',
+                initial_amount_desc: 'Added as an income when creating the project'
             },
             fr: {
                 home: 'Accueil',
@@ -1666,7 +1773,9 @@
                 share_revoked: 'Partage révoqué',
                 import_share_success: 'Partage importé avec succès',
                 import_share_failed: 'Échec de l\'import',
-                refresh_shares: 'Rafraîchir les partages'
+                refresh_shares: 'Rafraîchir les partages',
+                initial_amount: 'Montant initial (optionnel)',
+                initial_amount_desc: 'Ajouté comme un revenu lors de la création du projet'
             }
         };
 
@@ -1691,11 +1800,8 @@
         let allProjects = [];
         let allOperations = [];
         let allRecurrings = [];
-        // GitHub settings
         let githubToken = '';
         let githubRepo = '';
-        // Shared projects cache (for display)
-        let sharedProjects = []; // list of {id, name, emoji, shared: true/false}
 
         // ============================================================
         // INDEXED DB
@@ -1996,6 +2102,27 @@
         }
 
         // ============================================================
+        // EMOJI PICKER
+        // ============================================================
+        function renderEmojiPicker(selectedEmoji, onSelect) {
+            const container = document.createElement('div');
+            container.className = 'emoji-grid';
+            EMOJIS.forEach(emoji => {
+                const el = document.createElement('div');
+                el.className = 'emoji-option' + (emoji === selectedEmoji ? ' selected' : '');
+                el.textContent = emoji;
+                el.onclick = () => {
+                    // Remove selected from all
+                    container.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('selected'));
+                    el.classList.add('selected');
+                    onSelect(emoji);
+                };
+                container.appendChild(el);
+            });
+            return container;
+        }
+
+        // ============================================================
         // RENDER: HOME
         // ============================================================
         function renderHome() {
@@ -2256,11 +2383,8 @@
                 container.innerHTML = `<div class="empty-state"><span class="empty-icon">🔗</span><h3>Aucun projet actif à partager</h3></div>`;
                 return;
             }
-            // For each project, show if shared (we check if it exists in GitHub shares)
-            // We'll fetch from GitHub? We'll just show a share button.
             let html = '';
             for (const p of projects) {
-                const isShared = false; // we need to check from GitHub, but we'll just show share button
                 html += `
               <div class="share-item">
                 <div class="share-info">
@@ -2275,12 +2399,10 @@
             `;
             }
             container.innerHTML = html;
-            // Check share status from GitHub
             checkAllShares();
         }
 
         async function checkAllShares() {
-            // For each project, check if a share file exists on GitHub
             if (!githubToken || !githubRepo) return;
             const projects = allProjects.filter(p => p.active && !p.archived);
             for (const p of projects) {
@@ -2301,9 +2423,7 @@
                         if (statusEl) statusEl.textContent = '❌ ' + t('not_shared');
                         if (revokeBtn) revokeBtn.style.display = 'none';
                     }
-                } catch (e) {
-                    // ignore
-                }
+                } catch (e) {}
             }
         }
 
@@ -2317,25 +2437,19 @@
             }
             const p = getProjectById(projectId);
             if (!p) return;
-            // Prompt for password
             const password = prompt(t('share_with_password'));
             if (!password) return;
-            // Build data: project + operations + recurrings
             const data = {
                 project: p,
                 operations: getOperationsForProject(projectId),
                 recurrings: getRecurringsForProject(projectId),
                 sharedAt: new Date().toISOString()
             };
-            // Encrypt? For simplicity, we'll base64 encode (not secure) - but we use password to encrypt (simple XOR or use CryptoJS? We'll use basic encryption)
-            // We'll use a simple XOR with password for demo
             const json = JSON.stringify(data);
             const encrypted = encryptXOR(json, password);
-            // Upload to GitHub
             const path = `shares/${projectId}.json`;
-            const content = btoa(encrypted); // base64
+            const content = btoa(encrypted);
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
-            // Check if exists
             let sha = '';
             try {
                 const res = await fetch(url, {
@@ -2349,7 +2463,6 @@
                     sha = data.sha;
                 }
             } catch (e) {}
-            // Upload
             const payload = {
                 message: `Share project ${p.title}`,
                 content: content,
@@ -2410,7 +2523,6 @@
             }
         }
 
-        // Simple XOR encryption
         function encryptXOR(str, key) {
             let result = '';
             for (let i = 0; i < str.length; i++) {
@@ -2421,7 +2533,7 @@
         }
 
         function decryptXOR(encrypted, key) {
-            return encryptXOR(encrypted, key); // XOR is symmetric
+            return encryptXOR(encrypted, key);
         }
 
         async function importShare() {
@@ -2452,11 +2564,9 @@
                 const encrypted = atob(data.content);
                 const decrypted = decryptXOR(encrypted, password);
                 const shareData = JSON.parse(decrypted);
-                // Import project, operations, recurrings (merge non-destructive)
                 const existingProject = getProjectById(shareData.project.id);
                 if (existingProject) {
                     if (!confirm('Un projet avec cet ID existe déjà. Voulez-vous le remplacer ?')) return;
-                    // Remove old project and its data
                     await dbDelete('projects', shareData.project.id);
                     allProjects = allProjects.filter(p => p.id !== shareData.project.id);
                     const opsToRemove = allOperations.filter(o => o.projectId === shareData.project.id);
@@ -2466,7 +2576,6 @@
                     for (const r of recsToRemove) await dbDelete('recurrings', r.id);
                     allRecurrings = allRecurrings.filter(r => r.projectId !== shareData.project.id);
                 }
-                // Add project
                 await dbPut('projects', shareData.project);
                 allProjects.push(shareData.project);
                 for (const op of shareData.operations) {
@@ -2480,7 +2589,6 @@
                 showToast(t('import_share_success'));
                 renderHome();
                 renderShare();
-                // Clean import fields
                 document.getElementById('importShareId').value = '';
                 document.getElementById('importSharePwd').value = '';
             } catch (e) {
@@ -2500,9 +2608,19 @@
         }
 
         // ============================================================
-        // PROJECT CRUD
+        // PROJECT CRUD (avec montant initial et émoticône)
         // ============================================================
+        let selectedEmoji = '📁';
+
         async function showCreateProject() {
+            selectedEmoji = '📁';
+            const emojiPickerContainer = document.createElement('div');
+            const picker = renderEmojiPicker(selectedEmoji, (emoji) => {
+                selectedEmoji = emoji;
+                document.getElementById('selectedEmojiDisplay').textContent = emoji;
+            });
+            emojiPickerContainer.appendChild(picker);
+
             openModal(t('create_project'), `
             <div class="form-group">
               <label>${t('project_title')}</label>
@@ -2510,16 +2628,40 @@
             </div>
             <div class="form-group">
               <label>${t('project_emoji')}</label>
-              <input class="form-control" id="projEmojiInput" placeholder="😊" value="">
+              <div class="selected-emoji-display" id="selectedEmojiDisplay">📁</div>
+              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px;background:var(--bg);">
+                ${emojiPickerContainer.innerHTML}
+              </div>
+            </div>
+            <div class="form-group">
+              <label>${t('initial_amount')}</label>
+              <div class="text-muted text-sm" style="margin-bottom:4px;">${t('initial_amount_desc')}</div>
+              <input type="number" step="0.01" class="form-control" id="projInitialAmount" placeholder="0.00" value="">
             </div>
           `, `
             <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
             <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
           `);
+
+            // Re-attach events for emoji picker in modal
+            const grid = document.querySelector('#modalBody .emoji-grid');
+            if (grid) {
+                grid.querySelectorAll('.emoji-option').forEach(el => {
+                    el.onclick = () => {
+                        grid.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('selected'));
+                        el.classList.add('selected');
+                        selectedEmoji = el.textContent;
+                        document.getElementById('selectedEmojiDisplay').textContent = selectedEmoji;
+                    };
+                });
+            }
+
             document.getElementById('createProjBtn').onclick = async () => {
                 const title = document.getElementById('projTitleInput').value.trim();
                 if (!title) { alert(t('project_title') + ' est requis'); return; }
-                const emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
+                const emoji = selectedEmoji || '📁';
+                const initialAmount = parseFloat(document.getElementById('projInitialAmount').value) || 0;
+
                 const project = {
                     id: generateId(),
                     title,
@@ -2531,6 +2673,25 @@
                 };
                 await dbPut('projects', project);
                 allProjects.push(project);
+
+                // If initial amount > 0, create an "add" operation
+                if (initialAmount > 0) {
+                    const op = {
+                        id: generateId(),
+                        projectId: project.id,
+                        type: 'add',
+                        amount: Math.round(initialAmount * 100) / 100,
+                        label: 'Montant initial',
+                        date: today(),
+                        linkedProjectId: null,
+                        isRecurring: false,
+                        recurringId: null,
+                        createdAt: Date.now()
+                    };
+                    await dbPut('operations', op);
+                    allOperations.push(op);
+                }
+
                 closeModal();
                 renderHome();
                 navigateTo('viewHome');
@@ -2540,6 +2701,14 @@
         async function showEditProject(id) {
             const p = getProjectById(id);
             if (!p) return;
+            selectedEmoji = p.emoji || '📁';
+            const emojiPickerContainer = document.createElement('div');
+            const picker = renderEmojiPicker(selectedEmoji, (emoji) => {
+                selectedEmoji = emoji;
+                document.getElementById('selectedEmojiDisplayEdit').textContent = emoji;
+            });
+            emojiPickerContainer.appendChild(picker);
+
             openModal(t('edit_project'), `
             <div class="form-group">
               <label>${t('project_title')}</label>
@@ -2547,17 +2716,33 @@
             </div>
             <div class="form-group">
               <label>${t('project_emoji')}</label>
-              <input class="form-control" id="projEmojiInput" value="${p.emoji || ''}">
+              <div class="selected-emoji-display" id="selectedEmojiDisplayEdit">${p.emoji || '📁'}</div>
+              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px;background:var(--bg);">
+                ${emojiPickerContainer.innerHTML}
+              </div>
             </div>
           `, `
             <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
             <button class="btn btn-primary" id="editProjBtn">${t('save')}</button>
           `);
+
+            const grid = document.querySelector('#modalBody .emoji-grid');
+            if (grid) {
+                grid.querySelectorAll('.emoji-option').forEach(el => {
+                    el.onclick = () => {
+                        grid.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('selected'));
+                        el.classList.add('selected');
+                        selectedEmoji = el.textContent;
+                        document.getElementById('selectedEmojiDisplayEdit').textContent = selectedEmoji;
+                    };
+                });
+            }
+
             document.getElementById('editProjBtn').onclick = async () => {
                 const title = document.getElementById('projTitleInput').value.trim();
                 if (!title) { alert(t('project_title') + ' est requis'); return; }
                 p.title = title;
-                p.emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
+                p.emoji = selectedEmoji || '📁';
                 p.updatedAt = Date.now();
                 await dbPut('projects', p);
                 closeModal();
@@ -3260,12 +3445,8 @@
                     }
                 };
                 const json = JSON.stringify(data, null, 2);
-                const formData = new FormData();
                 const blob = new Blob([json], { type: 'application/json' });
-                const metadata = {
-                    name: `cashflow_backup_${today()}.json`,
-                    mimeType: 'application/json'
-                };
+                const metadata = { name: `cashflow_backup_${today()}.json`, mimeType: 'application/json' };
                 const multipart = new FormData();
                 multipart.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                 multipart.append('file', blob);
@@ -3470,14 +3651,12 @@
 
             document.getElementById('addRecurringBtn').onclick = showAddRecurring;
 
-            // Share
             document.getElementById('importShareBtn').onclick = importShare;
             document.getElementById('refreshSharesBtn').onclick = () => {
                 renderShare();
                 showToast(t('refresh_shares'));
             };
 
-            // GitHub settings
             document.getElementById('saveGitHubBtn').onclick = saveGitHubSettings;
 
             document.addEventListener('keydown', (e) => {
