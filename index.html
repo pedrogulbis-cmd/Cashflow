@@ -13,7 +13,7 @@
     <title>CashFlow</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
-        /* ==== RESET & BASE ==== */
+        /* ===== RESET & BASE ===== */
         *,
         *::before,
         *::after {
@@ -536,12 +536,13 @@
             transform: scale(0.92);
         }
         .emoji-picker-scroll {
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 4px;
             background: var(--bg);
+            position: relative;
         }
         .selected-emoji-display {
             font-size: 40px;
@@ -740,6 +741,12 @@
             font-size: 11px;
             color: var(--text3);
             font-weight: 400;
+        }
+        .project-item .p-projected.positive {
+            color: var(--success);
+        }
+        .project-item .p-projected.negative {
+            color: var(--danger);
         }
         .project-item .p-actions {
             display: flex;
@@ -1550,7 +1557,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.5.0</span>
+                    <span class="version-badge" id="versionBadge">v1.6.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1739,6 +1746,7 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.6.0</span><span>2026-02-06 · Correction solde projeté, scroll émojis, icônes thème</span></div>
                         <div class="journal-entry"><span class="jv">v1.5.0</span><span>2026-02-05 · Réorganisation projets, planification directe, prévisions par défaut, + rapide</span></div>
                         <div class="journal-entry"><span class="jv">v1.4.0</span><span>2026-02-04 · Roue chromatique, correction récurrences, bouton copier lien</span></div>
                         <div class="journal-entry"><span class="jv">v1.3.0</span><span>2026-02-03 · Lien de partage, prévisions dans historique, picker couleur amélioré</span></div>
@@ -1747,7 +1755,7 @@
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.5.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.6.0</span>
                     </div>
                 </div>
             </div>
@@ -1798,9 +1806,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.5.0';
+        const VERSION = '1.6.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.6.0', date: '2026-02-06', changes: 'Correction solde projeté, scroll émojis, icônes thème' },
             { version: '1.5.0', date: '2026-02-05', changes: 'Réorganisation projets, planification directe, prévisions par défaut, + rapide' },
             { version: '1.4.0', date: '2026-02-04', changes: 'Roue chromatique, correction récurrences, bouton copier lien' },
             { version: '1.3.0', date: '2026-02-03', changes: 'Lien de partage, prévisions dans historique, picker couleur amélioré' },
@@ -2237,14 +2246,42 @@
             return Math.round(balance * 100) / 100;
         }
 
+        // Retourne le solde projeté à une date donnée (incluant les récurrences jusqu'à cette date)
         function getProjectProjectedBalance(projectId, targetDate) {
             let balance = getProjectBalance(projectId);
             const recs = getRecurringsForProject(projectId);
-            const todayStr = targetDate || today();
+            const todayStr = today();
             for (const r of recs) {
                 const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
                 for (const d of dates) {
-                    if (d <= todayStr) {
+                    if (d <= targetDate) {
+                        const exists = allOperations.some(o =>
+                            o.projectId === projectId &&
+                            o.recurringId === r.id &&
+                            o.date === d &&
+                            o.type === r.type
+                        );
+                        if (!exists) {
+                            if (r.type === 'add') balance += r.amount;
+                            else balance -= r.amount;
+                        }
+                    }
+                }
+            }
+            return Math.round(balance * 100) / 100;
+        }
+
+        // Retourne le solde projeté total (toutes les récurrences futures) - pour l'affichage "Solde projeté" sur l'accueil
+        function getProjectTotalProjectedBalance(projectId) {
+            // On prend le solde actuel + toutes les récurrences futures (dates > aujourd'hui)
+            let balance = getProjectBalance(projectId);
+            const recs = getRecurringsForProject(projectId);
+            const todayStr = today();
+            for (const r of recs) {
+                const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
+                for (const d of dates) {
+                    if (d > todayStr) {
+                        // Vérifier si une opération réelle existe déjà (normalement non pour le futur)
                         const exists = allOperations.some(o =>
                             o.projectId === projectId &&
                             o.recurringId === r.id &&
@@ -2287,7 +2324,7 @@
             let total = 0;
             for (const p of allProjects) {
                 if (p.active && !p.archived) {
-                    total += getProjectProjectedBalance(p.id, today());
+                    total += getProjectTotalProjectedBalance(p.id);
                 }
             }
             return Math.round(total * 100) / 100;
@@ -2339,12 +2376,14 @@
             const toggle = document.getElementById('themeToggle');
             if (theme === 'dark') {
                 toggle.classList.add('active');
-                document.getElementById('themeLabel').textContent = '☀️';
-                document.getElementById('themeLabel2').textContent = '🌙';
-            } else {
-                toggle.classList.remove('active');
+                // Mode sombre : gauche = 🌙 (pour indiquer le mode actuel), droite = ☀️
                 document.getElementById('themeLabel').textContent = '🌙';
                 document.getElementById('themeLabel2').textContent = '☀️';
+            } else {
+                toggle.classList.remove('active');
+                // Mode clair : gauche = ☀️ (mode actuel), droite = 🌙
+                document.getElementById('themeLabel').textContent = '☀️';
+                document.getElementById('themeLabel2').textContent = '🌙';
             }
             localStorage.setItem('cashflow_theme', theme);
         }
@@ -2698,6 +2737,7 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'emoji-picker-scroll';
             wrapper.appendChild(container);
+            // Ajouter un padding pour le scroll
             return wrapper;
         }
 
@@ -2732,7 +2772,7 @@
                     activeProjects.map((p, index) => {
                         const bal = getProjectBalance(p.id);
                         const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
-                        const projectedBal = getProjectProjectedBalance(p.id, today());
+                        const projectedBal = getProjectTotalProjectedBalance(p.id);
                         const projClass = projectedBal < 0 ? 'negative' : (projectedBal > 0 ? 'positive' : '');
                         return `
                   <div class="project-item" data-id="${p.id}" data-index="${index}" draggable="true">
@@ -3056,7 +3096,7 @@
 
             const bal = getProjectBalance(project.id);
             const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
-            const projectedBal = getProjectProjectedBalance(project.id, today());
+            const projectedBal = getProjectTotalProjectedBalance(project.id);
             const projClass = projectedBal < 0 ? 'negative' : (projectedBal > 0 ? 'positive' : '');
             const ops = getOperationsForProject(project.id);
 
