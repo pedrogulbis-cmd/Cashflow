@@ -13,7 +13,7 @@
     <title>CashFlow</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
-        /* ==== RESET & BASE ==== */
+        /* ===== RESET & BASE ===== */
         *,
         *::before,
         *::after {
@@ -507,13 +507,13 @@
         }
         /* ==== EMOJI PICKER ==== */
         .emoji-picker-scroll {
-            max-height: 180px;
-            height: 180px; /* force height for consistent scrolling */
-            overflow-y: auto;
+            height: 180px;
+            overflow-y: scroll !important;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 4px;
             background: var(--bg);
+            flex-shrink: 0;
             display: block;
             position: relative;
         }
@@ -1547,10 +1547,20 @@
             padding-left: 12px;
             margin-top: 6px;
         }
-        /* ===== ADDITIONAL FIX: ensure modal body doesn't interfere ===== */
+        /* ===== CORRECTION SCROLL EMOJIS ===== */
         .modal-body .emoji-picker-scroll {
-            max-height: 180px;
             height: 180px;
+            overflow-y: scroll !important;
+        }
+        .modal-body .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+        @media (max-width: 480px) {
+            .modal-body .emoji-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
         }
     </style>
 </head>
@@ -1564,7 +1574,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.9.0</span>
+                    <span class="version-badge" id="versionBadge">v1.9.1</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1753,6 +1763,7 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.9.1</span><span>2026-02-10 · Correction définitive du scroll des émoticônes (force height + !important)</span></div>
                         <div class="journal-entry"><span class="jv">v1.9.0</span><span>2026-02-09 · Correction définitive scroll émoticônes (retour à la méthode v1.2)</span></div>
                         <div class="journal-entry"><span class="jv">v1.8.0</span><span>2026-02-08 · Correction définitive du scroll des émoticônes (approche inline)</span></div>
                         <div class="journal-entry"><span class="jv">v1.7.0</span><span>2026-02-07 · Correction prévisionnel, icônes thème, scroll émojis</span></div>
@@ -1765,7 +1776,7 @@
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.9.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.9.1</span>
                     </div>
                 </div>
             </div>
@@ -1816,9 +1827,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.9.0';
+        const VERSION = '1.9.1';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.9.1', date: '2026-02-10', changes: 'Correction définitive du scroll des émoticônes (force height + !important)' },
             { version: '1.9.0', date: '2026-02-09', changes: 'Correction définitive scroll émoticônes (retour à la méthode v1.2)' },
             { version: '1.8.0', date: '2026-02-08', changes: 'Correction définitive du scroll des émoticônes (approche inline)' },
             { version: '1.7.0', date: '2026-02-07', changes: 'Correction prévisionnel, icônes thème, scroll émojis' },
@@ -2722,10 +2734,9 @@
         }
 
         // ============================================================
-        // EMOJI PICKER (retour à la méthode v1.2)
+        // EMOJI PICKER
         // ============================================================
         function renderEmojiPicker(selectedEmoji, onSelect) {
-            // Conteneur principal avec la classe dédiée
             const wrapper = document.createElement('div');
             wrapper.className = 'emoji-picker-scroll';
 
@@ -3830,7 +3841,6 @@
             <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
           `);
 
-            // Réattacher les événements du picker (pour la sélection initiale)
             const grid = document.querySelector('#modalBody .emoji-grid');
             if (grid) {
                 grid.querySelectorAll('.emoji-option').forEach(el => {
