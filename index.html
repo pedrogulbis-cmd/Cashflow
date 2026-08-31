@@ -537,11 +537,13 @@
         }
         .emoji-picker-scroll {
             max-height: 180px;
+            height: auto;
             overflow-y: auto;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 4px;
             background: var(--bg);
+            display: block;
             position: relative;
         }
         .selected-emoji-display {
@@ -1557,7 +1559,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.6.0</span>
+                    <span class="version-badge" id="versionBadge">v1.7.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1639,9 +1641,9 @@
                         <div class="set-desc" data-i18n="theme_desc">Mode clair ou sombre</div>
                     </div>
                     <div class="set-control toggle-wrap">
-                        <span class="toggle-label" id="themeLabel">🌙</span>
-                        <div class="toggle active" id="themeToggle"><div class="toggle-knob"></div></div>
-                        <span class="toggle-label" id="themeLabel2">☀️</span>
+                        <span class="toggle-label" id="themeLabel">☀️</span>
+                        <div class="toggle" id="themeToggle"><div class="toggle-knob"></div></div>
+                        <span class="toggle-label" id="themeLabel2">🌙</span>
                     </div>
                 </div>
 
@@ -1746,6 +1748,7 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.7.0</span><span>2026-02-07 · Correction prévisionnel, icônes thème, scroll émojis</span></div>
                         <div class="journal-entry"><span class="jv">v1.6.0</span><span>2026-02-06 · Correction solde projeté, scroll émojis, icônes thème</span></div>
                         <div class="journal-entry"><span class="jv">v1.5.0</span><span>2026-02-05 · Réorganisation projets, planification directe, prévisions par défaut, + rapide</span></div>
                         <div class="journal-entry"><span class="jv">v1.4.0</span><span>2026-02-04 · Roue chromatique, correction récurrences, bouton copier lien</span></div>
@@ -1755,7 +1758,7 @@
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.6.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.7.0</span>
                     </div>
                 </div>
             </div>
@@ -1806,9 +1809,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.6.0';
+        const VERSION = '1.7.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.7.0', date: '2026-02-07', changes: 'Correction prévisionnel, icônes thème, scroll émojis' },
             { version: '1.6.0', date: '2026-02-06', changes: 'Correction solde projeté, scroll émojis, icônes thème' },
             { version: '1.5.0', date: '2026-02-05', changes: 'Réorganisation projets, planification directe, prévisions par défaut, + rapide' },
             { version: '1.4.0', date: '2026-02-04', changes: 'Roue chromatique, correction récurrences, bouton copier lien' },
@@ -2246,15 +2250,15 @@
             return Math.round(balance * 100) / 100;
         }
 
-        // Retourne le solde projeté à une date donnée (incluant les récurrences jusqu'à cette date)
-        function getProjectProjectedBalance(projectId, targetDate) {
+        // Solde projeté total (réel + toutes les récurrences futures)
+        function getProjectTotalProjectedBalance(projectId) {
             let balance = getProjectBalance(projectId);
             const recs = getRecurringsForProject(projectId);
             const todayStr = today();
             for (const r of recs) {
                 const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
                 for (const d of dates) {
-                    if (d <= targetDate) {
+                    if (d > todayStr) {
                         const exists = allOperations.some(o =>
                             o.projectId === projectId &&
                             o.recurringId === r.id &&
@@ -2271,17 +2275,14 @@
             return Math.round(balance * 100) / 100;
         }
 
-        // Retourne le solde projeté total (toutes les récurrences futures) - pour l'affichage "Solde projeté" sur l'accueil
-        function getProjectTotalProjectedBalance(projectId) {
-            // On prend le solde actuel + toutes les récurrences futures (dates > aujourd'hui)
+        // Solde projeté à une date donnée (incluant les récurrences jusqu'à cette date)
+        function getProjectProjectedBalanceAtDate(projectId, targetDate) {
             let balance = getProjectBalance(projectId);
             const recs = getRecurringsForProject(projectId);
-            const todayStr = today();
             for (const r of recs) {
                 const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
                 for (const d of dates) {
-                    if (d > todayStr) {
-                        // Vérifier si une opération réelle existe déjà (normalement non pour le futur)
+                    if (d <= targetDate) {
                         const exists = allOperations.some(o =>
                             o.projectId === projectId &&
                             o.recurringId === r.id &&
@@ -2376,15 +2377,12 @@
             const toggle = document.getElementById('themeToggle');
             if (theme === 'dark') {
                 toggle.classList.add('active');
-                // Mode sombre : gauche = 🌙 (pour indiquer le mode actuel), droite = ☀️
-                document.getElementById('themeLabel').textContent = '🌙';
-                document.getElementById('themeLabel2').textContent = '☀️';
             } else {
                 toggle.classList.remove('active');
-                // Mode clair : gauche = ☀️ (mode actuel), droite = 🌙
-                document.getElementById('themeLabel').textContent = '☀️';
-                document.getElementById('themeLabel2').textContent = '🌙';
             }
+            // Labels fixes : ☀️ à gauche, 🌙 à droite
+            document.getElementById('themeLabel').textContent = '☀️';
+            document.getElementById('themeLabel2').textContent = '🌙';
             localStorage.setItem('cashflow_theme', theme);
         }
 
@@ -2737,7 +2735,6 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'emoji-picker-scroll';
             wrapper.appendChild(container);
-            // Ajouter un padding pour le scroll
             return wrapper;
         }
 
@@ -3261,15 +3258,14 @@
         }
 
         // ============================================================
-        // RENDER: FORECAST
+        // RENDER: FORECAST (corrigé pour correspondre à l'accueil)
         // ============================================================
         function renderForecast() {
             const container = document.getElementById('forecastResults');
             const dateInput = document.getElementById('forecastDate');
+            // Par défaut, on met la date à aujourd'hui pour afficher le solde projeté total
             if (!dateInput.value) {
-                const d = new Date();
-                d.setMonth(d.getMonth() + 1);
-                dateInput.value = d.toISOString().slice(0, 10);
+                dateInput.value = today();
             }
             updateForecast();
         }
@@ -3286,10 +3282,21 @@
                 container.innerHTML = `<div class="text-muted text-sm">${t('no_projects')}</div>`;
                 return;
             }
+
+            const todayStr = today();
+            // Si la date sélectionnée est aujourd'hui ou une date passée, on utilise le solde projeté total (toutes les récurrences futures)
+            // Sinon, on calcule le solde à la date sélectionnée
+            const useTotalProjected = (dateStr <= todayStr);
+
             let total = 0;
             let html = '<div class="forecast-grid">';
             for (const p of activeProjects) {
-                const bal = getProjectProjectedBalance(p.id, dateStr);
+                let bal;
+                if (useTotalProjected) {
+                    bal = getProjectTotalProjectedBalance(p.id);
+                } else {
+                    bal = getProjectProjectedBalanceAtDate(p.id, dateStr);
+                }
                 total += bal;
                 const cls = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
                 html += `
@@ -3306,6 +3313,7 @@
             <div class="total-bar" style="margin-top:12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);">
               <span class="total-label">${t('projected_balance')}</span>
               <span class="total-amount font-mono ${cls}" style="color:${total < 0 ? 'var(--danger)' : (total > 0 ? 'var(--success)' : 'var(--text2)')};">${formatCurrency(total)}</span>
+              ${useTotalProjected ? `<span class="total-sub" style="color:var(--text3);">(projeté total)</span>` : `<span class="total-sub" style="color:var(--text3);">à la date du ${dateStr}</span>`}
             </div>
           `;
             container.innerHTML = html;
@@ -4778,9 +4786,8 @@
 
             initDrive();
 
-            const d = new Date();
-            d.setMonth(d.getMonth() + 1);
-            document.getElementById('forecastDate').value = d.toISOString().slice(0, 10);
+            // Initialiser la date du prévisionnel à aujourd'hui
+            document.getElementById('forecastDate').value = today();
             document.getElementById('forecastDate').onchange = updateForecast;
 
             setupEventListeners();
