@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#3b82f6">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
-    <link rel="manifest" href="data:application/json,{'name':'CashFlow','short_name':'CashFlow','icons':[{'src':'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>','sizes':'192x192','type':'image/svg+xml'}],'start_url':'index.html','display':'standalone','theme_color':'#3b82f6','background_color':'#ffffff'}">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💰%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💰%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/json,%7B%22name%22:%22CashFlow%22,%22short_name%22:%22CashFlow%22,%22icons%22:%5B%7B%22src%22:%22data:image/svg+xml,%253Csvg%20xmlns=%2522http://www.w3.org/2000/svg%2522%20viewBox=%25220%200%20100%20100%2522%253E%253Ctext%20y=%2522.9em%2522%20font-size=%252290%2522%253E%25F0%259F%2592%25B0%253C/text%253E%253C/svg%253E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22%7D%5D,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22theme_color%22:%22#3b82f6%22,%22background_color%22:%22#ffffff%22%7D">
     <title>CashFlow</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ==== RESET & BASE ==== */
         *,
         *::before,
         *::after {
@@ -84,8 +85,7 @@
                 border-radius: 0;
             }
         }
-
-        /* ===== SCROLLBAR ===== */
+        /* ==== SCROLLBAR ==== */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -97,8 +97,7 @@
             background: var(--text3);
             border-radius: 4px;
         }
-
-        /* ===== HEADER ===== */
+        /* ==== HEADER ==== */
         .app-header {
             display: flex;
             align-items: center;
@@ -177,8 +176,7 @@
         .app-header .back-btn.show {
             display: flex;
         }
-
-        /* ===== MAIN CONTENT ===== */
+        /* ==== MAIN CONTENT ==== */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -203,8 +201,7 @@
                 transform: translateY(0);
             }
         }
-
-        /* ===== BOTTOM NAV ===== */
+        /* ==== BOTTOM NAV ==== */
         .bottom-nav {
             display: flex;
             align-items: stretch;
@@ -266,8 +263,7 @@
             text-align: center;
             line-height: 16px;
         }
-
-        /* ===== CARDS & LISTS ===== */
+        /* ==== CARDS & LISTS ==== */
         .card {
             background: var(--bg2);
             border-radius: var(--radius);
@@ -380,8 +376,7 @@
         .row .row-actions button.danger:hover {
             color: var(--danger);
         }
-
-        /* ===== BUTTONS ===== */
+        /* ==== BUTTONS ==== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -449,8 +444,7 @@
         .btn .emoji {
             font-size: 16px;
         }
-
-        /* ===== FORMS ===== */
+        /* ==== FORMS ==== */
         .form-group {
             margin-bottom: 14px;
         }
@@ -499,8 +493,7 @@
         .form-row .form-group {
             flex: 1;
         }
-
-        /* ===== EMOJI PICKER ===== */
+        /* ==== EMOJI PICKER ==== */
         .emoji-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -551,8 +544,7 @@
                 padding: 3px 0;
             }
         }
-
-        /* ===== MODAL ===== */
+        /* ==== MODAL ==== */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -655,8 +647,7 @@
             flex: 1;
             min-width: 80px;
         }
-
-        /* ===== PROJECT LIST ===== */
+        /* ==== PROJECT LIST ==== */
         .project-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -725,8 +716,7 @@
         .project-item .p-actions button:hover {
             background: var(--bg3);
         }
-
-        /* ===== EMPTY STATE ===== */
+        /* ==== EMPTY STATE ==== */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -746,8 +736,7 @@
         .empty-state p {
             font-size: 14px;
         }
-
-        /* ===== TOTAL BAR ===== */
+        /* ==== TOTAL BAR ==== */
         .total-bar {
             background: var(--accent);
             color: #fff;
@@ -768,8 +757,7 @@
             font-weight: 700;
             letter-spacing: -0.5px;
         }
-
-        /* ===== OPERATION ITEMS ===== */
+        /* ==== OPERATION ITEMS ==== */
         .op-item {
             display: flex;
             align-items: center;
@@ -829,8 +817,7 @@
         .op-item .op-actions button:hover {
             background: var(--bg3);
         }
-
-        /* ===== RECURRING ITEMS ===== */
+        /* ==== RECURRING ITEMS ==== */
         .rec-item {
             background: var(--bg2);
             border-radius: var(--radius-sm);
@@ -880,8 +867,7 @@
         .rec-item .rec-actions button:hover {
             background: var(--bg3);
         }
-
-        /* ===== FORECAST ===== */
+        /* ==== FORECAST ==== */
         .forecast-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -918,8 +904,7 @@
         .forecast-item .f-amount.negative {
             color: var(--danger);
         }
-
-        /* ===== TOAST ===== */
+        /* ==== TOAST ==== */
         .toast-container {
             position: fixed;
             bottom: calc(var(--nav-height) + 20px + var(--safe-bottom));
@@ -966,8 +951,7 @@
                 transform: translateY(0) scale(1);
             }
         }
-
-        /* ===== SETTINGS ===== */
+        /* ==== SETTINGS ==== */
         .setting-item {
             display: flex;
             justify-content: space-between;
@@ -1049,7 +1033,6 @@
         .toggle.active .toggle-knob {
             transform: translateX(20px);
         }
-
         .journal-entry {
             font-size: 12px;
             color: var(--text3);
@@ -1063,8 +1046,7 @@
             color: var(--text2);
             min-width: 56px;
         }
-
-        /* ===== ARCHIVED ===== */
+        /* ==== ARCHIVED ==== */
         .archived-section {
             margin-top: 16px;
             border-top: 2px dashed var(--border);
@@ -1085,8 +1067,7 @@
         .archived-section .arch-toggle:hover {
             color: var(--text2);
         }
-
-        /* ===== SHARE TAB ===== */
+        /* ==== SHARE TAB ==== */
         .share-item {
             display: flex;
             justify-content: space-between;
@@ -1108,8 +1089,7 @@
             display: flex;
             gap: 6px;
         }
-
-        /* ===== HELP / GUIDE ===== */
+        /* ==== HELP / GUIDE ==== */
         .help-box {
             background: var(--bg2);
             border-radius: var(--radius-sm);
@@ -1136,8 +1116,7 @@
             color: var(--accent);
             min-width: 24px;
         }
-
-        /* ===== PROJECT CHOOSER ===== */
+        /* ==== PROJECT CHOOSER ==== */
         .project-chooser .pc-item {
             display: flex;
             align-items: center;
@@ -1165,8 +1144,7 @@
             font-size: 14px;
             color: var(--text2);
         }
-
-        /* ===== RESPONSIVE ===== */
+        /* ==== RESPONSIVE ==== */
         @media (max-width: 600px) {
             .main-content {
                 padding: 12px 14px 6px;
@@ -1204,8 +1182,7 @@
                 max-width: 560px;
             }
         }
-
-        /* ===== UTILITY ===== */
+        /* ==== UTILITY ==== */
         .text-center {
             text-align: center;
         }
@@ -1287,15 +1264,13 @@
             background: #2a1a4a;
             color: #a78bfa;
         }
-
-        /* ===== SCROLL CONTAINER ===== */
+        /* ==== SCROLL CONTAINER ==== */
         .scroll-y {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             flex: 1;
         }
-
-        /* ===== SELECT PROJECT IN TRANSFER ===== */
+        /* ==== SELECT PROJECT IN TRANSFER ==== */
         .project-select-list .ps-item {
             padding: 10px 14px;
             border-bottom: 1px solid var(--border);
@@ -1315,7 +1290,6 @@
         .project-select-list .ps-item .ps-name {
             font-weight: 500;
         }
-
         .btn .btn-text {
             display: inline;
         }
@@ -1338,7 +1312,6 @@
                 display: inline;
             }
         }
-
         /* error box */
         .error-box {
             background: #fee2e2;
@@ -1380,7 +1353,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.1.0</span>
+                    <span class="version-badge" id="versionBadge">v1.2.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1508,7 +1481,7 @@
                     </div>
                     <div class="set-control" style="flex-direction:column;gap:4px;align-items:stretch;width:100%;">
                         <input class="form-control" id="githubToken" placeholder="Token GitHub (classic)" type="password" style="font-size:12px;padding:6px 10px;">
-                        <input class="form-control" id="githubRepo" placeholder="Dépôt : utilisateur/repo" style="font-size:12px;padding:6px 10px;">
+                        <input class="form-control" id="githubRepo" placeholder="Dépôt : utilisateur/repo (ex: pedrogulbis-cmd/Cashflow)" style="font-size:12px;padding:6px 10px;">
                         <button class="btn btn-sm btn-secondary" id="saveGitHubBtn">Enregistrer</button>
                         <div id="githubFeedback" style="margin-top:4px;font-size:12px;color:var(--text3);"></div>
                     </div>
@@ -1551,11 +1524,12 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.2.0</span><span>2026-02-02 · Correction manifeste, URL GitHub, encodage UTF-8</span></div>
                         <div class="journal-entry"><span class="jv">v1.1.0</span><span>2026-02-01 · + émojis, bouton + intelligent, partage amélioré</span></div>
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.1.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.2.0</span>
                     </div>
                 </div>
             </div>
@@ -1606,68 +1580,60 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.1.0';
+        const VERSION = '1.2.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.2.0', date: '2026-02-02', changes: 'Correction manifeste, URL GitHub, encodage UTF-8' },
             { version: '1.1.0', date: '2026-02-01', changes: '+ émojis, bouton + intelligent, partage amélioré' },
             { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale' }
         ];
         const GID_SITE = ''; // Mettez votre Client ID Google ici
 
-        // === ÉMOJIS : beaucoup plus nombreux ! ===
+        // === ÉMOJIS (liste complète) ===
         const EMOJIS = [
-            // Smileys & visages
-            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
-            '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐',
-            '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢',
-            '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️',
-            '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞',
-            '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺',
-            '👻', '👽', '👾', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾',
-            // Animaux
-            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵',
-            '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗',
-            '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕',
-            '🐙', '🦑', '🦐', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊',
-            // Nourriture
-            '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝',
-            '🍅', '🍆', '🥑', '🫑', '🌽', '🥕', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐',
-            '🥖', '🫓', '🥨', '🥯', '🥞', '🧇', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪',
-            '🌮', '🌯', '🫔', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🫕', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫',
-            '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠',
-            '🥡', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '☕',
-            '🍵', '🥤', '🧃', '🧉', '🧊', '🥂', '🥃', '🍷', '🍸', '🍹', '🍺', '🍻', '🥄', '🔪', '🏺',
-            // Sports & activités
-            '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍',
-            '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂',
-            '🏋️', '🤼', '🤸', '⛹️', '🤾', '🏌️', '🏇', '🧘', '🏄', '🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏃',
-            '💃', '🕺', '🕴️', '👯', '🧖', '🧑‍🦯', '🦮', '🐕‍🦺',
-            // Nature
-            '🌳', '🌲', '🌴', '🌵', '🌾', '🌿', '☘️', '🍀', '🎍', '🪴', '🌱', '🌺', '🌸', '🌼', '🌻', '🌹',
-            '🥀', '🌷', '🪷', '🌞', '🌝', '🌚', '🌛', '🌜', '🌙', '⭐', '🌟', '✨', '☄️', '💫', '🌈', '☀️',
-            '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️',
-            '🌫️', '🌊', '💧', '☔', '🔥', '💦',
-            // Voyages & lieux
-            '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏯', '🏰', '💒',
-            '🗼', '🗽', '⛪', '🕌', '🕍', '⛩️', '🛕', '🕋', '⛲', '⛺', '🌋', '🗻', '🏔️', '⛰️', '🏕️', '🛖',
-            '🏗️', '🧱', '🪨', '🪵', '🏘️', '🏚️', '🏠', '🏡', '🏢', '🏣', '🏤', '🏥', '🏦', '🏨', '🏩', '🏪',
-            '🏫', '🏬', '🏭', '🏯', '🏰', '💒', '🗼', '🗽', '⛪', '🕌', '🕍', '⛩️', '🛕', '🕋', '⛲', '⛺',
-            '🌋', '🗻', '🏔️', '⛰️', '🏕️', '🛖', '🏗️', '🧱', '🪨', '🪵', '🏘️', '🏚️',
-            // Objets
-            '⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️', '🗜️', '💽', '💾', '💿', '📀', '🧮',
-            '🎥', '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '🧭', '⏰', '⏳', '⌛',
-            '📡', '🔋', '🪫', '💡', '🔦', '🕯️', '🧯', '🪣', '🧹', '🧺', '🧻', '🚽', '🚿', '🛁', '🪥', '🪒',
-            '🧴', '🧷', '🧸', '🪆', '🎈', '🎉', '🎊', '🎀', '🎁', '🎂', '🎃', '🎄', '🎅', '🧑‍🎄', '🪔', '🕎',
-            '✡️', '☸️', '☯️', '🕉️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐',
-            '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️',
-            // Drapeaux & symboles
-            '🏁', '🚩', '🎌', '🏴', '🏳️', '🏳️‍🌈', '🏳️‍⚧️', '🇫🇷', '🇪🇺', '🇺🇸', '🇬🇧', '🇩🇪', '🇮🇹', '🇪🇸', '🇵🇹', '🇧🇪',
-            '🇨🇭', '🇯🇵', '🇨🇳', '🇷🇺', '🇧🇷', '🇦🇷', '🇲🇽', '🇨🇦', '🇦🇺', '🇳🇿', '🇿🇦', '🇮🇳', '🇰🇷', '🇸🇦', '🇦🇪', '🇮🇱',
-            // Divers
-            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖',
-            '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '♈', '♉', '♊', '♋', '♌',
-            '♍', '♎', '♏', '♐', '♑', '♒', '♓', '⛎', '🔀', '🔁', '🔂', '🔄', '🔃', '🎵', '🎶', '🎼',
-            '🎤', '🎧', '🎷', '🎸', '🎹', '🎺', '🎻', '🥁', '🪘', '🎬', '🎭', '🎨', '🧵', '🪡', '🧶', '🪢'
+            '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
+            '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤗','🤭','🤫','🤔','🤐','🤨','😐',
+            '😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢',
+            '🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','☹️',
+            '😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞',
+            '😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺',
+            '👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾',
+            '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵',
+            '🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗',
+            '🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🦂','🐢','🐍','🦎','🦖','🦕',
+            '🐙','🦑','🦐','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊',
+            '🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝',
+            '🍅','🍆','🥑','🫑','🌽','🥕','🥒','🥬','🥦','🧄','🧅','🍄','🥜','🌰','🍞','🥐',
+            '🥖','🫓','🥨','🥯','🥞','🧇','🧀','🍖','🍗','🥩','🥓','🍔','🍟','🍕','🌭','🥪',
+            '🌮','🌯','🫔','🥙','🧆','🥚','🍳','🥘','🍲','🫕','🥣','🥗','🍿','🧈','🧂','🥫',
+            '🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠',
+            '🥡','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','☕',
+            '🍵','🥤','🧃','🧉','🧊','🥂','🥃','🍷','🍸','🍹','🍺','🍻','🥄','🔪','🏺',
+            '⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍',
+            '🏏','⛳','🏹','🎣','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂',
+            '🏋️','🤼','🤸','⛹️','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏃',
+            '💃','🕺','🕴️','👯','🧖','🧑‍🦯','🦮','🐕‍🦺',
+            '🌳','🌲','🌴','🌵','🌾','🌿','☘️','🍀','🎍','🪴','🌱','🌺','🌸','🌼','🌻','🌹',
+            '🥀','🌷','🪷','🌞','🌝','🌚','🌛','🌜','🌙','⭐','🌟','✨','☄️','💫','🌈','☀️',
+            '🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','🌪️',
+            '🌫️','🌊','💧','☔','🔥','💦',
+            '🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒',
+            '🗼','🗽','⛪','🕌','🕍','⛩️','🛕','🕋','⛲','⛺','🌋','🗻','🏔️','⛰️','🏕️','🛖',
+            '🏗️','🧱','🪨','🪵','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪',
+            '🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🕍','⛩️','🛕','🕋','⛲','⛺',
+            '🌋','🗻','🏔️','⛰️','🏕️','🛖','🏗️','🧱','🪨','🪵','🏘️','🏚️',
+            '⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','🧮',
+            '🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏰','⏳','⌛',
+            '📡','🔋','🪫','💡','🔦','🕯️','🧯','🪣','🧹','🧺','🧻','🚽','🚿','🛁','🪥','🪒',
+            '🧴','🧷','🧸','🪆','🎈','🎉','🎊','🎀','🎁','🎂','🎃','🎄','🎅','🧑‍🎄','🪔','🕎',
+            '✡️','☸️','☯️','🕉️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐',
+            '♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️',
+            '🏁','🚩','🎌','🏴','🏳️','🏳️‍🌈','🏳️‍⚧️','🇫🇷','🇪🇺','🇺🇸','🇬🇧','🇩🇪','🇮🇹','🇪🇸','🇵🇹','🇧🇪',
+            '🇨🇭','🇯🇵','🇨🇳','🇷🇺','🇧🇷','🇦🇷','🇲🇽','🇨🇦','🇦🇺','🇳🇿','🇿🇦','🇮🇳','🇰🇷','🇸🇦','🇦🇪','🇮🇱',
+            '❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖',
+            '💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','♈','♉','♊','♋','♌',
+            '♍','♎','♏','♐','♑','♒','♓','⛎','🔀','🔁','🔂','🔄','🔃','🎵','🎶','🎼',
+            '🎤','🎧','🎷','🎸','🎹','🎺','🎻','🥁','🪘','🎬','🎭','🎨','🧵','🪡','🧶','🪢'
         ];
 
         // ============================================================
@@ -1788,7 +1754,8 @@
                 github_unauthorized: 'Unauthorized. Check your token and permissions (repo scope required).',
                 github_not_found: 'Repository or file not found. Check your repo name.',
                 github_network: 'Network error. Check your internet connection.',
-                github_unknown: 'Unknown error. See console for details.'
+                github_unknown: 'Unknown error. See console for details.',
+                repo_format: 'Repository must be in format "username/repo" (without https://)'
             },
             fr: {
                 home: 'Accueil',
@@ -1904,7 +1871,8 @@
                 github_unauthorized: 'Non autorisé. Vérifiez votre token et les permissions (repo requis).',
                 github_not_found: 'Dépôt ou fichier introuvable. Vérifiez le nom du dépôt.',
                 github_network: 'Erreur réseau. Vérifiez votre connexion internet.',
-                github_unknown: 'Erreur inconnue. Consultez la console pour plus de détails.'
+                github_unknown: 'Erreur inconnue. Consultez la console pour plus de détails.',
+                repo_format: 'Le dépôt doit être au format "utilisateur/repo" (sans https://)'
             }
         };
 
@@ -2501,7 +2469,6 @@
                     el.innerHTML = `<div class="success-box">✅ ${message}</div>`;
                 }
             } else {
-                // Fallback : afficher une alerte
                 alert(message);
             }
             console.log('[Share] ' + (isError ? '❌' : '✅') + ' ' + message);
@@ -2540,6 +2507,11 @@
 
         async function checkAllShares() {
             if (!githubToken || !githubRepo) return;
+            // Vérifier que githubRepo est au bon format
+            if (!githubRepo.includes('/')) {
+                console.warn('Repo format invalid:', githubRepo);
+                return;
+            }
             const projects = allProjects.filter(p => p.active && !p.archived);
             for (const p of projects) {
                 try {
@@ -2565,10 +2537,34 @@
             }
         }
 
+        // Fonction pour encoder en base64 une chaîne UTF-8
+        function utf8ToBase64(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToUtf8(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
+        }
+
         async function shareProject(projectId) {
             clearShareFeedback();
             if (!githubToken || !githubRepo) {
                 const msg = '❌ ' + t('github_settings') + ' : token et dépôt requis.';
+                setShareFeedback(msg, true);
+                return;
+            }
+            if (!githubRepo.includes('/')) {
+                const msg = '❌ ' + t('repo_format');
                 setShareFeedback(msg, true);
                 return;
             }
@@ -2590,8 +2586,9 @@
             };
             const json = JSON.stringify(data);
             const encrypted = encryptXOR(json, password);
+            // Encodage base64 UTF-8
+            const content = utf8ToBase64(encrypted);
             const path = `shares/${projectId}.json`;
-            const content = btoa(encrypted);
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
             let sha = '';
             try {
@@ -2660,6 +2657,10 @@
                 alert(t('github_settings') + ' requis.');
                 return;
             }
+            if (!githubRepo.includes('/')) {
+                alert(t('repo_format'));
+                return;
+            }
             const path = `shares/${projectId}.json`;
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
             try {
@@ -2721,6 +2722,10 @@
                 setShareFeedback('❌ ' + t('github_settings') + ' requis.', true);
                 return;
             }
+            if (!githubRepo.includes('/')) {
+                setShareFeedback('❌ ' + t('repo_format'), true);
+                return;
+            }
             const path = `shares/${projectId}.json`;
             const url = `https://api.github.com/repos/${githubRepo}/contents/${path}`;
             try {
@@ -2743,7 +2748,7 @@
                     return;
                 }
                 const data = await res.json();
-                const encrypted = atob(data.content);
+                const encrypted = base64ToUtf8(data.content);
                 let decrypted;
                 try {
                     decrypted = decryptXOR(encrypted, password);
@@ -2823,14 +2828,29 @@
 
         function saveGitHubSettings() {
             const token = document.getElementById('githubToken').value.trim();
-            const repo = document.getElementById('githubRepo').value.trim();
+            let repo = document.getElementById('githubRepo').value.trim();
+            // Nettoyer l'URL si l'utilisateur a collé une URL complète
+            if (repo.startsWith('https://github.com/')) {
+                repo = repo.replace('https://github.com/', '');
+            }
+            if (repo.startsWith('http://github.com/')) {
+                repo = repo.replace('http://github.com/', '');
+            }
+            if (repo.endsWith('/')) {
+                repo = repo.slice(0, -1);
+            }
             githubToken = token;
             githubRepo = repo;
             localStorage.setItem('cashflow_github', JSON.stringify({ token, repo }));
             const fb = document.getElementById('githubFeedback');
             if (fb) {
-                fb.textContent = '✅ Paramètres enregistrés (' + (repo || 'aucun dépôt') + ')';
-                fb.style.color = 'var(--success)';
+                if (repo.includes('/')) {
+                    fb.textContent = '✅ Paramètres enregistrés (' + repo + ')';
+                    fb.style.color = 'var(--success)';
+                } else {
+                    fb.textContent = '⚠️ ' + t('repo_format');
+                    fb.style.color = 'var(--warning)';
+                }
             }
             showToast('Paramètres GitHub enregistrés');
             renderShare();
