@@ -1,0 +1,3134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <link rel="manifest" href="data:application/json,{'name':'CashFlow','short_name':'CashFlow','icons':[{'src':'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>','sizes':'192x192','type':'image/svg+xml'}],'start_url':'index.html','display':'standalone','theme_color':'#3b82f6','background_color':'#ffffff'}">
+    <title>CashFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --bg: #ffffff;
+            --bg2: #f8f9fa;
+            --bg3: #f1f3f5;
+            --text: #1a1a2e;
+            --text2: #4a4a5a;
+            --text3: #8a8a9a;
+            --border: #e9ecef;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-light: #dbeafe;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --nav-height: 68px;
+            --header-height: 56px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --transfer-color: #8b5cf6;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f1a;
+            --bg2: #1a1a2e;
+            --bg3: #252540;
+            --text: #f0f0f5;
+            --text2: #b0b0c0;
+            --text3: #707080;
+            --border: #2a2a45;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            --accent-light: #1a2a4a;
+        }
+        html,
+        body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.25s, color 0.25s;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--text3);
+            border-radius: 4px;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            height: var(--header-height);
+            min-height: var(--header-height);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            z-index: 10;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+        }
+        .app-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-header h1 .emoji {
+            font-size: 22px;
+        }
+        .app-header .header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .app-header .header-actions button {
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 20px;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-header .header-actions button:hover {
+            background: var(--bg3);
+        }
+        .app-header .header-actions .action-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 16px 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .main-content .view {
+            display: none;
+            animation: fadeUp 0.2s ease;
+        }
+        .main-content .view.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-around;
+            height: calc(var(--nav-height) + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+            z-index: 10;
+            position: sticky;
+            bottom: 0;
+        }
+        .bottom-nav .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            background: none;
+            border: none;
+            color: var(--text3);
+            font-size: 10px;
+            font-weight: 500;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: color 0.15s;
+            padding: 4px 0;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1.2;
+        }
+        .bottom-nav .nav-item .nav-label {
+            font-size: 10px;
+            letter-spacing: 0.2px;
+        }
+        .bottom-nav .nav-item.active {
+            color: var(--accent);
+        }
+        .bottom-nav .nav-item.active .nav-icon {
+            transform: scale(1.05);
+        }
+        .bottom-nav .nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(calc(50% + 20px));
+            background: var(--danger);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            line-height: 16px;
+        }
+
+        /* ===== CARDS & LISTS ===== */
+        .card {
+            background: var(--bg2);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+            border: 1px solid var(--border);
+        }
+        .card-hover:hover {
+            background: var(--bg3);
+            cursor: pointer;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .card-sub {
+            font-size: 13px;
+            color: var(--text2);
+        }
+        .card-amount {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.3px;
+        }
+        .card-amount.positive {
+            color: var(--success);
+        }
+        .card-amount.negative {
+            color: var(--danger);
+        }
+        .card-amount.neutral {
+            color: var(--text2);
+        }
+        .card-amount.transfer {
+            color: var(--transfer-color);
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+        .row .row-icon {
+            font-size: 22px;
+            width: 36px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .row .row-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .row .row-title {
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .row .row-desc {
+            font-size: 12px;
+            color: var(--text3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .row .row-amount {
+            font-weight: 600;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .row .row-amount.positive {
+            color: var(--success);
+        }
+        .row .row-amount.negative {
+            color: var(--danger);
+        }
+        .row .row-amount.transfer {
+            color: var(--transfer-color);
+        }
+        .row .row-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .row .row-actions button {
+            background: none;
+            border: none;
+            color: var(--text3);
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.15s;
+        }
+        .row .row-actions button:hover {
+            background: var(--bg3);
+        }
+        .row .row-actions button.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+        }
+        .btn-outline:hover {
+            background: var(--accent-light);
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+        .btn .emoji {
+            font-size: 16px;
+        }
+
+        /* ===== FORMS ===== */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: var(--text2);
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 15px;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        .form-control::placeholder {
+            color: var(--text3);
+        }
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8a9a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        .modal-box {
+            background: var(--bg);
+            border-radius: var(--radius) var(--radius) 0 0;
+            max-width: 480px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            transform: translateY(0);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        @keyframes slideUp {
+            0% {
+                transform: translateY(40px);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border);
+            margin: 10px auto 4px;
+            flex-shrink: 0;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px 8px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text3);
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+        .modal-body {
+            padding: 16px 20px 20px;
+            overflow-y: auto;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-footer {
+            padding: 12px 20px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .modal-footer .btn {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        /* ===== PROJECT LIST ===== */
+        .project-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            transition: background 0.15s, transform 0.1s;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .project-item:active {
+            transform: scale(0.98);
+        }
+        .project-item .p-emoji {
+            font-size: 28px;
+            width: 44px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .project-item .p-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .project-item .p-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .project-item .p-balance {
+            font-weight: 700;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+        .project-item .p-balance.positive {
+            color: var(--success);
+        }
+        .project-item .p-balance.negative {
+            color: var(--danger);
+        }
+        .project-item .p-actions {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .project-item .p-actions button {
+            background: none;
+            border: none;
+            color: var(--text3);
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.15s;
+        }
+        .project-item .p-actions button:hover {
+            background: var(--bg3);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text3);
+        }
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .empty-state h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text2);
+            margin-bottom: 4px;
+        }
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ===== TOTAL BAR ===== */
+        .total-bar {
+            background: var(--accent);
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-bar .total-label {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        .total-bar .total-amount {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* ===== OPERATION ITEMS ===== */
+        .op-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .op-item:last-child {
+            border-bottom: none;
+        }
+        .op-item .op-icon {
+            font-size: 20px;
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .op-item .op-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .op-item .op-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .op-item .op-meta {
+            font-size: 12px;
+            color: var(--text3);
+        }
+        .op-item .op-amount {
+            font-weight: 600;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .op-item .op-amount.positive {
+            color: var(--success);
+        }
+        .op-item .op-amount.negative {
+            color: var(--danger);
+        }
+        .op-item .op-amount.transfer {
+            color: var(--transfer-color);
+        }
+        .op-item .op-actions {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .op-item .op-actions button {
+            background: none;
+            border: none;
+            color: var(--text3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .op-item .op-actions button:hover {
+            background: var(--bg3);
+        }
+
+        /* ===== RECURRING ITEMS ===== */
+        .rec-item {
+            background: var(--bg2);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .rec-item .rec-info {
+            flex: 1;
+        }
+        .rec-item .rec-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .rec-item .rec-meta {
+            font-size: 12px;
+            color: var(--text3);
+        }
+        .rec-item .rec-amount {
+            font-weight: 600;
+            font-size: 15px;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+        .rec-item .rec-amount.positive {
+            color: var(--success);
+        }
+        .rec-item .rec-amount.negative {
+            color: var(--danger);
+        }
+        .rec-item .rec-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .rec-item .rec-actions button {
+            background: none;
+            border: none;
+            color: var(--text3);
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .rec-item .rec-actions button:hover {
+            background: var(--bg3);
+        }
+
+        /* ===== FORECAST ===== */
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .forecast-item {
+            background: var(--bg2);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .forecast-item .f-emoji {
+            font-size: 24px;
+        }
+        .forecast-item .f-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin: 2px 0;
+        }
+        .forecast-item .f-amount {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .forecast-item .f-amount.positive {
+            color: var(--success);
+        }
+        .forecast-item .f-amount.negative {
+            color: var(--danger);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            bottom: calc(var(--nav-height) + 20px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            max-width: 400px;
+            width: 90%;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--text);
+            color: var(--bg);
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            pointer-events: auto;
+            animation: toastIn 0.3s ease;
+            margin-bottom: 6px;
+        }
+        .toast .toast-undo {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        @keyframes toastIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ===== SETTINGS ===== */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-item .set-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .setting-item .set-desc {
+            font-size: 12px;
+            color: var(--text3);
+        }
+        .setting-item .set-control {
+            flex-shrink: 0;
+        }
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-picker-wrap input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            padding: 2px;
+            cursor: pointer;
+            background: none;
+        }
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        .toggle-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .toggle-wrap .toggle-label {
+            font-size: 13px;
+            color: var(--text2);
+            cursor: pointer;
+        }
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .toggle.active {
+            background: var(--accent);
+        }
+        .toggle .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+        .toggle.active .toggle-knob {
+            transform: translateX(20px);
+        }
+
+        .journal-entry {
+            font-size: 12px;
+            color: var(--text3);
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+        .journal-entry .jv {
+            font-weight: 600;
+            color: var(--text2);
+            min-width: 56px;
+        }
+
+        /* ===== ARCHIVED ===== */
+        .archived-section {
+            margin-top: 16px;
+            border-top: 2px dashed var(--border);
+            padding-top: 16px;
+        }
+        .archived-section .arch-toggle {
+            background: none;
+            border: none;
+            color: var(--text3);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+        }
+        .archived-section .arch-toggle:hover {
+            color: var(--text2);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px 12px 6px;
+            }
+            .modal-box {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+            .modal-body {
+                padding: 12px 16px 16px;
+            }
+            .total-bar .total-amount {
+                font-size: 22px;
+            }
+            .project-item .p-emoji {
+                font-size: 24px;
+                width: 38px;
+            }
+            .forecast-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+        }
+        @media (min-width: 481px) {
+            #app {
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+            }
+        }
+
+        /* ===== UTILITY ===== */
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .text-muted {
+            color: var(--text3);
+            font-size: 13px;
+        }
+        .text-sm {
+            font-size: 13px;
+        }
+        .font-mono {
+            font-variant-numeric: tabular-nums;
+        }
+        .tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg3);
+            color: var(--text2);
+            display: inline-block;
+        }
+        .tag.positive {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .tag.negative {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .tag.transfer {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        [data-theme="dark"] .tag.positive {
+            background: #1a3a2a;
+            color: #4ade80;
+        }
+        [data-theme="dark"] .tag.negative {
+            background: #3a1a1a;
+            color: #f87171;
+        }
+        [data-theme="dark"] .tag.transfer {
+            background: #2a1a4a;
+            color: #a78bfa;
+        }
+
+        /* ===== SCROLL CONTAINER ===== */
+        .scroll-y {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+        }
+
+        /* ===== SELECT PROJECT IN TRANSFER ===== */
+        .project-select-list .ps-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .project-select-list .ps-item:hover {
+            background: var(--bg3);
+        }
+        .project-select-list .ps-item .ps-emoji {
+            font-size: 20px;
+        }
+        .project-select-list .ps-item .ps-name {
+            font-weight: 500;
+        }
+
+        /* small screen tweaks */
+        .btn .btn-text {
+            display: inline;
+        }
+        @media (max-width: 400px) {
+            .btn .btn-text {
+                display: none;
+            }
+            .btn .btn-icon-only {
+                display: inline;
+            }
+            .btn {
+                padding: 8px 12px;
+            }
+        }
+        .btn .btn-icon-only {
+            display: none;
+        }
+        @media (max-width: 400px) {
+            .btn .btn-icon-only {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- HEADER -->
+        <header class="app-header" id="appHeader">
+            <h1><span class="emoji">💰</span> <span id="headerTitle">CashFlow</span></h1>
+            <div class="header-actions">
+                <button id="headerAddOp" title="Add operation" aria-label="Add operation">➕</button>
+                <button id="headerAddProject" title="Add project" aria-label="Add project">📁</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content" id="mainContent">
+
+            <!-- HOME VIEW -->
+            <div class="view active" id="viewHome">
+                <div class="total-bar" id="totalBar">
+                    <span class="total-label" data-i18n="total_available">Total available</span>
+                    <span class="total-amount font-mono" id="totalAmount">€0.00</span>
+                </div>
+                <div id="projectList"></div>
+                <div class="archived-section" id="archivedSection">
+                    <button class="arch-toggle" id="archToggle">📦 <span data-i18n="archived_projects">Archived projects</span> <span id="archBadge">(0)</span></button>
+                    <div id="archivedList" style="display:none;margin-top:8px;"></div>
+                </div>
+            </div>
+
+            <!-- PROJECT VIEW -->
+            <div class="view" id="viewProject">
+                <div id="projectDetail"></div>
+            </div>
+
+            <!-- PLANNING VIEW -->
+            <div class="view" id="viewPlanning">
+                <div class="flex-between mb-16">
+                    <h2 style="font-size:18px;font-weight:600;" data-i18n="monthly_planning">Monthly planning</h2>
+                    <button class="btn btn-primary btn-sm" id="addRecurringBtn">+ <span data-i18n="add">Add</span></button>
+                </div>
+                <div id="recurringList"></div>
+            </div>
+
+            <!-- FORECAST VIEW -->
+            <div class="view" id="viewForecast">
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:10px;" data-i18n="forecast">Forecast</h2>
+                <div class="form-group">
+                    <label data-i18n="select_date">Select a future date</label>
+                    <input type="date" class="form-control" id="forecastDate">
+                </div>
+                <div id="forecastResults"></div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div class="view" id="viewSettings">
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:12px;" data-i18n="settings">Settings</h2>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="theme">Theme</div>
+                        <div class="set-desc" data-i18n="theme_desc">Light or dark mode</div>
+                    </div>
+                    <div class="set-control toggle-wrap">
+                        <span class="toggle-label" id="themeLabel">🌙</span>
+                        <div class="toggle active" id="themeToggle"><div class="toggle-knob"></div></div>
+                        <span class="toggle-label" id="themeLabel2">☀️</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="language">Language</div>
+                        <div class="set-desc" data-i18n="language_desc">English or French</div>
+                    </div>
+                    <div class="set-control">
+                        <select class="form-control" id="langSelect" style="width:auto;padding:4px 28px 4px 10px;font-size:13px;">
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="accent_color">Accent color</div>
+                        <div class="set-desc" data-i18n="accent_desc">Customize your accent color</div>
+                    </div>
+                    <div class="set-control color-picker-wrap">
+                        <input type="color" id="accentColorPicker" value="#3b82f6">
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="google_drive">Google Drive backup</div>
+                        <div class="set-desc" data-i18n="drive_desc">Auto-save every 2min after change</div>
+                    </div>
+                    <div class="set-control">
+                        <button class="btn btn-sm btn-secondary" id="driveSignInBtn" data-i18n="sign_in">Sign in</button>
+                        <button class="btn btn-sm btn-secondary" id="driveBackupBtn" style="display:none;" data-i18n="backup_now">Backup now</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="import_export">Import / Export</div>
+                        <div class="set-desc" data-i18n="import_export_desc">Full JSON backup or restore</div>
+                    </div>
+                    <div class="set-control" style="display:flex;gap:6px;">
+                        <button class="btn btn-sm btn-secondary" id="exportBtn">📤</button>
+                        <button class="btn btn-sm btn-secondary" id="importBtn">📥</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="set-label" data-i18n="excel_export">Excel export</div>
+                        <div class="set-desc" data-i18n="excel_desc">Export to .xlsx file</div>
+                    </div>
+                    <div class="set-control">
+                        <button class="btn btn-sm btn-secondary" id="excelExportBtn">📊</button>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+                    <div class="flex-between" style="cursor:pointer;" id="journalToggle">
+                        <span style="font-weight:500;font-size:14px;" data-i18n="version_history">Version history</span>
+                        <span id="journalArrow">▶</span>
+                    </div>
+                    <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-01 · Initial release</span></div>
+                    </div>
+                    <div style="margin-top:8px;font-size:12px;color:var(--text3);">
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.0.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav" id="bottomNav">
+            <button class="nav-item active" data-view="viewHome" aria-label="Home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label" data-i18n="home">Home</span>
+            </button>
+            <button class="nav-item" data-view="viewProject" aria-label="Project">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label" data-i18n="project">Project</span>
+            </button>
+            <button class="nav-item" data-view="viewPlanning" aria-label="Planning">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label" data-i18n="planning">Planning</span>
+            </button>
+            <button class="nav-item" data-view="viewForecast" aria-label="Forecast">
+                <span class="nav-icon">🔮</span>
+                <span class="nav-label" data-i18n="forecast">Forecast</span>
+            </button>
+            <button class="nav-item" data-view="viewSettings" aria-label="Settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label" data-i18n="settings">Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL CONTAINER -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box" id="modalBox">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h2 id="modalTitle">Modal</h2>
+                <button class="close-btn" id="modalClose">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================================
+        // CONSTANTS
+        // ============================================================
+        const VERSION = '1.0.0';
+        const SCHEMA = 1;
+        const JOURNAL = [
+            { version: '1.0.0', date: '2026-01-31', changes: 'Initial release' }
+        ];
+        const GID_SITE = ''; // Set your Google Client ID here
+
+        // ============================================================
+        // TRANSLATIONS
+        // ============================================================
+        const LANG = {
+            en: {
+                home: 'Home',
+                project: 'Project',
+                planning: 'Planning',
+                forecast: 'Forecast',
+                settings: 'Settings',
+                total_available: 'Total available',
+                archived_projects: 'Archived projects',
+                monthly_planning: 'Monthly planning',
+                add: 'Add',
+                select_date: 'Select a future date',
+                theme: 'Theme',
+                theme_desc: 'Light or dark mode',
+                language: 'Language',
+                language_desc: 'English or French',
+                accent_color: 'Accent color',
+                accent_desc: 'Customize your accent color',
+                google_drive: 'Google Drive backup',
+                drive_desc: 'Auto-save every 2min after change',
+                sign_in: 'Sign in',
+                backup_now: 'Backup now',
+                import_export: 'Import / Export',
+                import_export_desc: 'Full JSON backup or restore',
+                excel_export: 'Excel export',
+                excel_desc: 'Export to .xlsx file',
+                version_history: 'Version history',
+                version: 'Version',
+                no_projects: 'No projects yet. Create your first project!',
+                create_project: 'Create project',
+                edit_project: 'Edit project',
+                delete_project: 'Delete project',
+                archive_project: 'Archive project',
+                unarchive: 'Unarchive',
+                transfer: 'Transfer',
+                add_operation: 'Add operation',
+                edit_operation: 'Edit operation',
+                delete_operation: 'Delete operation',
+                amount: 'Amount',
+                label: 'Label',
+                date: 'Date',
+                type: 'Type',
+                income: 'Income',
+                expense: 'Expense',
+                transfer_op: 'Transfer',
+                from: 'From',
+                to: 'To',
+                all_balance: 'All balance',
+                confirm_delete: 'Are you sure you want to delete this?',
+                confirm_delete_project: 'Are you sure you want to delete this project? This action is irreversible.',
+                confirm_archive: 'This project has a zero balance. Archive it?',
+                confirm_transfer_reliquat: 'This project has a remaining balance. Transfer it before archiving?',
+                project_title: 'Project title',
+                project_emoji: 'Emoji (optional)',
+                save: 'Save',
+                cancel: 'Cancel',
+                delete: 'Delete',
+                archive: 'Archive',
+                unarchive_btn: 'Unarchive',
+                recurring_add: 'Add recurring',
+                recurring_edit: 'Edit recurring',
+                recurring_amount: 'Amount',
+                recurring_label: 'Label',
+                recurring_start: 'Start date',
+                recurring_occurrences: 'Number of occurrences',
+                recurring_end: 'End date',
+                real: 'Real',
+                planned: 'Planned',
+                projected_balance: 'Projected balance',
+                no_recurring: 'No recurring operations planned.',
+                operation_deleted: 'Operation deleted',
+                project_deleted: 'Project deleted',
+                undo: 'Undo',
+                import_success: 'Data imported successfully',
+                export_success: 'Data exported',
+                drive_signed_in: 'Signed in to Google Drive',
+                drive_backup_done: 'Backup completed',
+                select_project: 'Select a project',
+                search: 'Search',
+                filter: 'Filter',
+                sort: 'Sort',
+                newest: 'Newest',
+                oldest: 'Oldest',
+                highest: 'Highest amount',
+                lowest: 'Lowest amount',
+                all_types: 'All types',
+            },
+            fr: {
+                home: 'Accueil',
+                project: 'Projet',
+                planning: 'Planification',
+                forecast: 'Prévisionnel',
+                settings: 'Réglages',
+                total_available: 'Total disponible',
+                archived_projects: 'Projets archivés',
+                monthly_planning: 'Planification mensuelle',
+                add: 'Ajouter',
+                select_date: 'Sélectionnez une date future',
+                theme: 'Thème',
+                theme_desc: 'Mode clair ou sombre',
+                language: 'Langue',
+                language_desc: 'Anglais ou Français',
+                accent_color: 'Couleur d\'accent',
+                accent_desc: 'Personnalisez votre couleur d\'accent',
+                google_drive: 'Sauvegarde Google Drive',
+                drive_desc: 'Auto-sauvegarde 2min après modification',
+                sign_in: 'Se connecter',
+                backup_now: 'Sauvegarder',
+                import_export: 'Import / Export',
+                import_export_desc: 'Sauvegarde ou restauration JSON',
+                excel_export: 'Export Excel',
+                excel_desc: 'Exporter en .xlsx',
+                version_history: 'Historique des versions',
+                version: 'Version',
+                no_projects: 'Aucun projet. Créez votre premier projet !',
+                create_project: 'Créer un projet',
+                edit_project: 'Modifier le projet',
+                delete_project: 'Supprimer le projet',
+                archive_project: 'Archiver le projet',
+                unarchive: 'Désarchiver',
+                transfer: 'Transférer',
+                add_operation: 'Ajouter une opération',
+                edit_operation: 'Modifier l\'opération',
+                delete_operation: 'Supprimer l\'opération',
+                amount: 'Montant',
+                label: 'Libellé',
+                date: 'Date',
+                type: 'Type',
+                income: 'Ajout',
+                expense: 'Dépense',
+                transfer_op: 'Transfert',
+                from: 'De',
+                to: 'Vers',
+                all_balance: 'Tout le solde',
+                confirm_delete: 'Êtes-vous sûr de vouloir supprimer ?',
+                confirm_delete_project: 'Êtes-vous sûr de vouloir supprimer ce projet ? Action irréversible.',
+                confirm_archive: 'Ce projet a un solde nul. Archiver ?',
+                confirm_transfer_reliquat: 'Ce projet a un solde restant. Transférer avant archiving ?',
+                project_title: 'Titre du projet',
+                project_emoji: 'Émoticône (optionnel)',
+                save: 'Enregistrer',
+                cancel: 'Annuler',
+                delete: 'Supprimer',
+                archive: 'Archiver',
+                unarchive_btn: 'Désarchiver',
+                recurring_add: 'Ajouter une récurrence',
+                recurring_edit: 'Modifier la récurrence',
+                recurring_amount: 'Montant',
+                recurring_label: 'Libellé',
+                recurring_start: 'Date de début',
+                recurring_occurrences: 'Nombre d\'occurrences',
+                recurring_end: 'Date de fin',
+                real: 'Réel',
+                planned: 'Planifié',
+                projected_balance: 'Solde projeté',
+                no_recurring: 'Aucune opération récurrente planifiée.',
+                operation_deleted: 'Opération supprimée',
+                project_deleted: 'Projet supprimé',
+                undo: 'Annuler',
+                import_success: 'Données importées avec succès',
+                export_success: 'Données exportées',
+                drive_signed_in: 'Connecté à Google Drive',
+                drive_backup_done: 'Sauvegarde effectuée',
+                select_project: 'Sélectionner un projet',
+                search: 'Rechercher',
+                filter: 'Filtrer',
+                sort: 'Trier',
+                newest: 'Plus récent',
+                oldest: 'Plus ancien',
+                highest: 'Montant le plus élevé',
+                lowest: 'Montant le plus faible',
+                all_types: 'Tous les types',
+            }
+        };
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentLang = 'en';
+        let currentTheme = 'light';
+        let accentColor = '#3b82f6';
+        let currentView = 'viewHome';
+        let selectedProjectId = null;
+        let editingOperationId = null;
+        let editingRecurringId = null;
+        let editingProjectId = null;
+        let undoStack = [];
+        let undoTimeout = null;
+        let driveToken = null;
+        let driveBackupTimer = null;
+        let driveBackupPending = false;
+        let lastDriveBackup = 0;
+        let db = null;
+        let allProjects = [];
+        let allOperations = [];
+        let allRecurrings = [];
+
+        // ============================================================
+        // INDEXED DB
+        // ============================================================
+        const DB_NAME = 'CashFlowDB';
+        const DB_VERSION = 1;
+        const STORES = ['projects', 'operations', 'recurrings', 'settings'];
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    STORES.forEach(s => {
+                        if (!d.objectStoreNames.contains(s)) {
+                            d.createObjectStore(s, { keyPath: 'id' });
+                        }
+                    });
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbGetAll(store) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).getAll();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function dbPut(store, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).put(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function dbDelete(store, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).delete(id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function dbGet(store, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).get(id);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        // ============================================================
+        // DATA HELPERS
+        // ============================================================
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function today() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function formatCurrency(amount) {
+            return '€' + Math.round(amount * 100) / 100;
+        }
+
+        function getProjectBalance(projectId) {
+            let balance = 0;
+            for (const op of allOperations) {
+                if (op.projectId === projectId) {
+                    if (op.type === 'add') balance += op.amount;
+                    else if (op.type === 'expense') balance -= op.amount;
+                    else if (op.type === 'transfer_in') balance += op.amount;
+                    else if (op.type === 'transfer_out') balance -= op.amount;
+                }
+            }
+            return Math.round(balance * 100) / 100;
+        }
+
+        function getProjectById(id) {
+            return allProjects.find(p => p.id === id);
+        }
+
+        function getOperationsForProject(projectId) {
+            return allOperations.filter(o => o.projectId === projectId).sort((a, b) => a.date < b.date ? 1 : -1);
+        }
+
+        function getRecurringsForProject(projectId) {
+            return allRecurrings.filter(r => r.projectId === projectId);
+        }
+
+        function getTotalActiveBalance() {
+            let total = 0;
+            for (const p of allProjects) {
+                if (p.active && !p.archived) {
+                    total += getProjectBalance(p.id);
+                }
+            }
+            return Math.round(total * 100) / 100;
+        }
+
+        function getRecurringEndDate(startDate, occurrences) {
+            if (!startDate || !occurrences) return '';
+            const d = new Date(startDate);
+            d.setMonth(d.getMonth() + occurrences - 1);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function getRecurringOccurrenceDates(startDate, occurrences) {
+            const dates = [];
+            const d = new Date(startDate);
+            for (let i = 0; i < occurrences; i++) {
+                dates.push(d.toISOString().slice(0, 10));
+                d.setMonth(d.getMonth() + 1);
+            }
+            return dates;
+        }
+
+        function getProjectedBalance(projectId, targetDate) {
+            let balance = getProjectBalance(projectId);
+            const recs = getRecurringsForProject(projectId);
+            for (const r of recs) {
+                const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
+                for (const d of dates) {
+                    if (d <= targetDate) {
+                        // Check if this occurrence already exists as a real operation
+                        const exists = allOperations.some(o =>
+                            o.projectId === projectId &&
+                            o.recurringId === r.id &&
+                            o.date === d &&
+                            o.type === r.type
+                        );
+                        if (!exists) {
+                            if (r.type === 'add') balance += r.amount;
+                            else balance -= r.amount;
+                        }
+                    }
+                }
+            }
+            return Math.round(balance * 100) / 100;
+        }
+
+        // ============================================================
+        // I18N
+        // ============================================================
+        function t(key) {
+            return LANG[currentLang]?.[key] || key;
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                el.textContent = t(key);
+            });
+            // Update header title
+            document.getElementById('headerTitle').textContent = 'CashFlow';
+        }
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function applyTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+            const toggle = document.getElementById('themeToggle');
+            if (theme === 'dark') {
+                toggle.classList.add('active');
+                document.getElementById('themeLabel').textContent = '☀️';
+                document.getElementById('themeLabel2').textContent = '🌙';
+            } else {
+                toggle.classList.remove('active');
+                document.getElementById('themeLabel').textContent = '🌙';
+                document.getElementById('themeLabel2').textContent = '☀️';
+            }
+            localStorage.setItem('cashflow_theme', theme);
+        }
+
+        // ============================================================
+        // ACCENT COLOR
+        // ============================================================
+        function applyAccentColor(color) {
+            accentColor = color;
+            document.documentElement.style.setProperty('--accent', color);
+            // compute hover
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+            const darker = `#${Math.max(0, r - 40).toString(16).padStart(2, '0')}${Math.max(0, g - 40).toString(16).padStart(2, '0')}${Math.max(0, b - 40).toString(16).padStart(2, '0')}`;
+            document.documentElement.style.setProperty('--accent-hover', darker);
+            const light = `rgba(${r},${g},${b},0.15)`;
+            document.documentElement.style.setProperty('--accent-light', light);
+            localStorage.setItem('cashflow_accent', color);
+            document.getElementById('accentColorPicker').value = color;
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function navigateTo(viewId, data) {
+            currentView = viewId;
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const target = document.getElementById(viewId);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector(`.nav-item[data-view="${viewId}"]`)?.classList.add('active');
+
+            if (viewId === 'viewHome') renderHome();
+            else if (viewId === 'viewProject') renderProjectDetail();
+            else if (viewId === 'viewPlanning') renderPlanning();
+            else if (viewId === 'viewForecast') renderForecast();
+            else if (viewId === 'viewSettings') renderSettings();
+
+            // Update header
+            const titles = {
+                viewHome: '🏠 ' + t('home'),
+                viewProject: '📊 ' + t('project'),
+                viewPlanning: '📅 ' + t('planning'),
+                viewForecast: '🔮 ' + t('forecast'),
+                viewSettings: '⚙️ ' + t('settings')
+            };
+            document.getElementById('headerTitle').textContent = titles[viewId] || 'CashFlow';
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function openModal(title, bodyHTML, footerHTML) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            document.getElementById('modalFooter').innerHTML = footerHTML || '';
+            document.getElementById('modalOverlay').classList.add('open');
+            // Close on overlay click
+            document.getElementById('modalOverlay').onclick = (e) => {
+                if (e.target === e.currentTarget) closeModal();
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(message, undoAction) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+            <span>${message}</span>
+            ${undoAction ? `<button class="toast-undo" data-undo>${t('undo')}</button>` : ''}
+          `;
+            container.appendChild(toast);
+            if (undoAction) {
+                toast.querySelector('[data-undo]').onclick = () => {
+                    undoAction();
+                    toast.remove();
+                };
+            }
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 5000);
+        }
+
+        // ============================================================
+        // UNDO SYSTEM
+        // ============================================================
+        function pushUndo(action, data) {
+            undoStack.push({ action, data });
+            if (undoTimeout) clearTimeout(undoTimeout);
+            undoTimeout = setTimeout(() => {
+                undoStack = [];
+            }, 8000);
+        }
+
+        function popUndo() {
+            if (undoStack.length === 0) return null;
+            return undoStack.pop();
+        }
+
+        // ============================================================
+        // RENDER: HOME
+        // ============================================================
+        function renderHome() {
+            const total = getTotalActiveBalance();
+            document.getElementById('totalAmount').textContent = formatCurrency(total);
+            document.getElementById('totalAmount').className = 'total-amount font-mono' + (total < 0 ? ' negative' : '');
+
+            const activeProjects = allProjects.filter(p => p.active && !p.archived);
+            const list = document.getElementById('projectList');
+
+            if (activeProjects.length === 0) {
+                list.innerHTML = `
+              <div class="empty-state">
+                <span class="empty-icon">📂</span>
+                <h3>${t('no_projects')}</h3>
+                <p style="margin-top:8px;">
+                  <button class="btn btn-primary" onclick="showCreateProject()">${t('create_project')}</button>
+                </p>
+              </div>
+            `;
+            } else {
+                list.innerHTML = activeProjects.map(p => {
+                    const bal = getProjectBalance(p.id);
+                    const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+                    return `
+                <div class="project-item" onclick="selectProject('${p.id}')">
+                  <span class="p-emoji">${p.emoji || '📁'}</span>
+                  <div class="p-info">
+                    <div class="p-title">${p.title}</div>
+                  </div>
+                  <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
+                  <div class="p-actions">
+                    <button onclick="event.stopPropagation();showEditProject('${p.id}')" title="${t('edit_project')}">✏️</button>
+                    <button onclick="event.stopPropagation();showTransferModal('${p.id}')" title="${t('transfer')}">↔️</button>
+                    <button onclick="event.stopPropagation();showArchiveProject('${p.id}')" title="${t('archive_project')}">📦</button>
+                    <button onclick="event.stopPropagation();showDeleteProject('${p.id}')" title="${t('delete_project')}">🗑️</button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+            }
+
+            // Archived
+            const archived = allProjects.filter(p => p.archived);
+            document.getElementById('archBadge').textContent = `(${archived.length})`;
+            const archList = document.getElementById('archivedList');
+            if (archived.length === 0) {
+                archList.innerHTML = '<div class="text-muted text-sm" style="padding:8px 0;">' + t('no_projects') + '</div>';
+            } else {
+                archList.innerHTML = archived.map(p => {
+                    const bal = getProjectBalance(p.id);
+                    const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+                    return `
+                <div class="project-item" style="opacity:0.7;" onclick="selectProject('${p.id}')">
+                  <span class="p-emoji">${p.emoji || '📁'}</span>
+                  <div class="p-info">
+                    <div class="p-title">${p.title}</div>
+                    <div class="text-muted text-sm">${t('archived') || 'Archived'}</div>
+                  </div>
+                  <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
+                  <div class="p-actions">
+                    <button onclick="event.stopPropagation();unarchiveProject('${p.id}')" title="${t('unarchive_btn')}">↩️</button>
+                    <button onclick="event.stopPropagation();showDeleteProject('${p.id}')" title="${t('delete_project')}">🗑️</button>
+                  </div>
+                </div>
+              `;
+                }).join('');
+            }
+
+            document.getElementById('archToggle').onclick = () => {
+                const el = document.getElementById('archivedList');
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            };
+        }
+
+        // ============================================================
+        // RENDER: PROJECT DETAIL
+        // ============================================================
+        function renderProjectDetail() {
+            const container = document.getElementById('projectDetail');
+            if (!selectedProjectId) {
+                container.innerHTML = `
+              <div class="empty-state">
+                <span class="empty-icon">📊</span>
+                <h3>${t('select_project')}</h3>
+                <p>${t('home')}</p>
+              </div>
+            `;
+                return;
+            }
+            const project = getProjectById(selectedProjectId);
+            if (!project) {
+                container.innerHTML = `<div class="empty-state"><h3>${t('select_project')}</h3></div>`;
+                return;
+            }
+            const bal = getProjectBalance(project.id);
+            const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+            const ops = getOperationsForProject(project.id);
+
+            let opsHTML = ops.length === 0 ? `
+            <div class="text-muted text-sm" style="padding:12px 0;">No operations yet.</div>
+          ` : ops.map(op => {
+                const isTransfer = op.type === 'transfer_in' || op.type === 'transfer_out';
+                const icon = op.type === 'add' ? '➕' : (op.type === 'expense' ? '➖' : (op.type === 'transfer_in' ? '⬅️' :
+                '➡️'));
+                const amtClass = op.type === 'add' || op.type === 'transfer_in' ? 'positive' : (op.type === 'expense' ||
+                    op.type === 'transfer_out' ? 'negative' : '');
+                const label = op.label || (op.type === 'add' ? t('income') : (op.type === 'expense' ? t('expense') : t(
+                'transfer_op')));
+                let linked = '';
+                if (isTransfer && op.linkedProjectId) {
+                    const lp = getProjectById(op.linkedProjectId);
+                    linked = lp ? ` → ${lp.emoji || '📁'} ${lp.title}` : '';
+                }
+                return `
+              <div class="op-item">
+                <span class="op-icon">${icon}</span>
+                <div class="op-body">
+                  <div class="op-label">${label}${linked}</div>
+                  <div class="op-meta">${op.date} ${op.isRecurring ? '🔄' : ''}</div>
+                </div>
+                <span class="op-amount ${amtClass}">${formatCurrency(op.amount)}</span>
+                <div class="op-actions">
+                  <button onclick="showEditOperation('${op.id}')" title="${t('edit_operation')}">✏️</button>
+                  <button onclick="showDeleteOperation('${op.id}')" title="${t('delete_operation')}">🗑️</button>
+                </div>
+              </div>
+            `;
+            }).join('');
+
+            container.innerHTML = `
+            <div class="card" style="margin-bottom:12px;">
+              <div class="flex-between">
+                <div>
+                  <span style="font-size:28px;">${project.emoji || '📁'}</span>
+                  <span style="font-size:20px;font-weight:700;margin-left:8px;">${project.title}</span>
+                </div>
+                <span class="card-amount ${balClass}">${formatCurrency(bal)}</span>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                <button class="btn btn-sm btn-success" onclick="showAddOperation('${project.id}','add')">➕ ${t('income')}</button>
+                <button class="btn btn-sm btn-danger" onclick="showAddOperation('${project.id}','expense')">➖ ${t('expense')}</button>
+                <button class="btn btn-sm btn-secondary" onclick="showTransferModal('${project.id}')">↔️ ${t('transfer')}</button>
+                <button class="btn btn-sm btn-secondary" onclick="showEditProject('${project.id}')">✏️</button>
+              </div>
+            </div>
+            <div class="card">
+              <div style="font-weight:600;font-size:14px;margin-bottom:6px;">📋 ${t('project')}</div>
+              ${opsHTML}
+            </div>
+          `;
+        }
+
+        // ============================================================
+        // RENDER: PLANNING
+        // ============================================================
+        function renderPlanning() {
+            const container = document.getElementById('recurringList');
+            // Show all recurrings grouped by project
+            if (allRecurrings.length === 0) {
+                container.innerHTML = `
+              <div class="empty-state">
+                <span class="empty-icon">📅</span>
+                <h3>${t('no_recurring')}</h3>
+              </div>
+            `;
+                return;
+            }
+            // Group by project
+            const groups = {};
+            for (const r of allRecurrings) {
+                if (!groups[r.projectId]) groups[r.projectId] = [];
+                groups[r.projectId].push(r);
+            }
+            let html = '';
+            for (const pid in groups) {
+                const p = getProjectById(pid);
+                if (!p) continue;
+                html += `<div style="font-weight:600;font-size:14px;margin:10px 0 4px;">${p.emoji || '📁'} ${p.title}</div>`;
+                for (const r of groups[pid]) {
+                    const amtClass = r.type === 'add' ? 'positive' : 'negative';
+                    const icon = r.type === 'add' ? '➕' : '➖';
+                    const endDate = getRecurringEndDate(r.startDate, r.occurrences);
+                    html += `
+                <div class="rec-item" style="border-left-color:${r.type === 'add' ? 'var(--success)' : 'var(--danger)'};">
+                  <div class="rec-info">
+                    <div class="rec-label">${icon} ${r.label || (r.type === 'add' ? t('income') : t('expense'))}</div>
+                    <div class="rec-meta">${r.startDate} → ${endDate} (${r.occurrences}×)</div>
+                  </div>
+                  <span class="rec-amount ${amtClass}">${formatCurrency(r.amount)}</span>
+                  <div class="rec-actions">
+                    <button onclick="showEditRecurring('${r.id}')">✏️</button>
+                    <button onclick="showDeleteRecurring('${r.id}')">🗑️</button>
+                  </div>
+                </div>
+              `;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDER: FORECAST
+        // ============================================================
+        function renderForecast() {
+            const container = document.getElementById('forecastResults');
+            const dateInput = document.getElementById('forecastDate');
+            if (!dateInput.value) {
+                const d = new Date();
+                d.setMonth(d.getMonth() + 1);
+                dateInput.value = d.toISOString().slice(0, 10);
+            }
+            updateForecast();
+        }
+
+        function updateForecast() {
+            const container = document.getElementById('forecastResults');
+            const dateStr = document.getElementById('forecastDate').value;
+            if (!dateStr) {
+                container.innerHTML = '';
+                return;
+            }
+            const activeProjects = allProjects.filter(p => p.active && !p.archived);
+            if (activeProjects.length === 0) {
+                container.innerHTML = `<div class="text-muted text-sm">${t('no_projects')}</div>`;
+                return;
+            }
+            let total = 0;
+            let html = '<div class="forecast-grid">';
+            for (const p of activeProjects) {
+                const bal = getProjectedBalance(p.id, dateStr);
+                total += bal;
+                const cls = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+                html += `
+              <div class="forecast-item">
+                <div class="f-emoji">${p.emoji || '📁'}</div>
+                <div class="f-title">${p.title}</div>
+                <div class="f-amount ${cls}">${formatCurrency(bal)}</div>
+              </div>
+            `;
+            }
+            html += '</div>';
+            const cls = total < 0 ? 'negative' : (total > 0 ? 'positive' : '');
+            html += `
+            <div class="total-bar" style="margin-top:12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);">
+              <span class="total-label">${t('projected_balance')}</span>
+              <span class="total-amount font-mono ${cls}" style="color:${total < 0 ? 'var(--danger)' : (total > 0 ? 'var(--success)' : 'var(--text2)')};">${formatCurrency(total)}</span>
+            </div>
+          `;
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDER: SETTINGS
+        // ============================================================
+        function renderSettings() {
+            // Already rendered in HTML, just update values
+            document.getElementById('versionDisplay').textContent = VERSION;
+            document.getElementById('langSelect').value = currentLang;
+            document.getElementById('accentColorPicker').value = accentColor;
+        }
+
+        // ============================================================
+        // PROJECT CRUD
+        // ============================================================
+        async function showCreateProject() {
+            openModal(t('create_project'), `
+            <div class="form-group">
+              <label>${t('project_title')}</label>
+              <input class="form-control" id="projTitleInput" placeholder="${t('project_title')}" value="">
+            </div>
+            <div class="form-group">
+              <label>${t('project_emoji')}</label>
+              <input class="form-control" id="projEmojiInput" placeholder="😊" value="">
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
+          `);
+            document.getElementById('createProjBtn').onclick = async () => {
+                const title = document.getElementById('projTitleInput').value.trim();
+                if (!title) { alert(t('project_title') + ' is required'); return; }
+                const emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
+                const project = {
+                    id: generateId(),
+                    title,
+                    emoji,
+                    active: true,
+                    archived: false,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+                await dbPut('projects', project);
+                allProjects.push(project);
+                closeModal();
+                renderHome();
+                navigateTo('viewHome');
+            };
+        }
+
+        async function showEditProject(id) {
+            const p = getProjectById(id);
+            if (!p) return;
+            openModal(t('edit_project'), `
+            <div class="form-group">
+              <label>${t('project_title')}</label>
+              <input class="form-control" id="projTitleInput" value="${p.title}">
+            </div>
+            <div class="form-group">
+              <label>${t('project_emoji')}</label>
+              <input class="form-control" id="projEmojiInput" value="${p.emoji || ''}">
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="editProjBtn">${t('save')}</button>
+          `);
+            document.getElementById('editProjBtn').onclick = async () => {
+                const title = document.getElementById('projTitleInput').value.trim();
+                if (!title) { alert(t('project_title') + ' is required'); return; }
+                p.title = title;
+                p.emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
+                p.updatedAt = Date.now();
+                await dbPut('projects', p);
+                closeModal();
+                renderHome();
+                renderProjectDetail();
+            };
+        }
+
+        async function showDeleteProject(id) {
+            const p = getProjectById(id);
+            if (!p) return;
+            if (!confirm(t('confirm_delete_project') + ' "' + p.title + '" ?')) return;
+            await dbDelete('projects', id);
+            // Delete operations
+            const opsToDelete = allOperations.filter(o => o.projectId === id);
+            for (const o of opsToDelete) {
+                await dbDelete('operations', o.id);
+            }
+            const recsToDelete = allRecurrings.filter(r => r.projectId === id);
+            for (const r of recsToDelete) {
+                await dbDelete('recurrings', r.id);
+            }
+            allProjects = allProjects.filter(p => p.id !== id);
+            allOperations = allOperations.filter(o => o.projectId !== id);
+            allRecurrings = allRecurrings.filter(r => r.projectId !== id);
+            if (selectedProjectId === id) selectedProjectId = null;
+            renderHome();
+            renderProjectDetail();
+            showToast(t('project_deleted'));
+        }
+
+        async function showArchiveProject(id) {
+            const p = getProjectById(id);
+            if (!p) return;
+            const bal = getProjectBalance(id);
+            if (Math.abs(bal) < 0.01) {
+                if (!confirm(t('confirm_archive'))) return;
+                p.archived = true;
+                p.active = false;
+                await dbPut('projects', p);
+                allProjects = allProjects.map(pp => pp.id === id ? p : pp);
+                renderHome();
+                renderProjectDetail();
+                return;
+            }
+            // Has balance - propose transfer
+            if (confirm(t('confirm_transfer_reliquat'))) {
+                showTransferModal(id, true);
+                return;
+            }
+            // Archive anyway? only if zero balance
+            if (Math.abs(bal) < 0.01) {
+                p.archived = true;
+                p.active = false;
+                await dbPut('projects', p);
+                allProjects = allProjects.map(pp => pp.id === id ? p : pp);
+                renderHome();
+                renderProjectDetail();
+            } else {
+                alert('Balance must be zero to archive.');
+            }
+        }
+
+        async function unarchiveProject(id) {
+            const p = getProjectById(id);
+            if (!p) return;
+            p.archived = false;
+            p.active = true;
+            await dbPut('projects', p);
+            allProjects = allProjects.map(pp => pp.id === id ? p : pp);
+            renderHome();
+            renderProjectDetail();
+        }
+
+        function selectProject(id) {
+            selectedProjectId = id;
+            navigateTo('viewProject');
+        }
+
+        // ============================================================
+        // OPERATIONS CRUD
+        // ============================================================
+        function showAddOperation(projectId, type) {
+            editingOperationId = null;
+            const todayStr = today();
+            const project = getProjectById(projectId);
+            const bal = getProjectBalance(projectId);
+            const isExpense = type === 'expense';
+            const title = isExpense ? t('expense') : t('income');
+            openModal(t('add_operation') + ' — ' + title, `
+            <div class="form-group">
+              <label>${t('type')}</label>
+              <select class="form-control" id="opTypeSelect">
+                <option value="add" ${type==='add'?'selected':''}>${t('income')}</option>
+                <option value="expense" ${type==='expense'?'selected':''}>${t('expense')}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <div style="display:flex;gap:8px;">
+                <input type="number" step="0.01" class="form-control" id="opAmountInput" placeholder="0.00" value="">
+                ${isExpense ? `<button class="btn btn-sm btn-secondary" id="opAllBalanceBtn">${t('all_balance')}</button>` : ''}
+              </div>
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="opLabelInput" placeholder="${t('label')}" value="">
+            </div>
+            <div class="form-group">
+              <label>${t('date')}</label>
+              <input type="date" class="form-control" id="opDateInput" value="${todayStr}">
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="saveOpBtn">${t('save')}</button>
+          `);
+
+            if (isExpense) {
+                document.getElementById('opAllBalanceBtn').onclick = () => {
+                    const amt = Math.abs(bal);
+                    document.getElementById('opAmountInput').value = amt > 0 ? amt : '';
+                };
+            }
+
+            document.getElementById('saveOpBtn').onclick = async () => {
+                const typeVal = document.getElementById('opTypeSelect').value;
+                const amount = parseFloat(document.getElementById('opAmountInput').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                const label = document.getElementById('opLabelInput').value.trim() || '';
+                const date = document.getElementById('opDateInput').value || todayStr;
+                const op = {
+                    id: generateId(),
+                    projectId: projectId,
+                    type: typeVal,
+                    amount: Math.round(amount * 100) / 100,
+                    label: label,
+                    date: date,
+                    linkedProjectId: null,
+                    isRecurring: false,
+                    recurringId: null,
+                    createdAt: Date.now()
+                };
+                await dbPut('operations', op);
+                allOperations.push(op);
+                closeModal();
+                renderProjectDetail();
+                renderHome();
+                // trigger drive backup
+                triggerDriveBackup();
+            };
+        }
+
+        async function showEditOperation(id) {
+            const op = allOperations.find(o => o.id === id);
+            if (!op) return;
+            editingOperationId = id;
+            openModal(t('edit_operation'), `
+            <div class="form-group">
+              <label>${t('type')}</label>
+              <select class="form-control" id="opTypeSelect">
+                <option value="add" ${op.type==='add'?'selected':''}>${t('income')}</option>
+                <option value="expense" ${op.type==='expense'?'selected':''}>${t('expense')}</option>
+                <option value="transfer_in" ${op.type==='transfer_in'?'selected':''}>${t('transfer_op')} (in)</option>
+                <option value="transfer_out" ${op.type==='transfer_out'?'selected':''}>${t('transfer_op')} (out)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <input type="number" step="0.01" class="form-control" id="opAmountInput" value="${op.amount}">
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="opLabelInput" value="${op.label || ''}">
+            </div>
+            <div class="form-group">
+              <label>${t('date')}</label>
+              <input type="date" class="form-control" id="opDateInput" value="${op.date}">
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="saveOpBtn">${t('save')}</button>
+          `);
+
+            document.getElementById('saveOpBtn').onclick = async () => {
+                const typeVal = document.getElementById('opTypeSelect').value;
+                const amount = parseFloat(document.getElementById('opAmountInput').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                op.type = typeVal;
+                op.amount = Math.round(amount * 100) / 100;
+                op.label = document.getElementById('opLabelInput').value.trim() || '';
+                op.date = document.getElementById('opDateInput').value || today();
+                await dbPut('operations', op);
+                closeModal();
+                renderProjectDetail();
+                renderHome();
+                triggerDriveBackup();
+            };
+        }
+
+        async function showDeleteOperation(id) {
+            if (!confirm(t('confirm_delete'))) return;
+            const op = allOperations.find(o => o.id === id);
+            if (!op) return;
+            // Check if it's a transfer - need to delete the linked op too
+            const isTransfer = op.type === 'transfer_in' || op.type === 'transfer_out';
+            let linkedOp = null;
+            if (isTransfer && op.linkedProjectId) {
+                linkedOp = allOperations.find(o =>
+                    o.linkedProjectId === op.projectId &&
+                    o.projectId === op.linkedProjectId &&
+                    ((o.type === 'transfer_in' && op.type === 'transfer_out') ||
+                        (o.type === 'transfer_out' && op.type === 'transfer_in'))
+                );
+            }
+            await dbDelete('operations', id);
+            allOperations = allOperations.filter(o => o.id !== id);
+            if (linkedOp) {
+                await dbDelete('operations', linkedOp.id);
+                allOperations = allOperations.filter(o => o.id !== linkedOp.id);
+            }
+            renderProjectDetail();
+            renderHome();
+            showToast(t('operation_deleted'), () => {
+                // Undo: re-add the operation
+                dbPut('operations', op);
+                allOperations.push(op);
+                if (linkedOp) {
+                    dbPut('operations', linkedOp);
+                    allOperations.push(linkedOp);
+                }
+                renderProjectDetail();
+                renderHome();
+            });
+            triggerDriveBackup();
+        }
+
+        // ============================================================
+        // TRANSFER
+        // ============================================================
+        function showTransferModal(fromProjectId, isArchiveMode = false) {
+            const fromProj = getProjectById(fromProjectId);
+            if (!fromProj) return;
+            const projects = allProjects.filter(p => p.active && !p.archived && p.id !== fromProjectId);
+            if (projects.length === 0) {
+                alert('No other active projects available.');
+                return;
+            }
+            const bal = getProjectBalance(fromProjectId);
+            openModal(t('transfer'), `
+            <div class="form-group">
+              <label>${t('from')}</label>
+              <div style="font-weight:500;">${fromProj.emoji || '📁'} ${fromProj.title}</div>
+            </div>
+            <div class="form-group">
+              <label>${t('to')}</label>
+              <select class="form-control" id="transferTarget">
+                ${projects.map(p => `<option value="${p.id}">${p.emoji || '📁'} ${p.title}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <input type="number" step="0.01" class="form-control" id="transferAmount" value="${isArchiveMode ? Math.abs(bal) : ''}" placeholder="0.00">
+              ${isArchiveMode ? `<div class="text-muted text-sm">${t('confirm_transfer_reliquat')}</div>` : ''}
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="transferLabel" placeholder="${t('label')}" value="Transfer">
+            </div>
+            <div class="form-group">
+              <label>${t('date')}</label>
+              <input type="date" class="form-control" id="transferDate" value="${today()}">
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="transferBtn">${t('transfer')}</button>
+          `);
+
+            document.getElementById('transferBtn').onclick = async () => {
+                const targetId = document.getElementById('transferTarget').value;
+                const amount = parseFloat(document.getElementById('transferAmount').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                const label = document.getElementById('transferLabel').value.trim() || 'Transfer';
+                const date = document.getElementById('transferDate').value || today();
+                const transferId = generateId();
+
+                // Create two operations
+                const opOut = {
+                    id: generateId(),
+                    projectId: fromProjectId,
+                    type: 'transfer_out',
+                    amount: Math.round(amount * 100) / 100,
+                    label: label + ' → ' + (getProjectById(targetId)?.title || ''),
+                    date: date,
+                    linkedProjectId: targetId,
+                    isRecurring: false,
+                    recurringId: null,
+                    createdAt: Date.now(),
+                    transferGroup: transferId
+                };
+                const opIn = {
+                    id: generateId(),
+                    projectId: targetId,
+                    type: 'transfer_in',
+                    amount: Math.round(amount * 100) / 100,
+                    label: label + ' ← ' + fromProj.title,
+                    date: date,
+                    linkedProjectId: fromProjectId,
+                    isRecurring: false,
+                    recurringId: null,
+                    createdAt: Date.now(),
+                    transferGroup: transferId
+                };
+
+                await dbPut('operations', opOut);
+                await dbPut('operations', opIn);
+                allOperations.push(opOut);
+                allOperations.push(opIn);
+
+                closeModal();
+
+                // If in archive mode, archive the project after transfer
+                if (isArchiveMode) {
+                    const p = getProjectById(fromProjectId);
+                    if (p) {
+                        p.archived = true;
+                        p.active = false;
+                        await dbPut('projects', p);
+                        allProjects = allProjects.map(pp => pp.id === fromProjectId ? p : pp);
+                    }
+                }
+
+                renderProjectDetail();
+                renderHome();
+                triggerDriveBackup();
+            };
+        }
+
+        // ============================================================
+        // RECURRING CRUD
+        // ============================================================
+        function showAddRecurring() {
+            const projects = allProjects.filter(p => p.active && !p.archived);
+            if (projects.length === 0) {
+                alert('Please create a project first.');
+                return;
+            }
+            editingRecurringId = null;
+            const todayStr = today();
+            openModal(t('recurring_add'), `
+            <div class="form-group">
+              <label>${t('project')}</label>
+              <select class="form-control" id="recProjectSelect">
+                ${projects.map(p => `<option value="${p.id}">${p.emoji || '📁'} ${p.title}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('type')}</label>
+              <select class="form-control" id="recTypeSelect">
+                <option value="add">${t('income')}</option>
+                <option value="expense">${t('expense')}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <input type="number" step="0.01" class="form-control" id="recAmount" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="recLabel" placeholder="${t('label')}" value="">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_start')}</label>
+              <input type="date" class="form-control" id="recStart" value="${todayStr}">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_occurrences')}</label>
+              <input type="number" class="form-control" id="recOccurrences" value="12" min="1" max="120">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_end')}</label>
+              <div id="recEndDisplay" class="text-muted text-sm">—</div>
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="saveRecBtn">${t('save')}</button>
+          `);
+
+            // Update end date dynamically
+            const updateEnd = () => {
+                const start = document.getElementById('recStart').value;
+                const occ = parseInt(document.getElementById('recOccurrences').value) || 1;
+                if (start) {
+                    const end = getRecurringEndDate(start, occ);
+                    document.getElementById('recEndDisplay').textContent = end || '—';
+                }
+            };
+            document.getElementById('recStart').onchange = updateEnd;
+            document.getElementById('recOccurrences').oninput = updateEnd;
+            updateEnd();
+
+            document.getElementById('saveRecBtn').onclick = async () => {
+                const projectId = document.getElementById('recProjectSelect').value;
+                const type = document.getElementById('recTypeSelect').value;
+                const amount = parseFloat(document.getElementById('recAmount').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                const label = document.getElementById('recLabel').value.trim() || '';
+                const startDate = document.getElementById('recStart').value;
+                const occurrences = parseInt(document.getElementById('recOccurrences').value) || 1;
+                if (!startDate) { alert(t('recurring_start') + ' is required'); return; }
+
+                const rec = {
+                    id: generateId(),
+                    projectId,
+                    type,
+                    amount: Math.round(amount * 100) / 100,
+                    label,
+                    startDate,
+                    occurrences,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+                await dbPut('recurrings', rec);
+                allRecurrings.push(rec);
+                closeModal();
+                renderPlanning();
+                triggerDriveBackup();
+            };
+        }
+
+        async function showEditRecurring(id) {
+            const rec = allRecurrings.find(r => r.id === id);
+            if (!rec) return;
+            const projects = allProjects.filter(p => p.active && !p.archived);
+            editingRecurringId = id;
+            openModal(t('recurring_edit'), `
+            <div class="form-group">
+              <label>${t('project')}</label>
+              <select class="form-control" id="recProjectSelect">
+                ${projects.map(p => `<option value="${p.id}" ${p.id===rec.projectId?'selected':''}>${p.emoji||'📁'} ${p.title}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('type')}</label>
+              <select class="form-control" id="recTypeSelect">
+                <option value="add" ${rec.type==='add'?'selected':''}>${t('income')}</option>
+                <option value="expense" ${rec.type==='expense'?'selected':''}>${t('expense')}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <input type="number" step="0.01" class="form-control" id="recAmount" value="${rec.amount}">
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="recLabel" value="${rec.label || ''}">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_start')}</label>
+              <input type="date" class="form-control" id="recStart" value="${rec.startDate}">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_occurrences')}</label>
+              <input type="number" class="form-control" id="recOccurrences" value="${rec.occurrences}" min="1" max="120">
+            </div>
+            <div class="form-group">
+              <label>${t('recurring_end')}</label>
+              <div id="recEndDisplay" class="text-muted text-sm">${getRecurringEndDate(rec.startDate, rec.occurrences)}</div>
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="saveRecBtn">${t('save')}</button>
+          `);
+
+            const updateEnd = () => {
+                const start = document.getElementById('recStart').value;
+                const occ = parseInt(document.getElementById('recOccurrences').value) || 1;
+                if (start) {
+                    document.getElementById('recEndDisplay').textContent = getRecurringEndDate(start, occ) || '—';
+                }
+            };
+            document.getElementById('recStart').onchange = updateEnd;
+            document.getElementById('recOccurrences').oninput = updateEnd;
+
+            document.getElementById('saveRecBtn').onclick = async () => {
+                const projectId = document.getElementById('recProjectSelect').value;
+                const type = document.getElementById('recTypeSelect').value;
+                const amount = parseFloat(document.getElementById('recAmount').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                rec.projectId = projectId;
+                rec.type = type;
+                rec.amount = Math.round(amount * 100) / 100;
+                rec.label = document.getElementById('recLabel').value.trim() || '';
+                rec.startDate = document.getElementById('recStart').value;
+                rec.occurrences = parseInt(document.getElementById('recOccurrences').value) || 1;
+                rec.updatedAt = Date.now();
+                await dbPut('recurrings', rec);
+                allRecurrings = allRecurrings.map(r => r.id === rec.id ? rec : r);
+                closeModal();
+                renderPlanning();
+                triggerDriveBackup();
+            };
+        }
+
+        async function showDeleteRecurring(id) {
+            if (!confirm(t('confirm_delete'))) return;
+            await dbDelete('recurrings', id);
+            allRecurrings = allRecurrings.filter(r => r.id !== id);
+            renderPlanning();
+            triggerDriveBackup();
+        }
+
+        // ============================================================
+        // RECURRING PROCESSING (check daily occurrences)
+        // ============================================================
+        async function processRecurrings() {
+            const todayStr = today();
+            let changed = false;
+            for (const rec of allRecurrings) {
+                const dates = getRecurringOccurrenceDates(rec.startDate, rec.occurrences);
+                for (const d of dates) {
+                    if (d <= todayStr) {
+                        // Check if already processed
+                        const exists = allOperations.some(o =>
+                            o.projectId === rec.projectId &&
+                            o.recurringId === rec.id &&
+                            o.date === d &&
+                            o.type === rec.type
+                        );
+                        if (!exists) {
+                            // Create real operation
+                            const op = {
+                                id: generateId(),
+                                projectId: rec.projectId,
+                                type: rec.type,
+                                amount: rec.amount,
+                                label: rec.label || (rec.type === 'add' ? t('income') : t('expense')) + ' (recurring)',
+                                date: d,
+                                linkedProjectId: null,
+                                isRecurring: true,
+                                recurringId: rec.id,
+                                createdAt: Date.now()
+                            };
+                            await dbPut('operations', op);
+                            allOperations.push(op);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if (changed) {
+                renderHome();
+                renderProjectDetail();
+                triggerDriveBackup();
+            }
+        }
+
+        // ============================================================
+        // EXPORT / IMPORT
+        // ============================================================
+        async function exportData() {
+            const data = {
+                version: VERSION,
+                schema: SCHEMA,
+                exportedAt: new Date().toISOString(),
+                projects: allProjects,
+                operations: allOperations,
+                recurrings: allRecurrings,
+                settings: {
+                    theme: currentTheme,
+                    accentColor: accentColor,
+                    language: currentLang
+                }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cashflow_backup_${today()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(t('export_success'));
+        }
+
+        async function importData(file) {
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!data.projects || !data.operations) {
+                    alert('Invalid backup file.');
+                    return;
+                }
+                // Non-destructive merge
+                // Projects: merge by id
+                for (const p of data.projects) {
+                    const existing = getProjectById(p.id);
+                    if (!existing) {
+                        await dbPut('projects', p);
+                        allProjects.push(p);
+                    }
+                }
+                for (const o of data.operations) {
+                    const existing = allOperations.find(op => op.id === o.id);
+                    if (!existing) {
+                        await dbPut('operations', o);
+                        allOperations.push(o);
+                    }
+                }
+                for (const r of data.recurrings || []) {
+                    const existing = allRecurrings.find(rec => rec.id === r.id);
+                    if (!existing) {
+                        await dbPut('recurrings', r);
+                        allRecurrings.push(r);
+                    }
+                }
+                // Settings: only if not set
+                if (data.settings) {
+                    if (data.settings.accentColor) {
+                        applyAccentColor(data.settings.accentColor);
+                    }
+                    if (data.settings.theme) {
+                        applyTheme(data.settings.theme);
+                    }
+                    if (data.settings.language) {
+                        currentLang = data.settings.language;
+                        applyTranslations();
+                    }
+                }
+                renderHome();
+                renderProjectDetail();
+                renderPlanning();
+                showToast(t('import_success'));
+                triggerDriveBackup();
+            } catch (e) {
+                alert('Import failed: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // EXCEL EXPORT (simple CSV-based XLSX)
+        // ============================================================
+        function exportExcel() {
+            // Simple CSV export as .xlsx (actually CSV with .xlsx extension - some apps accept it)
+            // For true XLSX we'd need a library, but we'll use CSV format with proper headers
+            let rows = [
+                ['Date', 'Type', 'Label', 'Amount', 'Project', 'Linked Project']
+            ];
+            for (const op of allOperations) {
+                const p = getProjectById(op.projectId);
+                const lp = op.linkedProjectId ? getProjectById(op.linkedProjectId) : null;
+                const typeLabel = op.type === 'add' ? 'Income' : (op.type === 'expense' ? 'Expense' : (op.type ===
+                    'transfer_in' ? 'Transfer In' : 'Transfer Out'));
+                rows.push([
+                    op.date,
+                    typeLabel,
+                    op.label || '',
+                    op.amount.toString(),
+                    p ? p.title : '',
+                    lp ? lp.title : ''
+                ]);
+            }
+            // Also include recurrings
+            rows.push([]);
+            rows.push(['=== RECURRING OPERATIONS ===']);
+            rows.push(['Type', 'Label', 'Amount', 'Start Date', 'Occurrences', 'Project']);
+            for (const r of allRecurrings) {
+                const p = getProjectById(r.projectId);
+                rows.push([
+                    r.type === 'add' ? 'Income' : 'Expense',
+                    r.label || '',
+                    r.amount.toString(),
+                    r.startDate,
+                    r.occurrences.toString(),
+                    p ? p.title : ''
+                ]);
+            }
+
+            let csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cashflow_export_${today()}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(t('export_success'));
+        }
+
+        // ============================================================
+        // GOOGLE DRIVE
+        // ============================================================
+        function triggerDriveBackup() {
+            if (!driveToken) return;
+            const now = Date.now();
+            if (now - lastDriveBackup < 30 * 60 * 1000) {
+                driveBackupPending = true;
+                return;
+            }
+            if (driveBackupTimer) clearTimeout(driveBackupTimer);
+            driveBackupTimer = setTimeout(() => {
+                doDriveBackup();
+                driveBackupTimer = null;
+            }, 2 * 60 * 1000);
+        }
+
+        async function doDriveBackup() {
+            if (!driveToken) return;
+            const now = Date.now();
+            if (now - lastDriveBackup < 30 * 60 * 1000) return;
+            try {
+                const data = {
+                    version: VERSION,
+                    schema: SCHEMA,
+                    exportedAt: new Date().toISOString(),
+                    projects: allProjects,
+                    operations: allOperations,
+                    recurrings: allRecurrings,
+                    settings: {
+                        theme: currentTheme,
+                        accentColor: accentColor,
+                        language: currentLang
+                    }
+                };
+                const json = JSON.stringify(data, null, 2);
+                const metadata = {
+                    name: `cashflow_backup_${today()}.json`,
+                    mimeType: 'application/json'
+                };
+                // Check if file exists
+                const listRes = await fetch('https://www.googleapis.com/drive/v3/files?q=name="cashflow_backup"&spaces=drive&fields=files(id,name)&key=' +
+                    GID_SITE, {
+                        headers: { 'Authorization': 'Bearer ' + driveToken }
+                    });
+                const listData = await listRes.json();
+                let fileId = null;
+                if (listData.files && listData.files.length > 0) {
+                    fileId = listData.files[0].id;
+                }
+
+                const formData = new FormData();
+                const blob = new Blob([json], { type: 'application/json' });
+                if (fileId) {
+                    // Update existing
+                    const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&key=${GID_SITE}`, {
+                        method: 'PATCH',
+                        headers: { 'Authorization': 'Bearer ' + driveToken },
+                        body: blob
+                    });
+                    if (res.ok) {
+                        lastDriveBackup = Date.now();
+                        showToast(t('drive_backup_done'));
+                    }
+                } else {
+                    // Create new
+                    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' +
+                        GID_SITE, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + driveToken },
+                            body: formData
+                        });
+                    if (res.ok) {
+                        lastDriveBackup = Date.now();
+                        showToast(t('drive_backup_done'));
+                    }
+                }
+            } catch (e) {
+                console.warn('Drive backup failed:', e);
+            }
+        }
+
+        function initDrive() {
+            if (!GID_SITE) {
+                document.getElementById('driveSignInBtn').style.display = 'none';
+                document.getElementById('driveBackupBtn').style.display = 'none';
+                return;
+            }
+            // Load Google Identity Services
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.onload = () => {
+                // Initialize
+                google.accounts.id.initialize({
+                    client_id: GID_SITE,
+                    callback: (res) => {
+                        driveToken = res.credential;
+                        document.getElementById('driveSignInBtn').textContent = '✅ ' + t('sign_in');
+                        document.getElementById('driveBackupBtn').style.display = 'inline-block';
+                        showToast(t('drive_signed_in'));
+                        // Do immediate backup
+                        setTimeout(() => doDriveBackup(), 1000);
+                    }
+                });
+            };
+            document.head.appendChild(script);
+
+            document.getElementById('driveSignInBtn').onclick = () => {
+                google.accounts.id.prompt();
+            };
+            document.getElementById('driveBackupBtn').onclick = () => {
+                doDriveBackup();
+            };
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        async function init() {
+            // Load settings from localStorage
+            const savedTheme = localStorage.getItem('cashflow_theme') || 'light';
+            const savedAccent = localStorage.getItem('cashflow_accent') || '#3b82f6';
+            const savedLang = localStorage.getItem('cashflow_lang') || 'en';
+            currentLang = savedLang;
+            applyTheme(savedTheme);
+            applyAccentColor(savedAccent);
+
+            // Open DB
+            db = await openDB();
+
+            // Load data
+            allProjects = await dbGetAll('projects') || [];
+            allOperations = await dbGetAll('operations') || [];
+            allRecurrings = await dbGetAll('recurrings') || [];
+
+            // Apply translations
+            applyTranslations();
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Process recurrings
+            await processRecurrings();
+
+            // Render initial view
+            renderHome();
+
+            // Auto backup timer
+            setInterval(() => {
+                if (driveBackupPending) {
+                    doDriveBackup();
+                    driveBackupPending = false;
+                }
+            }, 2 * 60 * 1000);
+
+            // Init Google Drive
+            initDrive();
+
+            // Set forecast date
+            const d = new Date();
+            d.setMonth(d.getMonth() + 1);
+            document.getElementById('forecastDate').value = d.toISOString().slice(0, 10);
+            document.getElementById('forecastDate').onchange = updateForecast;
+
+            console.log('CashFlow initialized v' + VERSION);
+        }
+
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.onclick = () => {
+                    const view = item.dataset.view;
+                    if (view === 'viewProject' && !selectedProjectId) {
+                        // Show home and select first project
+                        const active = allProjects.filter(p => p.active && !p.archived);
+                        if (active.length > 0) {
+                            selectedProjectId = active[0].id;
+                        } else {
+                            navigateTo('viewHome');
+                            return;
+                        }
+                    }
+                    navigateTo(view);
+                };
+            });
+
+            // Header actions
+            document.getElementById('headerAddProject').onclick = () => showCreateProject();
+            document.getElementById('headerAddOp').onclick = () => {
+                if (selectedProjectId) {
+                    showAddOperation(selectedProjectId, 'add');
+                } else {
+                    const active = allProjects.filter(p => p.active && !p.archived);
+                    if (active.length > 0) {
+                        selectedProjectId = active[0].id;
+                        navigateTo('viewProject');
+                        setTimeout(() => showAddOperation(selectedProjectId, 'add'), 100);
+                    } else {
+                        showCreateProject();
+                    }
+                }
+            };
+
+            // Modal close
+            document.getElementById('modalClose').onclick = closeModal;
+
+            // Theme toggle
+            document.getElementById('themeToggle').onclick = () => {
+                applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+                // Save setting
+                const setting = { id: 'settings', theme: currentTheme, accent: accentColor, language: currentLang };
+                dbPut('settings', setting);
+            };
+
+            // Language
+            document.getElementById('langSelect').onchange = (e) => {
+                currentLang = e.target.value;
+                localStorage.setItem('cashflow_lang', currentLang);
+                applyTranslations();
+                // Re-render current view
+                if (currentView === 'viewHome') renderHome();
+                else if (currentView === 'viewProject') renderProjectDetail();
+                else if (currentView === 'viewPlanning') renderPlanning();
+                else if (currentView === 'viewForecast') renderForecast();
+                else if (currentView === 'viewSettings') renderSettings();
+                const setting = { id: 'settings', theme: currentTheme, accent: accentColor, language: currentLang };
+                dbPut('settings', setting);
+            };
+
+            // Accent color
+            document.getElementById('accentColorPicker').oninput = (e) => {
+                applyAccentColor(e.target.value);
+                const setting = { id: 'settings', theme: currentTheme, accent: e.target.value, language: currentLang };
+                dbPut('settings', setting);
+            };
+
+            // Export / Import
+            document.getElementById('exportBtn').onclick = exportData;
+            document.getElementById('importBtn').onclick = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    if (e.target.files.length > 0) {
+                        importData(e.target.files[0]);
+                    }
+                };
+                input.click();
+            };
+
+            // Excel export
+            document.getElementById('excelExportBtn').onclick = exportExcel;
+
+            // Journal toggle
+            document.getElementById('journalToggle').onclick = () => {
+                const content = document.getElementById('journalContent');
+                const arrow = document.getElementById('journalArrow');
+                if (content.style.display === 'none') {
+                    content.style.display = 'block';
+                    arrow.textContent = '▼';
+                } else {
+                    content.style.display = 'none';
+                    arrow.textContent = '▶';
+                }
+            };
+
+            // Add recurring
+            document.getElementById('addRecurringBtn').onclick = showAddRecurring;
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        // Start the app
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Expose functions to global scope for inline onclick
+        window.showCreateProject = showCreateProject;
+        window.showEditProject = showEditProject;
+        window.showDeleteProject = showDeleteProject;
+        window.showArchiveProject = showArchiveProject;
+        window.unarchiveProject = unarchiveProject;
+        window.selectProject = selectProject;
+        window.showAddOperation = showAddOperation;
+        window.showEditOperation = showEditOperation;
+        window.showDeleteOperation = showDeleteOperation;
+        window.showTransferModal = showTransferModal;
+        window.showAddRecurring = showAddRecurring;
+        window.showEditRecurring = showEditRecurring;
+        window.showDeleteRecurring = showDeleteRecurring;
+        window.closeModal = closeModal;
+        window.exportData = exportData;
+        window.importData = importData;
+        window.exportExcel = exportExcel;
+        window.navigateTo = navigateTo;
+        window.renderHome = renderHome;
+        window.renderProjectDetail = renderProjectDetail;
+        window.renderPlanning = renderPlanning;
+        window.renderForecast = renderForecast;
+        window.renderSettings = renderSettings;
+        window.updateForecast = updateForecast;
+        window.t = t;
+    </script>
+</body>
+</html>
