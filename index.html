@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -43,6 +43,7 @@
             --header-height: 56px;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --transfer-color: #8b5cf6;
+            --max-width: 900px;
         }
         [data-theme="dark"] {
             --bg: #0f0f1a;
@@ -69,17 +70,25 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            max-width: 480px;
+            max-width: var(--max-width);
             margin: 0 auto;
             position: relative;
             background: var(--bg);
             overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.05);
+        }
+        @media (min-width: 768px) {
+            #app {
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+                border-radius: 0;
+            }
         }
 
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
@@ -94,7 +103,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 16px;
+            padding: 8px 20px;
             height: var(--header-height);
             min-height: var(--header-height);
             border-bottom: 1px solid var(--border);
@@ -117,7 +126,7 @@
         }
         .app-header .header-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
         }
         .app-header .header-actions button {
@@ -125,7 +134,7 @@
             border: none;
             color: var(--text2);
             font-size: 20px;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: background 0.15s;
@@ -141,13 +150,27 @@
             font-weight: 500;
             color: var(--accent);
         }
+        .app-header .back-btn {
+            font-size: 24px;
+            padding: 4px 8px;
+            background: none;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+        .app-header .back-btn.show {
+            display: flex;
+        }
 
         /* ===== MAIN CONTENT ===== */
         .main-content {
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 12px 16px 8px;
+            padding: 16px 20px 8px;
             -webkit-overflow-scrolling: touch;
         }
         .main-content .view {
@@ -491,7 +514,7 @@
         .modal-box {
             background: var(--bg);
             border-radius: var(--radius) var(--radius) 0 0;
-            max-width: 480px;
+            max-width: 520px;
             width: 100%;
             max-height: 90vh;
             display: flex;
@@ -499,6 +522,16 @@
             animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
             transform: translateY(0);
             padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        @media (min-width: 768px) {
+            .modal-box {
+                border-radius: var(--radius);
+                margin-bottom: 40px;
+                max-height: 80vh;
+            }
+            .modal-overlay {
+                align-items: center;
+            }
         }
         @keyframes slideUp {
             0% {
@@ -559,15 +592,24 @@
         }
 
         /* ===== PROJECT LIST ===== */
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        @media (min-width: 600px) {
+            .project-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
         .project-item {
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 12px 14px;
+            padding: 14px 16px;
             border-radius: var(--radius);
             background: var(--bg2);
             border: 1px solid var(--border);
-            margin-bottom: 8px;
             transition: background 0.15s, transform 0.1s;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -645,7 +687,7 @@
             background: var(--accent);
             color: #fff;
             border-radius: var(--radius);
-            padding: 14px 18px;
+            padding: 14px 20px;
             margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
@@ -781,6 +823,11 @@
             gap: 10px;
             margin-top: 10px;
         }
+        @media (min-width: 600px) {
+            .forecast-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
         .forecast-item {
             background: var(--bg2);
             border-radius: var(--radius-sm);
@@ -814,7 +861,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 2000;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
             pointer-events: none;
         }
@@ -862,6 +909,8 @@
             align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .setting-item:last-child {
             border-bottom: none;
@@ -973,9 +1022,9 @@
         }
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .main-content {
-                padding: 10px 12px 6px;
+                padding: 12px 14px 6px;
             }
             .modal-box {
                 border-radius: var(--radius) var(--radius) 0 0;
@@ -994,11 +1043,13 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 8px;
             }
+            .app-header {
+                padding: 8px 14px;
+            }
         }
-        @media (min-width: 481px) {
-            #app {
-                border-left: 1px solid var(--border);
-                border-right: 1px solid var(--border);
+        @media (min-width: 601px) {
+            .modal-box {
+                max-width: 560px;
             }
         }
 
@@ -1136,6 +1187,26 @@
                 display: inline;
             }
         }
+
+        /* back button in header */
+        .back-btn {
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .back-btn:hover {
+            background: var(--bg3);
+        }
+        .back-btn.show {
+            display: flex;
+        }
     </style>
 </head>
 <body>
@@ -1143,10 +1214,13 @@
     <div id="app">
         <!-- HEADER -->
         <header class="app-header" id="appHeader">
-            <h1><span class="emoji">💰</span> <span id="headerTitle">CashFlow</span></h1>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <button class="back-btn" id="backBtn">← <span data-i18n="back">Retour</span></button>
+                <h1><span class="emoji">💰</span> <span id="headerTitle">CashFlow</span></h1>
+            </div>
             <div class="header-actions">
-                <button id="headerAddOp" title="Add operation" aria-label="Add operation">➕</button>
-                <button id="headerAddProject" title="Add project" aria-label="Add project">📁</button>
+                <button id="headerAddOp" title="Ajouter une opération" aria-label="Ajouter une opération">➕</button>
+                <button id="headerAddProject" title="Ajouter un projet" aria-label="Ajouter un projet">📁</button>
             </div>
         </header>
 
@@ -1156,17 +1230,17 @@
             <!-- HOME VIEW -->
             <div class="view active" id="viewHome">
                 <div class="total-bar" id="totalBar">
-                    <span class="total-label" data-i18n="total_available">Total available</span>
+                    <span class="total-label" data-i18n="total_available">Total disponible</span>
                     <span class="total-amount font-mono" id="totalAmount">€0.00</span>
                 </div>
                 <div id="projectList"></div>
                 <div class="archived-section" id="archivedSection">
-                    <button class="arch-toggle" id="archToggle">📦 <span data-i18n="archived_projects">Archived projects</span> <span id="archBadge">(0)</span></button>
+                    <button class="arch-toggle" id="archToggle">📦 <span data-i18n="archived_projects">Projets archivés</span> <span id="archBadge">(0)</span></button>
                     <div id="archivedList" style="display:none;margin-top:8px;"></div>
                 </div>
             </div>
 
-            <!-- PROJECT VIEW -->
+            <!-- PROJECT DETAIL VIEW (hidden from nav) -->
             <div class="view" id="viewProject">
                 <div id="projectDetail"></div>
             </div>
@@ -1174,17 +1248,17 @@
             <!-- PLANNING VIEW -->
             <div class="view" id="viewPlanning">
                 <div class="flex-between mb-16">
-                    <h2 style="font-size:18px;font-weight:600;" data-i18n="monthly_planning">Monthly planning</h2>
-                    <button class="btn btn-primary btn-sm" id="addRecurringBtn">+ <span data-i18n="add">Add</span></button>
+                    <h2 style="font-size:18px;font-weight:600;" data-i18n="monthly_planning">Planification mensuelle</h2>
+                    <button class="btn btn-primary btn-sm" id="addRecurringBtn">+ <span data-i18n="add">Ajouter</span></button>
                 </div>
                 <div id="recurringList"></div>
             </div>
 
             <!-- FORECAST VIEW -->
             <div class="view" id="viewForecast">
-                <h2 style="font-size:18px;font-weight:600;margin-bottom:10px;" data-i18n="forecast">Forecast</h2>
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:10px;" data-i18n="forecast">Prévisionnel</h2>
                 <div class="form-group">
-                    <label data-i18n="select_date">Select a future date</label>
+                    <label data-i18n="select_date">Sélectionnez une date future</label>
                     <input type="date" class="form-control" id="forecastDate">
                 </div>
                 <div id="forecastResults"></div>
@@ -1192,12 +1266,12 @@
 
             <!-- SETTINGS VIEW -->
             <div class="view" id="viewSettings">
-                <h2 style="font-size:18px;font-weight:600;margin-bottom:12px;" data-i18n="settings">Settings</h2>
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:12px;" data-i18n="settings">Réglages</h2>
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="theme">Theme</div>
-                        <div class="set-desc" data-i18n="theme_desc">Light or dark mode</div>
+                        <div class="set-label" data-i18n="theme">Thème</div>
+                        <div class="set-desc" data-i18n="theme_desc">Mode clair ou sombre</div>
                     </div>
                     <div class="set-control toggle-wrap">
                         <span class="toggle-label" id="themeLabel">🌙</span>
@@ -1208,21 +1282,21 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="language">Language</div>
-                        <div class="set-desc" data-i18n="language_desc">English or French</div>
+                        <div class="set-label" data-i18n="language">Langue</div>
+                        <div class="set-desc" data-i18n="language_desc">Anglais ou Français</div>
                     </div>
                     <div class="set-control">
                         <select class="form-control" id="langSelect" style="width:auto;padding:4px 28px 4px 10px;font-size:13px;">
                             <option value="en">English</option>
-                            <option value="fr">Français</option>
+                            <option value="fr" selected>Français</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="accent_color">Accent color</div>
-                        <div class="set-desc" data-i18n="accent_desc">Customize your accent color</div>
+                        <div class="set-label" data-i18n="accent_color">Couleur d'accent</div>
+                        <div class="set-desc" data-i18n="accent_desc">Personnalisez votre couleur d'accent</div>
                     </div>
                     <div class="set-control color-picker-wrap">
                         <input type="color" id="accentColorPicker" value="#3b82f6">
@@ -1231,19 +1305,19 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="google_drive">Google Drive backup</div>
-                        <div class="set-desc" data-i18n="drive_desc">Auto-save every 2min after change</div>
+                        <div class="set-label" data-i18n="google_drive">Sauvegarde Google Drive</div>
+                        <div class="set-desc" data-i18n="drive_desc">Auto-sauvegarde 2min après modification</div>
                     </div>
                     <div class="set-control">
-                        <button class="btn btn-sm btn-secondary" id="driveSignInBtn" data-i18n="sign_in">Sign in</button>
-                        <button class="btn btn-sm btn-secondary" id="driveBackupBtn" style="display:none;" data-i18n="backup_now">Backup now</button>
+                        <button class="btn btn-sm btn-secondary" id="driveSignInBtn" data-i18n="sign_in">Se connecter</button>
+                        <button class="btn btn-sm btn-secondary" id="driveBackupBtn" style="display:none;" data-i18n="backup_now">Sauvegarder</button>
                     </div>
                 </div>
 
                 <div class="setting-item">
                     <div>
                         <div class="set-label" data-i18n="import_export">Import / Export</div>
-                        <div class="set-desc" data-i18n="import_export_desc">Full JSON backup or restore</div>
+                        <div class="set-desc" data-i18n="import_export_desc">Sauvegarde ou restauration JSON</div>
                     </div>
                     <div class="set-control" style="display:flex;gap:6px;">
                         <button class="btn btn-sm btn-secondary" id="exportBtn">📤</button>
@@ -1253,8 +1327,8 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="set-label" data-i18n="excel_export">Excel export</div>
-                        <div class="set-desc" data-i18n="excel_desc">Export to .xlsx file</div>
+                        <div class="set-label" data-i18n="excel_export">Export Excel</div>
+                        <div class="set-desc" data-i18n="excel_desc">Exporter en .xlsx</div>
                     </div>
                     <div class="set-control">
                         <button class="btn btn-sm btn-secondary" id="excelExportBtn">📊</button>
@@ -1263,11 +1337,11 @@
 
                 <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
                     <div class="flex-between" style="cursor:pointer;" id="journalToggle">
-                        <span style="font-weight:500;font-size:14px;" data-i18n="version_history">Version history</span>
+                        <span style="font-weight:500;font-size:14px;" data-i18n="version_history">Historique des versions</span>
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
-                        <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-01 · Initial release</span></div>
+                        <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
                         <span data-i18n="version">Version</span> <span id="versionDisplay">1.0.0</span>
@@ -1276,27 +1350,23 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAV -->
+        <!-- BOTTOM NAV (sans Projet) -->
         <nav class="bottom-nav" id="bottomNav">
-            <button class="nav-item active" data-view="viewHome" aria-label="Home">
+            <button class="nav-item active" data-view="viewHome" aria-label="Accueil">
                 <span class="nav-icon">🏠</span>
-                <span class="nav-label" data-i18n="home">Home</span>
+                <span class="nav-label" data-i18n="home">Accueil</span>
             </button>
-            <button class="nav-item" data-view="viewProject" aria-label="Project">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label" data-i18n="project">Project</span>
-            </button>
-            <button class="nav-item" data-view="viewPlanning" aria-label="Planning">
+            <button class="nav-item" data-view="viewPlanning" aria-label="Planification">
                 <span class="nav-icon">📅</span>
-                <span class="nav-label" data-i18n="planning">Planning</span>
+                <span class="nav-label" data-i18n="planning">Planification</span>
             </button>
-            <button class="nav-item" data-view="viewForecast" aria-label="Forecast">
+            <button class="nav-item" data-view="viewForecast" aria-label="Prévisionnel">
                 <span class="nav-icon">🔮</span>
-                <span class="nav-label" data-i18n="forecast">Forecast</span>
+                <span class="nav-label" data-i18n="forecast">Prévisionnel</span>
             </button>
-            <button class="nav-item" data-view="viewSettings" aria-label="Settings">
+            <button class="nav-item" data-view="viewSettings" aria-label="Réglages">
                 <span class="nav-icon">⚙️</span>
-                <span class="nav-label" data-i18n="settings">Settings</span>
+                <span class="nav-label" data-i18n="settings">Réglages</span>
             </button>
         </nav>
     </div>
@@ -1324,12 +1394,12 @@
         const VERSION = '1.0.0';
         const SCHEMA = 1;
         const JOURNAL = [
-            { version: '1.0.0', date: '2026-01-31', changes: 'Initial release' }
+            { version: '1.0.0', date: '2026-01-31', changes: 'Version initiale' }
         ];
-        const GID_SITE = ''; // Set your Google Client ID here
+        const GID_SITE = ''; // Mettez votre Client ID Google ici
 
         // ============================================================
-        // TRANSLATIONS
+        // TRANSLATIONS (français par défaut)
         // ============================================================
         const LANG = {
             en: {
@@ -1417,6 +1487,8 @@
                 highest: 'Highest amount',
                 lowest: 'Lowest amount',
                 all_types: 'All types',
+                back: 'Back',
+                archived: 'Archived'
             },
             fr: {
                 home: 'Accueil',
@@ -1503,13 +1575,15 @@
                 highest: 'Montant le plus élevé',
                 lowest: 'Montant le plus faible',
                 all_types: 'Tous les types',
+                back: 'Retour',
+                archived: 'Archivé'
             }
         };
 
         // ============================================================
         // STATE
         // ============================================================
-        let currentLang = 'en';
+        let currentLang = 'fr'; // français par défaut
         let currentTheme = 'light';
         let accentColor = '#3b82f6';
         let currentView = 'viewHome';
@@ -1661,7 +1735,6 @@
                 const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
                 for (const d of dates) {
                     if (d <= targetDate) {
-                        // Check if this occurrence already exists as a real operation
                         const exists = allOperations.some(o =>
                             o.projectId === projectId &&
                             o.recurringId === r.id &&
@@ -1690,8 +1763,12 @@
                 const key = el.dataset.i18n;
                 el.textContent = t(key);
             });
-            // Update header title
             document.getElementById('headerTitle').textContent = 'CashFlow';
+            // Mettre à jour le titre de la vue projet si affichée
+            const backBtn = document.getElementById('backBtn');
+            if (currentView === 'viewProject') {
+                backBtn.innerHTML = `← ${t('back')}`;
+            }
         }
 
         // ============================================================
@@ -1719,7 +1796,6 @@
         function applyAccentColor(color) {
             accentColor = color;
             document.documentElement.style.setProperty('--accent', color);
-            // compute hover
             const r = parseInt(color.slice(1, 3), 16);
             const g = parseInt(color.slice(3, 5), 16);
             const b = parseInt(color.slice(5, 7), 16);
@@ -1742,13 +1818,16 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelector(`.nav-item[data-view="${viewId}"]`)?.classList.add('active');
 
-            if (viewId === 'viewHome') renderHome();
-            else if (viewId === 'viewProject') renderProjectDetail();
-            else if (viewId === 'viewPlanning') renderPlanning();
-            else if (viewId === 'viewForecast') renderForecast();
-            else if (viewId === 'viewSettings') renderSettings();
+            // Gérer le bouton retour
+            const backBtn = document.getElementById('backBtn');
+            if (viewId === 'viewProject') {
+                backBtn.classList.add('show');
+                backBtn.innerHTML = `← ${t('back')}`;
+            } else {
+                backBtn.classList.remove('show');
+            }
 
-            // Update header
+            // Titre
             const titles = {
                 viewHome: '🏠 ' + t('home'),
                 viewProject: '📊 ' + t('project'),
@@ -1757,6 +1836,12 @@
                 viewSettings: '⚙️ ' + t('settings')
             };
             document.getElementById('headerTitle').textContent = titles[viewId] || 'CashFlow';
+
+            if (viewId === 'viewHome') renderHome();
+            else if (viewId === 'viewProject') renderProjectDetail();
+            else if (viewId === 'viewPlanning') renderPlanning();
+            else if (viewId === 'viewForecast') renderForecast();
+            else if (viewId === 'viewSettings') renderSettings();
         }
 
         // ============================================================
@@ -1767,7 +1852,6 @@
             document.getElementById('modalBody').innerHTML = bodyHTML;
             document.getElementById('modalFooter').innerHTML = footerHTML || '';
             document.getElementById('modalOverlay').classList.add('open');
-            // Close on overlay click
             document.getElementById('modalOverlay').onclick = (e) => {
                 if (e.target === e.currentTarget) closeModal();
             };
@@ -1838,28 +1922,28 @@
               </div>
             `;
             } else {
-                list.innerHTML = activeProjects.map(p => {
-                    const bal = getProjectBalance(p.id);
-                    const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
-                    return `
-                <div class="project-item" onclick="selectProject('${p.id}')">
-                  <span class="p-emoji">${p.emoji || '📁'}</span>
-                  <div class="p-info">
-                    <div class="p-title">${p.title}</div>
+                list.innerHTML = `<div class="project-grid">` +
+                    activeProjects.map(p => {
+                        const bal = getProjectBalance(p.id);
+                        const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+                        return `
+                  <div class="project-item" onclick="selectProject('${p.id}')">
+                    <span class="p-emoji">${p.emoji || '📁'}</span>
+                    <div class="p-info">
+                      <div class="p-title">${p.title}</div>
+                    </div>
+                    <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
+                    <div class="p-actions">
+                      <button onclick="event.stopPropagation();showEditProject('${p.id}')" title="${t('edit_project')}">✏️</button>
+                      <button onclick="event.stopPropagation();showTransferModal('${p.id}')" title="${t('transfer')}">↔️</button>
+                      <button onclick="event.stopPropagation();showArchiveProject('${p.id}')" title="${t('archive_project')}">📦</button>
+                      <button onclick="event.stopPropagation();showDeleteProject('${p.id}')" title="${t('delete_project')}">🗑️</button>
+                    </div>
                   </div>
-                  <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
-                  <div class="p-actions">
-                    <button onclick="event.stopPropagation();showEditProject('${p.id}')" title="${t('edit_project')}">✏️</button>
-                    <button onclick="event.stopPropagation();showTransferModal('${p.id}')" title="${t('transfer')}">↔️</button>
-                    <button onclick="event.stopPropagation();showArchiveProject('${p.id}')" title="${t('archive_project')}">📦</button>
-                    <button onclick="event.stopPropagation();showDeleteProject('${p.id}')" title="${t('delete_project')}">🗑️</button>
-                  </div>
-                </div>
-              `;
-                }).join('');
+                `;
+                    }).join('') + `</div>`;
             }
 
-            // Archived
             const archived = allProjects.filter(p => p.archived);
             document.getElementById('archBadge').textContent = `(${archived.length})`;
             const archList = document.getElementById('archivedList');
@@ -1874,7 +1958,7 @@
                   <span class="p-emoji">${p.emoji || '📁'}</span>
                   <div class="p-info">
                     <div class="p-title">${p.title}</div>
-                    <div class="text-muted text-sm">${t('archived') || 'Archived'}</div>
+                    <div class="text-muted text-sm">${t('archived')}</div>
                   </div>
                   <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
                   <div class="p-actions">
@@ -1917,7 +2001,7 @@
             const ops = getOperationsForProject(project.id);
 
             let opsHTML = ops.length === 0 ? `
-            <div class="text-muted text-sm" style="padding:12px 0;">No operations yet.</div>
+            <div class="text-muted text-sm" style="padding:12px 0;">Aucune opération.</div>
           ` : ops.map(op => {
                 const isTransfer = op.type === 'transfer_in' || op.type === 'transfer_out';
                 const icon = op.type === 'add' ? '➕' : (op.type === 'expense' ? '➖' : (op.type === 'transfer_in' ? '⬅️' :
@@ -1975,7 +2059,6 @@
         // ============================================================
         function renderPlanning() {
             const container = document.getElementById('recurringList');
-            // Show all recurrings grouped by project
             if (allRecurrings.length === 0) {
                 container.innerHTML = `
               <div class="empty-state">
@@ -1985,7 +2068,6 @@
             `;
                 return;
             }
-            // Group by project
             const groups = {};
             for (const r of allRecurrings) {
                 if (!groups[r.projectId]) groups[r.projectId] = [];
@@ -2073,7 +2155,6 @@
         // RENDER: SETTINGS
         // ============================================================
         function renderSettings() {
-            // Already rendered in HTML, just update values
             document.getElementById('versionDisplay').textContent = VERSION;
             document.getElementById('langSelect').value = currentLang;
             document.getElementById('accentColorPicker').value = accentColor;
@@ -2098,7 +2179,7 @@
           `);
             document.getElementById('createProjBtn').onclick = async () => {
                 const title = document.getElementById('projTitleInput').value.trim();
-                if (!title) { alert(t('project_title') + ' is required'); return; }
+                if (!title) { alert(t('project_title') + ' est requis'); return; }
                 const emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
                 const project = {
                     id: generateId(),
@@ -2135,7 +2216,7 @@
           `);
             document.getElementById('editProjBtn').onclick = async () => {
                 const title = document.getElementById('projTitleInput').value.trim();
-                if (!title) { alert(t('project_title') + ' is required'); return; }
+                if (!title) { alert(t('project_title') + ' est requis'); return; }
                 p.title = title;
                 p.emoji = document.getElementById('projEmojiInput').value.trim() || '📁';
                 p.updatedAt = Date.now();
@@ -2151,7 +2232,6 @@
             if (!p) return;
             if (!confirm(t('confirm_delete_project') + ' "' + p.title + '" ?')) return;
             await dbDelete('projects', id);
-            // Delete operations
             const opsToDelete = allOperations.filter(o => o.projectId === id);
             for (const o of opsToDelete) {
                 await dbDelete('operations', o.id);
@@ -2183,12 +2263,10 @@
                 renderProjectDetail();
                 return;
             }
-            // Has balance - propose transfer
             if (confirm(t('confirm_transfer_reliquat'))) {
                 showTransferModal(id, true);
                 return;
             }
-            // Archive anyway? only if zero balance
             if (Math.abs(bal) < 0.01) {
                 p.archived = true;
                 p.active = false;
@@ -2197,7 +2275,7 @@
                 renderHome();
                 renderProjectDetail();
             } else {
-                alert('Balance must be zero to archive.');
+                alert('Le solde doit être nul pour archiver.');
             }
         }
 
@@ -2265,7 +2343,7 @@
             document.getElementById('saveOpBtn').onclick = async () => {
                 const typeVal = document.getElementById('opTypeSelect').value;
                 const amount = parseFloat(document.getElementById('opAmountInput').value);
-                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
                 const label = document.getElementById('opLabelInput').value.trim() || '';
                 const date = document.getElementById('opDateInput').value || todayStr;
                 const op = {
@@ -2285,7 +2363,6 @@
                 closeModal();
                 renderProjectDetail();
                 renderHome();
-                // trigger drive backup
                 triggerDriveBackup();
             };
         }
@@ -2324,7 +2401,7 @@
             document.getElementById('saveOpBtn').onclick = async () => {
                 const typeVal = document.getElementById('opTypeSelect').value;
                 const amount = parseFloat(document.getElementById('opAmountInput').value);
-                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
                 op.type = typeVal;
                 op.amount = Math.round(amount * 100) / 100;
                 op.label = document.getElementById('opLabelInput').value.trim() || '';
@@ -2341,7 +2418,6 @@
             if (!confirm(t('confirm_delete'))) return;
             const op = allOperations.find(o => o.id === id);
             if (!op) return;
-            // Check if it's a transfer - need to delete the linked op too
             const isTransfer = op.type === 'transfer_in' || op.type === 'transfer_out';
             let linkedOp = null;
             if (isTransfer && op.linkedProjectId) {
@@ -2361,7 +2437,6 @@
             renderProjectDetail();
             renderHome();
             showToast(t('operation_deleted'), () => {
-                // Undo: re-add the operation
                 dbPut('operations', op);
                 allOperations.push(op);
                 if (linkedOp) {
@@ -2382,7 +2457,7 @@
             if (!fromProj) return;
             const projects = allProjects.filter(p => p.active && !p.archived && p.id !== fromProjectId);
             if (projects.length === 0) {
-                alert('No other active projects available.');
+                alert('Aucun autre projet actif disponible.');
                 return;
             }
             const bal = getProjectBalance(fromProjectId);
@@ -2404,7 +2479,7 @@
             </div>
             <div class="form-group">
               <label>${t('label')}</label>
-              <input class="form-control" id="transferLabel" placeholder="${t('label')}" value="Transfer">
+              <input class="form-control" id="transferLabel" placeholder="${t('label')}" value="Transfert">
             </div>
             <div class="form-group">
               <label>${t('date')}</label>
@@ -2418,12 +2493,11 @@
             document.getElementById('transferBtn').onclick = async () => {
                 const targetId = document.getElementById('transferTarget').value;
                 const amount = parseFloat(document.getElementById('transferAmount').value);
-                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
-                const label = document.getElementById('transferLabel').value.trim() || 'Transfer';
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
+                const label = document.getElementById('transferLabel').value.trim() || 'Transfert';
                 const date = document.getElementById('transferDate').value || today();
                 const transferId = generateId();
 
-                // Create two operations
                 const opOut = {
                     id: generateId(),
                     projectId: fromProjectId,
@@ -2458,7 +2532,6 @@
 
                 closeModal();
 
-                // If in archive mode, archive the project after transfer
                 if (isArchiveMode) {
                     const p = getProjectById(fromProjectId);
                     if (p) {
@@ -2481,7 +2554,7 @@
         function showAddRecurring() {
             const projects = allProjects.filter(p => p.active && !p.archived);
             if (projects.length === 0) {
-                alert('Please create a project first.');
+                alert('Créez d\'abord un projet.');
                 return;
             }
             editingRecurringId = null;
@@ -2525,7 +2598,6 @@
             <button class="btn btn-primary" id="saveRecBtn">${t('save')}</button>
           `);
 
-            // Update end date dynamically
             const updateEnd = () => {
                 const start = document.getElementById('recStart').value;
                 const occ = parseInt(document.getElementById('recOccurrences').value) || 1;
@@ -2542,11 +2614,11 @@
                 const projectId = document.getElementById('recProjectSelect').value;
                 const type = document.getElementById('recTypeSelect').value;
                 const amount = parseFloat(document.getElementById('recAmount').value);
-                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
                 const label = document.getElementById('recLabel').value.trim() || '';
                 const startDate = document.getElementById('recStart').value;
                 const occurrences = parseInt(document.getElementById('recOccurrences').value) || 1;
-                if (!startDate) { alert(t('recurring_start') + ' is required'); return; }
+                if (!startDate) { alert(t('recurring_start') + ' est requis'); return; }
 
                 const rec = {
                     id: generateId(),
@@ -2625,7 +2697,7 @@
                 const projectId = document.getElementById('recProjectSelect').value;
                 const type = document.getElementById('recTypeSelect').value;
                 const amount = parseFloat(document.getElementById('recAmount').value);
-                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' must be > 0'); return; }
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
                 rec.projectId = projectId;
                 rec.type = type;
                 rec.amount = Math.round(amount * 100) / 100;
@@ -2650,7 +2722,7 @@
         }
 
         // ============================================================
-        // RECURRING PROCESSING (check daily occurrences)
+        // RECURRING PROCESSING
         // ============================================================
         async function processRecurrings() {
             const todayStr = today();
@@ -2659,7 +2731,6 @@
                 const dates = getRecurringOccurrenceDates(rec.startDate, rec.occurrences);
                 for (const d of dates) {
                     if (d <= todayStr) {
-                        // Check if already processed
                         const exists = allOperations.some(o =>
                             o.projectId === rec.projectId &&
                             o.recurringId === rec.id &&
@@ -2667,13 +2738,12 @@
                             o.type === rec.type
                         );
                         if (!exists) {
-                            // Create real operation
                             const op = {
                                 id: generateId(),
                                 projectId: rec.projectId,
                                 type: rec.type,
                                 amount: rec.amount,
-                                label: rec.label || (rec.type === 'add' ? t('income') : t('expense')) + ' (recurring)',
+                                label: rec.label || (rec.type === 'add' ? t('income') : t('expense')) + ' (récurrent)',
                                 date: d,
                                 linkedProjectId: null,
                                 isRecurring: true,
@@ -2726,11 +2796,9 @@
                 const text = await file.text();
                 const data = JSON.parse(text);
                 if (!data.projects || !data.operations) {
-                    alert('Invalid backup file.');
+                    alert('Fichier de sauvegarde invalide.');
                     return;
                 }
-                // Non-destructive merge
-                // Projects: merge by id
                 for (const p of data.projects) {
                     const existing = getProjectById(p.id);
                     if (!existing) {
@@ -2752,14 +2820,9 @@
                         allRecurrings.push(r);
                     }
                 }
-                // Settings: only if not set
                 if (data.settings) {
-                    if (data.settings.accentColor) {
-                        applyAccentColor(data.settings.accentColor);
-                    }
-                    if (data.settings.theme) {
-                        applyTheme(data.settings.theme);
-                    }
+                    if (data.settings.accentColor) applyAccentColor(data.settings.accentColor);
+                    if (data.settings.theme) applyTheme(data.settings.theme);
                     if (data.settings.language) {
                         currentLang = data.settings.language;
                         applyTranslations();
@@ -2771,24 +2834,22 @@
                 showToast(t('import_success'));
                 triggerDriveBackup();
             } catch (e) {
-                alert('Import failed: ' + e.message);
+                alert('Import échoué : ' + e.message);
             }
         }
 
         // ============================================================
-        // EXCEL EXPORT (simple CSV-based XLSX)
+        // EXCEL EXPORT (CSV)
         // ============================================================
         function exportExcel() {
-            // Simple CSV export as .xlsx (actually CSV with .xlsx extension - some apps accept it)
-            // For true XLSX we'd need a library, but we'll use CSV format with proper headers
             let rows = [
-                ['Date', 'Type', 'Label', 'Amount', 'Project', 'Linked Project']
+                ['Date', 'Type', 'Libellé', 'Montant', 'Projet', 'Projet lié']
             ];
             for (const op of allOperations) {
                 const p = getProjectById(op.projectId);
                 const lp = op.linkedProjectId ? getProjectById(op.linkedProjectId) : null;
-                const typeLabel = op.type === 'add' ? 'Income' : (op.type === 'expense' ? 'Expense' : (op.type ===
-                    'transfer_in' ? 'Transfer In' : 'Transfer Out'));
+                const typeLabel = op.type === 'add' ? 'Ajout' : (op.type === 'expense' ? 'Dépense' : (op.type ===
+                    'transfer_in' ? 'Transfert entrant' : 'Transfert sortant'));
                 rows.push([
                     op.date,
                     typeLabel,
@@ -2798,14 +2859,13 @@
                     lp ? lp.title : ''
                 ]);
             }
-            // Also include recurrings
             rows.push([]);
-            rows.push(['=== RECURRING OPERATIONS ===']);
-            rows.push(['Type', 'Label', 'Amount', 'Start Date', 'Occurrences', 'Project']);
+            rows.push(['=== OPÉRATIONS RÉCURRENTES ===']);
+            rows.push(['Type', 'Libellé', 'Montant', 'Date début', 'Occurrences', 'Projet']);
             for (const r of allRecurrings) {
                 const p = getProjectById(r.projectId);
                 rows.push([
-                    r.type === 'add' ? 'Income' : 'Expense',
+                    r.type === 'add' ? 'Ajout' : 'Dépense',
                     r.label || '',
                     r.amount.toString(),
                     r.startDate,
@@ -2861,49 +2921,31 @@
                     }
                 };
                 const json = JSON.stringify(data, null, 2);
+                const formData = new FormData();
+                const blob = new Blob([json], { type: 'application/json' });
+                // On utilise une requête simple sans gestion de fichier existant pour éviter les CORS complexes
+                // On se contente de sauvegarder dans le Drive via une requête multipart
                 const metadata = {
                     name: `cashflow_backup_${today()}.json`,
                     mimeType: 'application/json'
                 };
-                // Check if file exists
-                const listRes = await fetch('https://www.googleapis.com/drive/v3/files?q=name="cashflow_backup"&spaces=drive&fields=files(id,name)&key=' +
-                    GID_SITE, {
-                        headers: { 'Authorization': 'Bearer ' + driveToken }
-                    });
-                const listData = await listRes.json();
-                let fileId = null;
-                if (listData.files && listData.files.length > 0) {
-                    fileId = listData.files[0].id;
-                }
+                const multipart = new FormData();
+                multipart.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                multipart.append('file', blob);
 
-                const formData = new FormData();
-                const blob = new Blob([json], { type: 'application/json' });
-                if (fileId) {
-                    // Update existing
-                    const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&key=${GID_SITE}`, {
-                        method: 'PATCH',
-                        headers: { 'Authorization': 'Bearer ' + driveToken },
-                        body: blob
-                    });
-                    if (res.ok) {
-                        lastDriveBackup = Date.now();
-                        showToast(t('drive_backup_done'));
-                    }
+                const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + driveToken },
+                    body: multipart
+                });
+                if (res.ok) {
+                    lastDriveBackup = Date.now();
+                    showToast(t('drive_backup_done'));
                 } else {
-                    // Create new
-                    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' +
-                        GID_SITE, {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Bearer ' + driveToken },
-                            body: formData
-                        });
-                    if (res.ok) {
-                        lastDriveBackup = Date.now();
-                        showToast(t('drive_backup_done'));
-                    }
+                    console.warn('Drive backup failed:', await res.text());
                 }
             } catch (e) {
-                console.warn('Drive backup failed:', e);
+                console.warn('Drive backup error:', e);
             }
         }
 
@@ -2913,11 +2955,9 @@
                 document.getElementById('driveBackupBtn').style.display = 'none';
                 return;
             }
-            // Load Google Identity Services
             const script = document.createElement('script');
             script.src = 'https://accounts.google.com/gsi/client';
             script.onload = () => {
-                // Initialize
                 google.accounts.id.initialize({
                     client_id: GID_SITE,
                     callback: (res) => {
@@ -2925,7 +2965,6 @@
                         document.getElementById('driveSignInBtn').textContent = '✅ ' + t('sign_in');
                         document.getElementById('driveBackupBtn').style.display = 'inline-block';
                         showToast(t('drive_signed_in'));
-                        // Do immediate backup
                         setTimeout(() => doDriveBackup(), 1000);
                     }
                 });
@@ -2944,35 +2983,25 @@
         // INIT
         // ============================================================
         async function init() {
-            // Load settings from localStorage
+            // Charger les préférences
             const savedTheme = localStorage.getItem('cashflow_theme') || 'light';
             const savedAccent = localStorage.getItem('cashflow_accent') || '#3b82f6';
-            const savedLang = localStorage.getItem('cashflow_lang') || 'en';
+            const savedLang = localStorage.getItem('cashflow_lang') || 'fr'; // français par défaut
             currentLang = savedLang;
             applyTheme(savedTheme);
             applyAccentColor(savedAccent);
 
-            // Open DB
             db = await openDB();
-
-            // Load data
             allProjects = await dbGetAll('projects') || [];
             allOperations = await dbGetAll('operations') || [];
             allRecurrings = await dbGetAll('recurrings') || [];
 
-            // Apply translations
             applyTranslations();
 
-            // Set up event listeners
-            setupEventListeners();
-
-            // Process recurrings
             await processRecurrings();
 
-            // Render initial view
             renderHome();
 
-            // Auto backup timer
             setInterval(() => {
                 if (driveBackupPending) {
                     doDriveBackup();
@@ -2980,38 +3009,35 @@
                 }
             }, 2 * 60 * 1000);
 
-            // Init Google Drive
             initDrive();
 
-            // Set forecast date
             const d = new Date();
             d.setMonth(d.getMonth() + 1);
             document.getElementById('forecastDate').value = d.toISOString().slice(0, 10);
             document.getElementById('forecastDate').onchange = updateForecast;
 
-            console.log('CashFlow initialized v' + VERSION);
+            setupEventListeners();
+
+            console.log('CashFlow initialisé v' + VERSION);
         }
 
         function setupEventListeners() {
-            // Navigation
+            // Navigation sans l'onglet Projet
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.onclick = () => {
                     const view = item.dataset.view;
-                    if (view === 'viewProject' && !selectedProjectId) {
-                        // Show home and select first project
-                        const active = allProjects.filter(p => p.active && !p.archived);
-                        if (active.length > 0) {
-                            selectedProjectId = active[0].id;
-                        } else {
-                            navigateTo('viewHome');
-                            return;
-                        }
-                    }
+                    if (view === 'viewProject') return; // ne devrait pas arriver
                     navigateTo(view);
                 };
             });
 
-            // Header actions
+            // Bouton retour
+            document.getElementById('backBtn').onclick = () => {
+                if (currentView === 'viewProject') {
+                    navigateTo('viewHome');
+                }
+            };
+
             document.getElementById('headerAddProject').onclick = () => showCreateProject();
             document.getElementById('headerAddOp').onclick = () => {
                 if (selectedProjectId) {
@@ -3028,23 +3054,18 @@
                 }
             };
 
-            // Modal close
             document.getElementById('modalClose').onclick = closeModal;
 
-            // Theme toggle
             document.getElementById('themeToggle').onclick = () => {
                 applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-                // Save setting
                 const setting = { id: 'settings', theme: currentTheme, accent: accentColor, language: currentLang };
                 dbPut('settings', setting);
             };
 
-            // Language
             document.getElementById('langSelect').onchange = (e) => {
                 currentLang = e.target.value;
                 localStorage.setItem('cashflow_lang', currentLang);
                 applyTranslations();
-                // Re-render current view
                 if (currentView === 'viewHome') renderHome();
                 else if (currentView === 'viewProject') renderProjectDetail();
                 else if (currentView === 'viewPlanning') renderPlanning();
@@ -3054,14 +3075,12 @@
                 dbPut('settings', setting);
             };
 
-            // Accent color
             document.getElementById('accentColorPicker').oninput = (e) => {
                 applyAccentColor(e.target.value);
                 const setting = { id: 'settings', theme: currentTheme, accent: e.target.value, language: currentLang };
                 dbPut('settings', setting);
             };
 
-            // Export / Import
             document.getElementById('exportBtn').onclick = exportData;
             document.getElementById('importBtn').onclick = () => {
                 const input = document.createElement('input');
@@ -3075,10 +3094,8 @@
                 input.click();
             };
 
-            // Excel export
             document.getElementById('excelExportBtn').onclick = exportExcel;
 
-            // Journal toggle
             document.getElementById('journalToggle').onclick = () => {
                 const content = document.getElementById('journalContent');
                 const arrow = document.getElementById('journalArrow');
@@ -3091,19 +3108,16 @@
                 }
             };
 
-            // Add recurring
             document.getElementById('addRecurringBtn').onclick = showAddRecurring;
 
-            // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeModal();
             });
         }
 
-        // Start the app
         document.addEventListener('DOMContentLoaded', init);
 
-        // Expose functions to global scope for inline onclick
+        // Exposés globalement
         window.showCreateProject = showCreateProject;
         window.showEditProject = showEditProject;
         window.showDeleteProject = showDeleteProject;
