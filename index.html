@@ -444,6 +444,18 @@
         .btn .emoji {
             font-size: 16px;
         }
+        .btn-drag {
+            cursor: grab;
+            font-size: 18px;
+            padding: 4px 6px;
+            background: none;
+            border: none;
+            color: var(--text3);
+            touch-action: none;
+        }
+        .btn-drag:active {
+            cursor: grabbing;
+        }
         /* ==== FORMS ==== */
         .form-group {
             margin-bottom: 14px;
@@ -522,6 +534,14 @@
         }
         .emoji-grid .emoji-option:active {
             transform: scale(0.92);
+        }
+        .emoji-picker-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+            background: var(--bg);
         }
         .selected-emoji-display {
             font-size: 40px;
@@ -661,21 +681,34 @@
         .project-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
+            gap: 10px;
+            padding: 12px 14px;
             border-radius: var(--radius);
             background: var(--bg2);
             border: 1px solid var(--border);
             transition: background 0.15s, transform 0.1s;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
         }
         .project-item:active {
             transform: scale(0.98);
         }
+        .project-item .p-drag {
+            cursor: grab;
+            font-size: 18px;
+            color: var(--text3);
+            padding: 4px 2px;
+            touch-action: none;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .project-item .p-drag:active {
+            cursor: grabbing;
+        }
         .project-item .p-emoji {
             font-size: 28px;
-            width: 44px;
+            width: 40px;
             text-align: center;
             flex-shrink: 0;
         }
@@ -687,16 +720,26 @@
             font-weight: 600;
             font-size: 15px;
         }
+        .project-item .p-balance-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
         .project-item .p-balance {
             font-weight: 700;
             font-size: 17px;
-            flex-shrink: 0;
         }
         .project-item .p-balance.positive {
             color: var(--success);
         }
         .project-item .p-balance.negative {
             color: var(--danger);
+        }
+        .project-item .p-projected {
+            font-size: 11px;
+            color: var(--text3);
+            font-weight: 400;
         }
         .project-item .p-actions {
             display: flex;
@@ -715,6 +758,22 @@
         }
         .project-item .p-actions button:hover {
             background: var(--bg3);
+        }
+        .project-item .p-actions .quick-add {
+            color: var(--success);
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .project-item .p-actions .quick-add:hover {
+            background: #dcfce7;
+        }
+        .project-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        .project-item.drag-over {
+            border-color: var(--accent);
+            border-width: 2px;
         }
         /* ==== EMPTY STATE ==== */
         .empty-state {
@@ -746,6 +805,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
         }
         .total-bar .total-label {
             font-size: 14px;
@@ -756,6 +817,12 @@
             font-size: 26px;
             font-weight: 700;
             letter-spacing: -0.5px;
+        }
+        .total-bar .total-sub {
+            font-size: 12px;
+            opacity: 0.7;
+            width: 100%;
+            text-align: right;
         }
         /* ==== OPERATION ITEMS ==== */
         .op-item {
@@ -817,9 +884,8 @@
         .op-item .op-actions button:hover {
             background: var(--bg3);
         }
-        /* Style pour les opérations planifiées (prévision) */
         .op-item.planned {
-            opacity: 0.5;
+            opacity: 0.6;
             border-bottom-style: dashed;
             border-bottom-color: var(--text3);
         }
@@ -987,7 +1053,7 @@
         .setting-item .set-control {
             flex-shrink: 0;
         }
-        /* ==== COLOR PICKER (roue chromatique) ==== */
+        /* ==== COLOR PICKER ==== */
         .color-picker-wrap {
             display: flex;
             flex-direction: column;
@@ -1020,21 +1086,6 @@
             box-shadow: 0 0 6px rgba(0,0,0,0.5);
             transform: translate(-50%, -50%);
             pointer-events: none;
-            transition: none;
-        }
-        .color-wheel-container .picker-dot {
-            background: transparent;
-        }
-        .color-wheel-container .picker-dot::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 1px solid rgba(255,255,255,0.3);
         }
         .color-wheel-container .picker-dot .inner-circle {
             position: absolute;
@@ -1084,10 +1135,6 @@
         }
         .color-swatch:hover {
             transform: scale(1.1);
-        }
-        .color-swatch.active {
-            border-color: var(--text);
-            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
         }
         .toggle-wrap {
             display: flex;
@@ -1277,6 +1324,13 @@
                 width: 150px;
                 height: 150px;
             }
+            .project-item .p-balance-row .p-balance {
+                font-size: 15px;
+            }
+            .project-item .p-actions button {
+                font-size: 14px;
+                padding: 2px 4px;
+            }
         }
         @media (min-width: 601px) {
             .modal-box {
@@ -1413,7 +1467,6 @@
                 display: inline;
             }
         }
-        /* error box */
         .error-box {
             background: #fee2e2;
             color: #dc2626;
@@ -1442,16 +1495,48 @@
             color: #4ade80;
             border-color: #166534;
         }
-        /* Toggle des prévisions dans l'historique */
         .toggle-forecast-btn {
             font-size: 13px;
             padding: 4px 12px;
             margin-left: 8px;
         }
-        /* Share link button */
         .share-link-btn {
             font-size: 12px;
             padding: 4px 12px;
+        }
+        .badge-recurring {
+            font-size: 10px;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .recurring-toggle {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin: 4px 0;
+        }
+        .recurring-toggle label {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .recurring-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .recurring-fields {
+            border-left: 2px solid var(--accent-light);
+            padding-left: 12px;
+            margin-top: 6px;
         }
     </style>
 </head>
@@ -1465,7 +1550,7 @@
                 <h1>
                     <span class="emoji">💰</span>
                     <span id="headerTitle">CashFlow</span>
-                    <span class="version-badge" id="versionBadge">v1.4.0</span>
+                    <span class="version-badge" id="versionBadge">v1.5.0</span>
                 </h1>
             </div>
             <div class="header-actions">
@@ -1482,6 +1567,7 @@
                 <div class="total-bar" id="totalBar">
                     <span class="total-label" data-i18n="total_available">Total disponible</span>
                     <span class="total-amount font-mono" id="totalAmount">€0.00</span>
+                    <span class="total-sub" id="totalProjectedSub">Solde projeté : €0.00</span>
                 </div>
                 <div id="projectList"></div>
                 <div class="archived-section" id="archivedSection">
@@ -1653,6 +1739,7 @@
                         <span id="journalArrow">▶</span>
                     </div>
                     <div id="journalContent" style="display:none;margin-top:8px;padding:8px 0;">
+                        <div class="journal-entry"><span class="jv">v1.5.0</span><span>2026-02-05 · Réorganisation projets, planification directe, prévisions par défaut, + rapide</span></div>
                         <div class="journal-entry"><span class="jv">v1.4.0</span><span>2026-02-04 · Roue chromatique, correction récurrences, bouton copier lien</span></div>
                         <div class="journal-entry"><span class="jv">v1.3.0</span><span>2026-02-03 · Lien de partage, prévisions dans historique, picker couleur amélioré</span></div>
                         <div class="journal-entry"><span class="jv">v1.2.0</span><span>2026-02-02 · Correction manifeste, URL GitHub, encodage UTF-8</span></div>
@@ -1660,7 +1747,7 @@
                         <div class="journal-entry"><span class="jv">v1.0.0</span><span>2026-01-31 · Version initiale</span></div>
                     </div>
                     <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.4.0</span>
+                        <span data-i18n="version">Version</span> <span id="versionDisplay">1.5.0</span>
                     </div>
                 </div>
             </div>
@@ -1711,9 +1798,10 @@
         // ============================================================
         // CONSTANTS
         // ============================================================
-        const VERSION = '1.4.0';
+        const VERSION = '1.5.0';
         const SCHEMA = 1;
         const JOURNAL = [
+            { version: '1.5.0', date: '2026-02-05', changes: 'Réorganisation projets, planification directe, prévisions par défaut, + rapide' },
             { version: '1.4.0', date: '2026-02-04', changes: 'Roue chromatique, correction récurrences, bouton copier lien' },
             { version: '1.3.0', date: '2026-02-03', changes: 'Lien de partage, prévisions dans historique, picker couleur amélioré' },
             { version: '1.2.0', date: '2026-02-02', changes: 'Correction manifeste, URL GitHub, encodage UTF-8' },
@@ -1722,7 +1810,6 @@
         ];
         const GID_SITE = '';
 
-        // === ÉMOJIS ===
         const EMOJIS = [
             '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
             '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤗','🤭','🤫','🤔','🤐','🤨','😐',
@@ -1893,7 +1980,12 @@
                 copy_link: 'Copy link',
                 link_copied: 'Link copied!',
                 show_forecast: 'Show forecast',
-                hide_forecast: 'Hide forecast'
+                hide_forecast: 'Hide forecast',
+                recurring: 'Recurring',
+                one_time: 'One-time',
+                projected: 'Projected',
+                quick_add: 'Quick add',
+                drag_to_reorder: 'Drag to reorder'
             },
             fr: {
                 home: 'Accueil',
@@ -2015,7 +2107,12 @@
                 copy_link: 'Copier le lien',
                 link_copied: 'Lien copié !',
                 show_forecast: 'Afficher les prévisions',
-                hide_forecast: 'Masquer les prévisions'
+                hide_forecast: 'Masquer les prévisions',
+                recurring: 'Récurrent',
+                one_time: 'Ponctuel',
+                projected: 'Projeté',
+                quick_add: 'Ajout rapide',
+                drag_to_reorder: 'Glisser pour réorganiser'
             }
         };
 
@@ -2042,25 +2139,42 @@
         let allRecurrings = [];
         let githubToken = '';
         let githubRepo = '';
-        let showForecastInHistory = false;
+        let showForecastInHistory = true; // Par défaut : afficher les prévisions
+
+        // Drag & drop pour projets
+        let dragIndex = null;
+        let dragOverIndex = null;
 
         // ============================================================
         // INDEXED DB
         // ============================================================
         const DB_NAME = 'CashFlowDB';
-        const DB_VERSION = 1;
-        const STORES = ['projects', 'operations', 'recurrings', 'settings'];
+        const DB_VERSION = 2;
 
         function openDB() {
             return new Promise((resolve, reject) => {
                 const req = indexedDB.open(DB_NAME, DB_VERSION);
                 req.onupgradeneeded = (e) => {
                     const d = e.target.result;
-                    STORES.forEach(s => {
-                        if (!d.objectStoreNames.contains(s)) {
-                            d.createObjectStore(s, { keyPath: 'id' });
+                    if (!d.objectStoreNames.contains('projects')) {
+                        d.createObjectStore('projects', { keyPath: 'id' });
+                    }
+                    if (!d.objectStoreNames.contains('operations')) {
+                        d.createObjectStore('operations', { keyPath: 'id' });
+                    }
+                    if (!d.objectStoreNames.contains('recurrings')) {
+                        d.createObjectStore('recurrings', { keyPath: 'id' });
+                    }
+                    if (!d.objectStoreNames.contains('settings')) {
+                        d.createObjectStore('settings', { keyPath: 'id' });
+                    }
+                    // Ajouter un index sur l'ordre si nécessaire
+                    if (d.objectStoreNames.contains('projects')) {
+                        const store = d.transaction.objectStore('projects');
+                        if (!store.indexNames.contains('order')) {
+                            store.createIndex('order', 'order');
                         }
-                    });
+                    }
                 };
                 req.onsuccess = (e) => resolve(e.target.result);
                 req.onerror = (e) => reject(e.target.error);
@@ -2131,6 +2245,30 @@
             return Math.round(balance * 100) / 100;
         }
 
+        function getProjectProjectedBalance(projectId, targetDate) {
+            let balance = getProjectBalance(projectId);
+            const recs = getRecurringsForProject(projectId);
+            const todayStr = targetDate || today();
+            for (const r of recs) {
+                const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
+                for (const d of dates) {
+                    if (d <= todayStr) {
+                        const exists = allOperations.some(o =>
+                            o.projectId === projectId &&
+                            o.recurringId === r.id &&
+                            o.date === d &&
+                            o.type === r.type
+                        );
+                        if (!exists) {
+                            if (r.type === 'add') balance += r.amount;
+                            else balance -= r.amount;
+                        }
+                    }
+                }
+            }
+            return Math.round(balance * 100) / 100;
+        }
+
         function getProjectById(id) {
             return allProjects.find(p => p.id === id);
         }
@@ -2153,6 +2291,16 @@
             return Math.round(total * 100) / 100;
         }
 
+        function getTotalActiveProjectedBalance() {
+            let total = 0;
+            for (const p of allProjects) {
+                if (p.active && !p.archived) {
+                    total += getProjectProjectedBalance(p.id, today());
+                }
+            }
+            return Math.round(total * 100) / 100;
+        }
+
         function getRecurringEndDate(startDate, occurrences) {
             if (!startDate || !occurrences) return '';
             const d = new Date(startDate);
@@ -2168,29 +2316,6 @@
                 d.setMonth(d.getMonth() + 1);
             }
             return dates;
-        }
-
-        function getProjectedBalance(projectId, targetDate) {
-            let balance = getProjectBalance(projectId);
-            const recs = getRecurringsForProject(projectId);
-            for (const r of recs) {
-                const dates = getRecurringOccurrenceDates(r.startDate, r.occurrences);
-                for (const d of dates) {
-                    if (d <= targetDate) {
-                        const exists = allOperations.some(o =>
-                            o.projectId === projectId &&
-                            o.recurringId === r.id &&
-                            o.date === d &&
-                            o.type === r.type
-                        );
-                        if (!exists) {
-                            if (r.type === 'add') balance += r.amount;
-                            else balance -= r.amount;
-                        }
-                    }
-                }
-            }
-            return Math.round(balance * 100) / 100;
         }
 
         // ============================================================
@@ -2222,12 +2347,10 @@
             const toggle = document.getElementById('themeToggle');
             if (theme === 'dark') {
                 toggle.classList.add('active');
-                // En mode sombre : ☀️ à gauche (pour passer en clair), 🌙 à droite
                 document.getElementById('themeLabel').textContent = '☀️';
                 document.getElementById('themeLabel2').textContent = '🌙';
             } else {
                 toggle.classList.remove('active');
-                // En mode clair : 🌙 à gauche (pour passer en sombre), ☀️ à droite
                 document.getElementById('themeLabel').textContent = '🌙';
                 document.getElementById('themeLabel2').textContent = '☀️';
             }
@@ -2245,9 +2368,7 @@
             const light = `rgba(${r},${g},${b},0.15)`;
             document.documentElement.style.setProperty('--accent-light', light);
             localStorage.setItem('cashflow_accent', color);
-            // Mettre à jour l'input hex
             document.getElementById('accentHexInput').value = color;
-            // Mettre à jour le dot de la roue
             updateColorWheelDot(color);
         }
 
@@ -2274,17 +2395,13 @@
 
             drawColorWheel();
 
-            // Événements souris
             canvas.addEventListener('mousedown', onColorWheelDown);
             document.addEventListener('mousemove', onColorWheelMove);
             document.addEventListener('mouseup', onColorWheelUp);
-
-            // Événements tactiles
             canvas.addEventListener('touchstart', onColorWheelTouchStart, { passive: false });
             document.addEventListener('touchmove', onColorWheelTouchMove, { passive: false });
             document.addEventListener('touchend', onColorWheelTouchEnd, { passive: false });
 
-            // Positionner le dot sur la couleur actuelle
             updateColorWheelDot(accentColor);
         }
 
@@ -2299,7 +2416,6 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // Dessiner la roue chromatique
             const imageData = ctx.createImageData(w, h);
             const data = imageData.data;
 
@@ -2311,9 +2427,7 @@
                     const angle = Math.atan2(dy, dx);
 
                     if (dist <= radius) {
-                        // Hue de 0 à 360
                         let hue = ((angle * 180 / Math.PI) + 360) % 360;
-                        // Saturation 100%, Lumière 50%
                         const rgb = hslToRgb(hue / 360, 1, 0.5);
                         const idx = (y * w + x) * 4;
                         data[idx] = rgb[0] * 255;
@@ -2325,7 +2439,6 @@
             }
             ctx.putImageData(imageData, 0, 0);
 
-            // Cercle extérieur
             ctx.beginPath();
             ctx.arc(cx, cy, radius, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
@@ -2405,14 +2518,12 @@
         function updateColorWheelDot(color) {
             const dot = document.getElementById('pickerDot');
             if (!dot) return;
-            // Trouver la position sur la roue pour cette couleur
             const canvas = colorWheelCanvas;
             if (!canvas) return;
             const r = parseInt(color.slice(1, 3), 16);
             const g = parseInt(color.slice(3, 5), 16);
             const b = parseInt(color.slice(5, 7), 16);
             const [h, s, l] = rgbToHsl(r, g, b);
-            // Saturation et luminosité fixes pour la roue (1, 0.5)
             const angle = h * 2 * Math.PI;
             const radius = wheelRadius * (canvas.width / 360) * 0.92;
 
@@ -2428,7 +2539,6 @@
             dot.style.left = (px * scaleX) + 'px';
             dot.style.top = (py * scaleY) + 'px';
             dot.style.display = 'block';
-            // Mettre à jour la couleur du dot
             const inner = dot.querySelector('.inner-circle');
             if (inner) {
                 inner.style.background = color;
@@ -2437,10 +2547,7 @@
 
         function onColorWheelDown(e) {
             isDragging = true;
-            const rect = colorWheelCanvas.getBoundingClientRect();
-            const x = e.clientX;
-            const y = e.clientY;
-            const color = getColorFromWheel(x, y);
+            const color = getColorFromWheel(e.clientX, e.clientY);
             if (color) {
                 applyAccentColor(color);
                 const setting = { id: 'settings', theme: currentTheme, accent: color, language: currentLang };
@@ -2450,10 +2557,7 @@
 
         function onColorWheelMove(e) {
             if (!isDragging) return;
-            const rect = colorWheelCanvas.getBoundingClientRect();
-            const x = e.clientX;
-            const y = e.clientY;
-            const color = getColorFromWheel(x, y);
+            const color = getColorFromWheel(e.clientX, e.clientY);
             if (color) {
                 applyAccentColor(color);
                 const setting = { id: 'settings', theme: currentTheme, accent: color, language: currentLang };
@@ -2461,9 +2565,7 @@
             }
         }
 
-        function onColorWheelUp() {
-            isDragging = false;
-        }
+        function onColorWheelUp() { isDragging = false; }
 
         function onColorWheelTouchStart(e) {
             e.preventDefault();
@@ -2489,9 +2591,7 @@
             }
         }
 
-        function onColorWheelTouchEnd() {
-            isDragging = false;
-        }
+        function onColorWheelTouchEnd() { isDragging = false; }
 
         // ============================================================
         // NAVIGATION
@@ -2603,7 +2703,11 @@
                 };
                 container.appendChild(el);
             });
-            return container;
+            // Wrap in scrollable container
+            const wrapper = document.createElement('div');
+            wrapper.className = 'emoji-picker-scroll';
+            wrapper.appendChild(container);
+            return wrapper;
         }
 
         // ============================================================
@@ -2611,10 +2715,16 @@
         // ============================================================
         function renderHome() {
             const total = getTotalActiveBalance();
+            const projected = getTotalActiveProjectedBalance();
+
             document.getElementById('totalAmount').textContent = formatCurrency(total);
             document.getElementById('totalAmount').className = 'total-amount font-mono' + (total < 0 ? ' negative' : '');
+            document.getElementById('totalProjectedSub').textContent = `Solde projeté : ${formatCurrency(projected)}`;
 
             const activeProjects = allProjects.filter(p => p.active && !p.archived);
+            // Trier par ordre
+            activeProjects.sort((a, b) => (a.order || 0) - (b.order || 0));
+
             const list = document.getElementById('projectList');
 
             if (activeProjects.length === 0) {
@@ -2628,19 +2738,25 @@
               </div>
             `;
             } else {
-                list.innerHTML = `<div class="project-grid">` +
-                    activeProjects.map(p => {
+                list.innerHTML = `<div class="project-grid" id="projectGrid">` +
+                    activeProjects.map((p, index) => {
                         const bal = getProjectBalance(p.id);
                         const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+                        const projectedBal = getProjectProjectedBalance(p.id, today());
+                        const projClass = projectedBal < 0 ? 'negative' : (projectedBal > 0 ? 'positive' : '');
                         return `
-                  <div class="project-item" onclick="selectProject('${p.id}')">
+                  <div class="project-item" data-id="${p.id}" data-index="${index}" draggable="true">
+                    <span class="p-drag" title="${t('drag_to_reorder')}">⠿</span>
                     <span class="p-emoji">${p.emoji || '📁'}</span>
-                    <div class="p-info">
+                    <div class="p-info" onclick="selectProject('${p.id}')">
                       <div class="p-title">${p.title}</div>
                     </div>
-                    <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
+                    <div class="p-balance-row">
+                      <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
+                      <span class="p-projected">${t('projected')}: ${formatCurrency(projectedBal)}</span>
+                    </div>
                     <div class="p-actions">
-                      <button onclick="event.stopPropagation();showEditProject('${p.id}')" title="${t('edit_project')}">✏️</button>
+                      <button class="quick-add" onclick="event.stopPropagation();quickAddOperation('${p.id}')" title="${t('quick_add')}">➕</button>
                       <button onclick="event.stopPropagation();showTransferModal('${p.id}')" title="${t('transfer')}">↔️</button>
                       <button onclick="event.stopPropagation();showArchiveProject('${p.id}')" title="${t('archive_project')}">📦</button>
                       <button onclick="event.stopPropagation();showDeleteProject('${p.id}')" title="${t('delete_project')}">🗑️</button>
@@ -2649,6 +2765,9 @@
                 `;
                     }).join('') + `</div>`;
             }
+
+            // Drag & drop events
+            setupDragDrop();
 
             const archived = allProjects.filter(p => p.archived);
             document.getElementById('archBadge').textContent = `(${archived.length})`;
@@ -2683,7 +2802,255 @@
         }
 
         // ============================================================
-        // RENDER PROJECT DETAIL avec prévisions
+        // DRAG & DROP
+        // ============================================================
+        function setupDragDrop() {
+            const items = document.querySelectorAll('#projectGrid .project-item');
+            items.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+                item.addEventListener('drop', handleDrop);
+                // Touch support
+                item.addEventListener('touchstart', handleTouchStart, { passive: true });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd, { passive: true });
+            });
+        }
+
+        let touchDragData = null;
+
+        function handleTouchStart(e) {
+            const item = e.currentTarget;
+            const touch = e.touches[0];
+            touchDragData = {
+                item: item,
+                id: item.dataset.id,
+                startY: touch.clientY,
+                moved: false
+            };
+        }
+
+        function handleTouchMove(e) {
+            if (!touchDragData) return;
+            const touch = e.touches[0];
+            const deltaY = touch.clientY - touchDragData.startY;
+            if (Math.abs(deltaY) > 20) {
+                touchDragData.moved = true;
+                e.preventDefault();
+                // Trouver l'élément sous le doigt
+                const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+                const target = elements.find(el => el.classList && el.classList.contains('project-item') && el.dataset.id !==
+                    touchDragData.id);
+                if (target) {
+                    const grid = document.getElementById('projectGrid');
+                    const items = grid.querySelectorAll('.project-item');
+                    const fromIndex = Array.from(items).indexOf(touchDragData.item);
+                    const toIndex = Array.from(items).indexOf(target);
+                    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+                        reorderProjects(fromIndex, toIndex);
+                        touchDragData.startY = touch.clientY;
+                    }
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            touchDragData = null;
+        }
+
+        let dragData = null;
+
+        function handleDragStart(e) {
+            const item = e.currentTarget;
+            dragData = {
+                id: item.dataset.id,
+                index: parseInt(item.dataset.index)
+            };
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', item.dataset.id);
+            item.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            const item = e.currentTarget;
+            item.classList.remove('dragging');
+            document.querySelectorAll('#projectGrid .project-item').forEach(el => el.classList.remove('drag-over'));
+            dragData = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const target = e.currentTarget;
+            if (target.dataset.id !== dragData?.id) {
+                target.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const target = e.currentTarget;
+            target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const target = e.currentTarget;
+            target.classList.remove('drag-over');
+
+            if (!dragData) return;
+
+            const grid = document.getElementById('projectGrid');
+            const items = grid.querySelectorAll('.project-item');
+            const fromIndex = Array.from(items).indexOf(document.querySelector(`.project-item[data-id="${dragData.id}"]`));
+            const toIndex = Array.from(items).indexOf(target);
+
+            if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+                reorderProjects(fromIndex, toIndex);
+            }
+        }
+
+        async function reorderProjects(fromIndex, toIndex) {
+            const activeProjects = allProjects.filter(p => p.active && !p.archived);
+            activeProjects.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            const [moved] = activeProjects.splice(fromIndex, 1);
+            activeProjects.splice(toIndex, 0, moved);
+
+            // Mettre à jour les ordres
+            for (let i = 0; i < activeProjects.length; i++) {
+                activeProjects[i].order = i;
+                await dbPut('projects', activeProjects[i]);
+            }
+
+            // Mettre à jour allProjects
+            for (let i = 0; i < allProjects.length; i++) {
+                const p = allProjects[i];
+                const updated = activeProjects.find(ap => ap.id === p.id);
+                if (updated) {
+                    p.order = updated.order;
+                }
+            }
+
+            renderHome();
+            triggerDriveBackup();
+        }
+
+        // ============================================================
+        // QUICK ADD OPERATION
+        // ============================================================
+        function quickAddOperation(projectId) {
+            const project = getProjectById(projectId);
+            if (!project) return;
+
+            const todayStr = today();
+            const bal = getProjectBalance(projectId);
+
+            openModal(t('quick_add') + ' — ' + project.title, `
+            <div class="form-group">
+              <label>${t('type')}</label>
+              <select class="form-control" id="quickOpType">
+                <option value="add">${t('income')}</option>
+                <option value="expense">${t('expense')}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>${t('amount')}</label>
+              <input type="number" step="0.01" class="form-control" id="quickOpAmount" placeholder="0.00" value="">
+            </div>
+            <div class="form-group">
+              <label>${t('label')}</label>
+              <input class="form-control" id="quickOpLabel" placeholder="${t('label')}" value="">
+            </div>
+            <div class="form-group">
+              <label>${t('date')}</label>
+              <input type="date" class="form-control" id="quickOpDate" value="${todayStr}">
+            </div>
+            <div class="recurring-toggle">
+              <label>
+                <input type="checkbox" id="quickIsRecurring">
+                ${t('recurring')}
+              </label>
+            </div>
+            <div class="recurring-fields" id="quickRecurringFields" style="display:none;">
+              <div class="form-group">
+                <label>${t('recurring_start')}</label>
+                <input type="date" class="form-control" id="quickRecStart" value="${todayStr}">
+              </div>
+              <div class="form-group">
+                <label>${t('recurring_occurrences')}</label>
+                <input type="number" class="form-control" id="quickRecOccurrences" value="12" min="1" max="120">
+              </div>
+            </div>
+          `, `
+            <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
+            <button class="btn btn-primary" id="quickSaveBtn">${t('save')}</button>
+          `);
+
+            document.getElementById('quickIsRecurring').onchange = function() {
+                const fields = document.getElementById('quickRecurringFields');
+                fields.style.display = this.checked ? 'block' : 'none';
+            };
+
+            document.getElementById('quickSaveBtn').onclick = async () => {
+                const type = document.getElementById('quickOpType').value;
+                const amount = parseFloat(document.getElementById('quickOpAmount').value);
+                if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
+                const label = document.getElementById('quickOpLabel').value.trim() || '';
+                const date = document.getElementById('quickOpDate').value || todayStr;
+                const isRecurring = document.getElementById('quickIsRecurring').checked;
+
+                if (isRecurring) {
+                    const startDate = document.getElementById('quickRecStart').value;
+                    const occurrences = parseInt(document.getElementById('quickRecOccurrences').value) || 1;
+                    if (!startDate) { alert(t('recurring_start') + ' est requis'); return; }
+
+                    const rec = {
+                        id: generateId(),
+                        projectId: projectId,
+                        type: type,
+                        amount: Math.round(amount * 100) / 100,
+                        label: label || (type === 'add' ? t('income') : t('expense')),
+                        startDate: startDate,
+                        occurrences: occurrences,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    };
+                    await dbPut('recurrings', rec);
+                    allRecurrings.push(rec);
+                    await processSingleRecurring(rec);
+                } else {
+                    const op = {
+                        id: generateId(),
+                        projectId: projectId,
+                        type: type,
+                        amount: Math.round(amount * 100) / 100,
+                        label: label || (type === 'add' ? t('income') : t('expense')),
+                        date: date,
+                        linkedProjectId: null,
+                        isRecurring: false,
+                        recurringId: null,
+                        createdAt: Date.now()
+                    };
+                    await dbPut('operations', op);
+                    allOperations.push(op);
+                }
+
+                closeModal();
+                renderHome();
+                if (selectedProjectId) renderProjectDetail();
+                triggerDriveBackup();
+            };
+        }
+
+        // ============================================================
+        // RENDER PROJECT DETAIL avec prévisions (activées par défaut)
         // ============================================================
         function renderProjectDetail() {
             const container = document.getElementById('projectDetail');
@@ -2702,8 +3069,11 @@
                 container.innerHTML = `<div class="empty-state"><h3>${t('select_project')}</h3></div>`;
                 return;
             }
+
             const bal = getProjectBalance(project.id);
             const balClass = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
+            const projectedBal = getProjectProjectedBalance(project.id, today());
+            const projClass = projectedBal < 0 ? 'negative' : (projectedBal > 0 ? 'positive' : '');
             const ops = getOperationsForProject(project.id);
 
             let items = ops.map(op => {
@@ -2795,7 +3165,10 @@
                   <span style="font-size:28px;">${project.emoji || '📁'}</span>
                   <span style="font-size:20px;font-weight:700;margin-left:8px;">${project.title}</span>
                 </div>
-                <span class="card-amount ${balClass}">${formatCurrency(bal)}</span>
+                <div style="text-align:right;">
+                  <div class="card-amount ${balClass}">${formatCurrency(bal)}</div>
+                  <div class="card-sub ${projClass}">${t('projected')}: ${formatCurrency(projectedBal)}</div>
+                </div>
               </div>
               <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
                 <button class="btn btn-sm btn-success" onclick="showAddOperation('${project.id}','add')">➕ ${t('income')}</button>
@@ -2892,7 +3265,7 @@
             let total = 0;
             let html = '<div class="forecast-grid">';
             for (const p of activeProjects) {
-                const bal = getProjectedBalance(p.id, dateStr);
+                const bal = getProjectProjectedBalance(p.id, dateStr);
                 total += bal;
                 const cls = bal < 0 ? 'negative' : (bal > 0 ? 'positive' : '');
                 html += `
@@ -2965,7 +3338,6 @@
 
         function copyShareLink(projectId) {
             const shareUrl = window.location.href.split('?')[0] + '?share=' + projectId;
-            // Utiliser clipboard API si disponible
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(shareUrl).then(() => {
                     showToast(t('link_copied'));
@@ -2989,7 +3361,6 @@
                 document.execCommand('copy');
                 showToast(t('link_copied'));
             } catch (e) {
-                // Fallback: afficher dans une alerte
                 alert('Copiez ce lien : ' + text);
             }
             document.body.removeChild(textarea);
@@ -3312,7 +3683,6 @@
             document.getElementById('accentHexInput').value = accentColor;
             document.getElementById('githubToken').value = githubToken;
             document.getElementById('githubRepo').value = githubRepo;
-            // Mettre à jour la roue
             setTimeout(initColorWheel, 50);
         }
 
@@ -3397,12 +3767,10 @@
 
         async function showCreateProject() {
             selectedEmoji = '📁';
-            const emojiPickerContainer = document.createElement('div');
             const picker = renderEmojiPicker(selectedEmoji, (emoji) => {
                 selectedEmoji = emoji;
                 document.getElementById('selectedEmojiDisplay').textContent = emoji;
             });
-            emojiPickerContainer.appendChild(picker);
 
             openModal(t('create_project'), `
             <div class="form-group">
@@ -3412,9 +3780,7 @@
             <div class="form-group">
               <label>${t('project_emoji')}</label>
               <div class="selected-emoji-display" id="selectedEmojiDisplay">📁</div>
-              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px;background:var(--bg);">
-                ${emojiPickerContainer.innerHTML}
-              </div>
+              ${picker.outerHTML}
             </div>
             <div class="form-group">
               <label>${t('initial_amount')}</label>
@@ -3426,6 +3792,7 @@
             <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
           `);
 
+            // Réattacher les événements du picker
             const grid = document.querySelector('#modalBody .emoji-grid');
             if (grid) {
                 grid.querySelectorAll('.emoji-option').forEach(el => {
@@ -3444,12 +3811,14 @@
                 const emoji = selectedEmoji || '📁';
                 const initialAmount = parseFloat(document.getElementById('projInitialAmount').value) || 0;
 
+                const maxOrder = allProjects.filter(p => p.active && !p.archived).length;
                 const project = {
                     id: generateId(),
                     title,
                     emoji,
                     active: true,
                     archived: false,
+                    order: maxOrder,
                     createdAt: Date.now(),
                     updatedAt: Date.now()
                 };
@@ -3483,12 +3852,10 @@
             const p = getProjectById(id);
             if (!p) return;
             selectedEmoji = p.emoji || '📁';
-            const emojiPickerContainer = document.createElement('div');
             const picker = renderEmojiPicker(selectedEmoji, (emoji) => {
                 selectedEmoji = emoji;
                 document.getElementById('selectedEmojiDisplayEdit').textContent = emoji;
             });
-            emojiPickerContainer.appendChild(picker);
 
             openModal(t('edit_project'), `
             <div class="form-group">
@@ -3498,9 +3865,7 @@
             <div class="form-group">
               <label>${t('project_emoji')}</label>
               <div class="selected-emoji-display" id="selectedEmojiDisplayEdit">${p.emoji || '📁'}</div>
-              <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px;background:var(--bg);">
-                ${emojiPickerContainer.innerHTML}
-              </div>
+              ${picker.outerHTML}
             </div>
           `, `
             <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
@@ -3604,13 +3969,13 @@
         // OPERATIONS CRUD
         // ============================================================
         function showAddOperation(projectId, type) {
-            editingOperationId = null;
             const todayStr = today();
             const project = getProjectById(projectId);
             const bal = getProjectBalance(projectId);
             const isExpense = type === 'expense';
             const title = isExpense ? t('expense') : t('income');
-            openModal(t('add_operation') + ' — ' + title + ' (' + (project ? project.title : '') + ')', `
+
+            openModal(t('add_operation') + ' — ' + (project ? project.title : ''), `
             <div class="form-group">
               <label>${t('type')}</label>
               <select class="form-control" id="opTypeSelect">
@@ -3633,10 +3998,30 @@
               <label>${t('date')}</label>
               <input type="date" class="form-control" id="opDateInput" value="${todayStr}">
             </div>
+            <div class="recurring-toggle">
+              <label>
+                <input type="checkbox" id="opIsRecurring">
+                ${t('recurring')}
+              </label>
+            </div>
+            <div class="recurring-fields" id="opRecurringFields" style="display:none;">
+              <div class="form-group">
+                <label>${t('recurring_start')}</label>
+                <input type="date" class="form-control" id="opRecStart" value="${todayStr}">
+              </div>
+              <div class="form-group">
+                <label>${t('recurring_occurrences')}</label>
+                <input type="number" class="form-control" id="opRecOccurrences" value="12" min="1" max="120">
+              </div>
+            </div>
           `, `
             <button class="btn btn-secondary" onclick="closeModal()">${t('cancel')}</button>
             <button class="btn btn-primary" id="saveOpBtn">${t('save')}</button>
           `);
+
+            document.getElementById('opIsRecurring').onchange = function() {
+                document.getElementById('opRecurringFields').style.display = this.checked ? 'block' : 'none';
+            };
 
             if (isExpense) {
                 document.getElementById('opAllBalanceBtn').onclick = () => {
@@ -3651,20 +4036,44 @@
                 if (isNaN(amount) || amount <= 0) { alert(t('amount') + ' doit être > 0'); return; }
                 const label = document.getElementById('opLabelInput').value.trim() || '';
                 const date = document.getElementById('opDateInput').value || todayStr;
-                const op = {
-                    id: generateId(),
-                    projectId: projectId,
-                    type: typeVal,
-                    amount: Math.round(amount * 100) / 100,
-                    label: label,
-                    date: date,
-                    linkedProjectId: null,
-                    isRecurring: false,
-                    recurringId: null,
-                    createdAt: Date.now()
-                };
-                await dbPut('operations', op);
-                allOperations.push(op);
+                const isRecurring = document.getElementById('opIsRecurring').checked;
+
+                if (isRecurring) {
+                    const startDate = document.getElementById('opRecStart').value;
+                    const occurrences = parseInt(document.getElementById('opRecOccurrences').value) || 1;
+                    if (!startDate) { alert(t('recurring_start') + ' est requis'); return; }
+
+                    const rec = {
+                        id: generateId(),
+                        projectId: projectId,
+                        type: typeVal,
+                        amount: Math.round(amount * 100) / 100,
+                        label: label || (typeVal === 'add' ? t('income') : t('expense')),
+                        startDate: startDate,
+                        occurrences: occurrences,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    };
+                    await dbPut('recurrings', rec);
+                    allRecurrings.push(rec);
+                    await processSingleRecurring(rec);
+                } else {
+                    const op = {
+                        id: generateId(),
+                        projectId: projectId,
+                        type: typeVal,
+                        amount: Math.round(amount * 100) / 100,
+                        label: label || (typeVal === 'add' ? t('income') : t('expense')),
+                        date: date,
+                        linkedProjectId: null,
+                        isRecurring: false,
+                        recurringId: null,
+                        createdAt: Date.now()
+                    };
+                    await dbPut('operations', op);
+                    allOperations.push(op);
+                }
+
                 closeModal();
                 renderProjectDetail();
                 renderHome();
@@ -3675,7 +4084,6 @@
         async function showEditOperation(id) {
             const op = allOperations.find(o => o.id === id);
             if (!op) return;
-            editingOperationId = id;
             openModal(t('edit_operation'), `
             <div class="form-group">
               <label>${t('type')}</label>
@@ -3854,7 +4262,7 @@
         }
 
         // ============================================================
-        // RECURRING CRUD - CORRECTION : déclencher immédiatement
+        // RECURRING CRUD
         // ============================================================
         function showAddRecurring() {
             const projects = allProjects.filter(p => p.active && !p.archived);
@@ -3862,7 +4270,6 @@
                 alert('Créez d\'abord un projet.');
                 return;
             }
-            editingRecurringId = null;
             const todayStr = today();
             openModal(t('recurring_add'), `
             <div class="form-group">
@@ -3938,8 +4345,6 @@
                 };
                 await dbPut('recurrings', rec);
                 allRecurrings.push(rec);
-
-                // === TRAITEMENT IMMÉDIAT DES OCCURRENCES ===
                 await processSingleRecurring(rec);
 
                 closeModal();
@@ -3992,7 +4397,6 @@
             const rec = allRecurrings.find(r => r.id === id);
             if (!rec) return;
             const projects = allProjects.filter(p => p.active && !p.archived);
-            editingRecurringId = id;
             openModal(t('recurring_edit'), `
             <div class="form-group">
               <label>${t('project')}</label>
@@ -4057,14 +4461,11 @@
                 await dbPut('recurrings', rec);
                 allRecurrings = allRecurrings.map(r => r.id === rec.id ? rec : r);
 
-                // Retraiter les occurrences (supprimer les anciennes et recréer)
-                // On supprime les opérations existantes liées à cette récurrence
                 const opsToRemove = allOperations.filter(o => o.recurringId === rec.id);
                 for (const o of opsToRemove) {
                     await dbDelete('operations', o.id);
                     allOperations = allOperations.filter(op => op.id !== o.id);
                 }
-                // Recréer les occurrences
                 await processSingleRecurring(rec);
 
                 closeModal();
@@ -4079,7 +4480,6 @@
             if (!confirm(t('confirm_delete'))) return;
             const rec = allRecurrings.find(r => r.id === id);
             if (rec) {
-                // Supprimer les opérations liées
                 const opsToRemove = allOperations.filter(o => o.recurringId === rec.id);
                 for (const o of opsToRemove) {
                     await dbDelete('operations', o.id);
@@ -4095,7 +4495,7 @@
         }
 
         // ============================================================
-        // RECURRING PROCESSING (global, appelé au démarrage et périodiquement)
+        // RECURRING PROCESSING (global)
         // ============================================================
         async function processRecurrings() {
             let changed = false;
@@ -4332,6 +4732,16 @@
             allOperations = await dbGetAll('operations') || [];
             allRecurrings = await dbGetAll('recurrings') || [];
 
+            // Migration : ajouter un ordre si absent
+            let needsUpdate = false;
+            for (let i = 0; i < allProjects.length; i++) {
+                if (allProjects[i].order === undefined) {
+                    allProjects[i].order = i;
+                    needsUpdate = true;
+                    await dbPut('projects', allProjects[i]);
+                }
+            }
+
             applyTranslations();
 
             await processRecurrings();
@@ -4343,7 +4753,6 @@
                     doDriveBackup();
                     driveBackupPending = false;
                 }
-                // Vérifier les récurrences toutes les heures
                 await processRecurrings();
             }, 60 * 60 * 1000);
 
@@ -4358,7 +4767,6 @@
 
             checkShareParam();
 
-            // Initialiser la roue chromatique
             setTimeout(initColorWheel, 100);
 
             console.log('CashFlow initialisé v' + VERSION);
@@ -4404,7 +4812,6 @@
                 dbPut('settings', setting);
             };
 
-            // Input hex pour la couleur
             document.getElementById('accentHexInput').addEventListener('change', function(e) {
                 let val = e.target.value.trim();
                 if (val.startsWith('#')) {
@@ -4418,7 +4825,6 @@
                 e.target.value = accentColor;
             });
 
-            // Swatches
             document.querySelectorAll('.color-swatch').forEach(el => {
                 el.onclick = () => {
                     const color = el.dataset.color;
@@ -4510,6 +4916,7 @@
         window.handleAddOperation = handleAddOperation;
         window.copyShareLink = copyShareLink;
         window.checkShareParam = checkShareParam;
+        window.quickAddOperation = quickAddOperation;
     </script>
 </body>
 </html>
