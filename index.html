@@ -2139,9 +2139,8 @@
         let allRecurrings = [];
         let githubToken = '';
         let githubRepo = '';
-        let showForecastInHistory = true; // Par défaut : afficher les prévisions
+        let showForecastInHistory = true;
 
-        // Drag & drop pour projets
         let dragIndex = null;
         let dragOverIndex = null;
 
@@ -2149,7 +2148,7 @@
         // INDEXED DB
         // ============================================================
         const DB_NAME = 'CashFlowDB';
-        const DB_VERSION = 2;
+        const DB_VERSION = 1;
 
         function openDB() {
             return new Promise((resolve, reject) => {
@@ -2167,13 +2166,6 @@
                     }
                     if (!d.objectStoreNames.contains('settings')) {
                         d.createObjectStore('settings', { keyPath: 'id' });
-                    }
-                    // Ajouter un index sur l'ordre si nécessaire
-                    if (d.objectStoreNames.contains('projects')) {
-                        const store = d.transaction.objectStore('projects');
-                        if (!store.indexNames.contains('order')) {
-                            store.createIndex('order', 'order');
-                        }
                     }
                 };
                 req.onsuccess = (e) => resolve(e.target.result);
@@ -2703,7 +2695,6 @@
                 };
                 container.appendChild(el);
             });
-            // Wrap in scrollable container
             const wrapper = document.createElement('div');
             wrapper.className = 'emoji-picker-scroll';
             wrapper.appendChild(container);
@@ -2722,7 +2713,6 @@
             document.getElementById('totalProjectedSub').textContent = `Solde projeté : ${formatCurrency(projected)}`;
 
             const activeProjects = allProjects.filter(p => p.active && !p.archived);
-            // Trier par ordre
             activeProjects.sort((a, b) => (a.order || 0) - (b.order || 0));
 
             const list = document.getElementById('projectList');
@@ -2753,7 +2743,7 @@
                     </div>
                     <div class="p-balance-row">
                       <span class="p-balance ${balClass}">${formatCurrency(bal)}</span>
-                      <span class="p-projected">${t('projected')}: ${formatCurrency(projectedBal)}</span>
+                      <span class="p-projected ${projClass}">${t('projected')}: ${formatCurrency(projectedBal)}</span>
                     </div>
                     <div class="p-actions">
                       <button class="quick-add" onclick="event.stopPropagation();quickAddOperation('${p.id}')" title="${t('quick_add')}">➕</button>
@@ -2766,7 +2756,6 @@
                     }).join('') + `</div>`;
             }
 
-            // Drag & drop events
             setupDragDrop();
 
             const archived = allProjects.filter(p => p.archived);
@@ -2813,7 +2802,6 @@
                 item.addEventListener('dragenter', handleDragEnter);
                 item.addEventListener('dragleave', handleDragLeave);
                 item.addEventListener('drop', handleDrop);
-                // Touch support
                 item.addEventListener('touchstart', handleTouchStart, { passive: true });
                 item.addEventListener('touchmove', handleTouchMove, { passive: false });
                 item.addEventListener('touchend', handleTouchEnd, { passive: true });
@@ -2840,7 +2828,6 @@
             if (Math.abs(deltaY) > 20) {
                 touchDragData.moved = true;
                 e.preventDefault();
-                // Trouver l'élément sous le doigt
                 const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
                 const target = elements.find(el => el.classList && el.classList.contains('project-item') && el.dataset.id !==
                     touchDragData.id);
@@ -2923,13 +2910,11 @@
             const [moved] = activeProjects.splice(fromIndex, 1);
             activeProjects.splice(toIndex, 0, moved);
 
-            // Mettre à jour les ordres
             for (let i = 0; i < activeProjects.length; i++) {
                 activeProjects[i].order = i;
                 await dbPut('projects', activeProjects[i]);
             }
 
-            // Mettre à jour allProjects
             for (let i = 0; i < allProjects.length; i++) {
                 const p = allProjects[i];
                 const updated = activeProjects.find(ap => ap.id === p.id);
@@ -2994,8 +2979,7 @@
           `);
 
             document.getElementById('quickIsRecurring').onchange = function() {
-                const fields = document.getElementById('quickRecurringFields');
-                fields.style.display = this.checked ? 'block' : 'none';
+                document.getElementById('quickRecurringFields').style.display = this.checked ? 'block' : 'none';
             };
 
             document.getElementById('quickSaveBtn').onclick = async () => {
@@ -3050,7 +3034,7 @@
         }
 
         // ============================================================
-        // RENDER PROJECT DETAIL avec prévisions (activées par défaut)
+        // RENDER PROJECT DETAIL
         // ============================================================
         function renderProjectDetail() {
             const container = document.getElementById('projectDetail');
@@ -3792,7 +3776,6 @@
             <button class="btn btn-primary" id="createProjBtn">${t('create_project')}</button>
           `);
 
-            // Réattacher les événements du picker
             const grid = document.querySelector('#modalBody .emoji-grid');
             if (grid) {
                 grid.querySelectorAll('.emoji-option').forEach(el => {
@@ -3973,7 +3956,6 @@
             const project = getProjectById(projectId);
             const bal = getProjectBalance(projectId);
             const isExpense = type === 'expense';
-            const title = isExpense ? t('expense') : t('income');
 
             openModal(t('add_operation') + ' — ' + (project ? project.title : ''), `
             <div class="form-group">
@@ -4733,11 +4715,9 @@
             allRecurrings = await dbGetAll('recurrings') || [];
 
             // Migration : ajouter un ordre si absent
-            let needsUpdate = false;
             for (let i = 0; i < allProjects.length; i++) {
                 if (allProjects[i].order === undefined) {
                     allProjects[i].order = i;
-                    needsUpdate = true;
                     await dbPut('projects', allProjects[i]);
                 }
             }
