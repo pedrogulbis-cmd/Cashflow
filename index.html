@@ -2489,6 +2489,29 @@
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // SHARE FUNCTIONS (GitHub) avec feedback amélioré
+        // ============================================================
+        function setShareFeedback(message, isError = true) {
+            const el = document.getElementById('shareImportFeedback');
+            if (el) {
+                if (isError) {
+                    el.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
+                } else {
+                    el.innerHTML = `<div class="success-box">✅ ${message}</div>`;
+                }
+            } else {
+                // Fallback : afficher une alerte
+                alert(message);
+            }
+            console.log('[Share] ' + (isError ? '❌' : '✅') + ' ' + message);
+        }
+
+        function clearShareFeedback() {
+            const el = document.getElementById('shareImportFeedback');
+            if (el) el.innerHTML = '';
+        }
+
         function renderShare() {
             const container = document.getElementById('shareList');
             const projects = allProjects.filter(p => p.active && !p.archived);
@@ -2513,24 +2536,6 @@
             }
             container.innerHTML = html;
             checkAllShares();
-        }
-
-        // ============================================================
-        // SHARE FUNCTIONS (GitHub) avec messages d'erreur améliorés
-        // ============================================================
-        function setShareFeedback(message, isError = true) {
-            const el = document.getElementById('shareImportFeedback');
-            if (!el) return;
-            if (isError) {
-                el.innerHTML = `<div class="error-box">⚠️ ${message}</div>`;
-            } else {
-                el.innerHTML = `<div class="success-box">✅ ${message}</div>`;
-            }
-        }
-
-        function clearShareFeedback() {
-            const el = document.getElementById('shareImportFeedback');
-            if (el) el.innerHTML = '';
         }
 
         async function checkAllShares() {
@@ -2563,13 +2568,20 @@
         async function shareProject(projectId) {
             clearShareFeedback();
             if (!githubToken || !githubRepo) {
-                setShareFeedback('❌ ' + t('github_settings') + ' : token et dépôt requis.');
+                const msg = '❌ ' + t('github_settings') + ' : token et dépôt requis.';
+                setShareFeedback(msg, true);
                 return;
             }
             const p = getProjectById(projectId);
-            if (!p) return;
+            if (!p) {
+                setShareFeedback('❌ Projet introuvable.', true);
+                return;
+            }
             const password = prompt(t('share_with_password'));
-            if (!password) return;
+            if (!password) {
+                setShareFeedback('⏸️ Annulé par l\'utilisateur.', false);
+                return;
+            }
             const data = {
                 project: p,
                 operations: getOperationsForProject(projectId),
@@ -2593,16 +2605,16 @@
                     const d = await res.json();
                     sha = d.sha;
                 } else if (res.status === 401) {
-                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                    setShareFeedback('❌ ' + t('github_unauthorized'), true);
                     return;
                 } else if (res.status === 404) {
-                    // File doesn't exist, will create
+                    // Fichier inexistant, on va le créer
                 } else {
-                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')');
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')', true);
                     return;
                 }
             } catch (e) {
-                setShareFeedback('❌ ' + t('github_network'));
+                setShareFeedback('❌ ' + t('github_network'), true);
                 console.error(e);
                 return;
             }
@@ -2623,20 +2635,21 @@
                     body: JSON.stringify(payload)
                 });
                 if (uploadRes.ok) {
-                    setShareFeedback('✅ ' + t('share_created'), false);
+                    const msg = '✅ ' + t('share_created');
+                    setShareFeedback(msg, false);
                     showToast(t('share_created'));
                     renderShare();
                 } else if (uploadRes.status === 401) {
-                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                    setShareFeedback('❌ ' + t('github_unauthorized'), true);
                 } else if (uploadRes.status === 404) {
-                    setShareFeedback('❌ ' + t('github_not_found'));
+                    setShareFeedback('❌ ' + t('github_not_found'), true);
                 } else {
                     const errText = await uploadRes.text();
-                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + uploadRes.status + ')');
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + uploadRes.status + ')', true);
                     console.error('GitHub upload error:', errText);
                 }
             } catch (e) {
-                setShareFeedback('❌ ' + t('github_network'));
+                setShareFeedback('❌ ' + t('github_network'), true);
                 console.error(e);
             }
         }
@@ -2657,7 +2670,7 @@
                     }
                 });
                 if (res.status !== 200) {
-                    alert(t('share_not_found') || 'Partage introuvable.');
+                    setShareFeedback('❌ Partage introuvable.', true);
                     return;
                 }
                 const data = await res.json();
@@ -2671,13 +2684,15 @@
                     body: JSON.stringify({ message: 'Revoke share', sha: data.sha })
                 });
                 if (deleteRes.ok) {
+                    setShareFeedback('✅ ' + t('share_revoked'), false);
                     showToast(t('share_revoked'));
                     renderShare();
                 } else {
-                    alert('Erreur lors de la révocation (HTTP ' + deleteRes.status + ')');
+                    setShareFeedback('❌ Erreur lors de la révocation (HTTP ' + deleteRes.status + ')', true);
                 }
             } catch (e) {
-                alert('Erreur : ' + e.message);
+                setShareFeedback('❌ ' + t('github_network'), true);
+                console.error(e);
             }
         }
 
@@ -2699,11 +2714,11 @@
             const projectId = document.getElementById('importShareId').value.trim();
             const password = document.getElementById('importSharePwd').value.trim();
             if (!projectId || !password) {
-                setShareFeedback('⚠️ ' + t('share_code') + ' et ' + t('password') + ' requis.');
+                setShareFeedback('⚠️ ' + t('share_code') + ' et ' + t('password') + ' requis.', true);
                 return;
             }
             if (!githubToken || !githubRepo) {
-                setShareFeedback('❌ ' + t('github_settings') + ' requis.');
+                setShareFeedback('❌ ' + t('github_settings') + ' requis.', true);
                 return;
             }
             const path = `shares/${projectId}.json`;
@@ -2716,15 +2731,15 @@
                     }
                 });
                 if (res.status === 401) {
-                    setShareFeedback('❌ ' + t('github_unauthorized'));
+                    setShareFeedback('❌ ' + t('github_unauthorized'), true);
                     return;
                 }
                 if (res.status === 404) {
-                    setShareFeedback('❌ ' + t('github_not_found'));
+                    setShareFeedback('❌ ' + t('github_not_found'), true);
                     return;
                 }
                 if (!res.ok) {
-                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')');
+                    setShareFeedback('❌ ' + t('github_error') + ' (HTTP ' + res.status + ')', true);
                     return;
                 }
                 const data = await res.json();
@@ -2733,19 +2748,18 @@
                 try {
                     decrypted = decryptXOR(encrypted, password);
                 } catch (e) {
-                    setShareFeedback('❌ ' + t('import_share_failed') + ' : mot de passe incorrect ?');
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : mot de passe incorrect ?', true);
                     return;
                 }
                 let shareData;
                 try {
                     shareData = JSON.parse(decrypted);
                 } catch (e) {
-                    setShareFeedback('❌ ' + t('import_share_failed') + ' : données corrompues.');
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : données corrompues.', true);
                     return;
                 }
-                // Vérifier que les données sont valides
                 if (!shareData.project || !shareData.operations) {
-                    setShareFeedback('❌ ' + t('import_share_failed') + ' : format invalide.');
+                    setShareFeedback('❌ ' + t('import_share_failed') + ' : format invalide.', true);
                     return;
                 }
                 const existingProject = getProjectById(shareData.project.id);
@@ -2780,7 +2794,7 @@
                 document.getElementById('importShareId').value = '';
                 document.getElementById('importSharePwd').value = '';
             } catch (e) {
-                setShareFeedback('❌ ' + t('github_network'));
+                setShareFeedback('❌ ' + t('github_network'), true);
                 console.error(e);
             }
         }
@@ -2828,16 +2842,13 @@
         function handleAddOperation() {
             const activeProjects = allProjects.filter(p => p.active && !p.archived);
             if (activeProjects.length === 0) {
-                // Pas de projet → créer un projet
                 showCreateProject();
                 return;
             }
             if (activeProjects.length === 1) {
-                // Un seul projet → ajouter directement une opération
                 showAddOperation(activeProjects[0].id, 'add');
                 return;
             }
-            // Plusieurs projets → afficher un choix
             openModal(t('choose_project'), `
             <p style="margin-bottom:12px;">${t('choose_project_desc')}</p>
             <div class="project-chooser">
@@ -3805,7 +3816,6 @@
             };
 
             document.getElementById('headerAddProject').onclick = () => showCreateProject();
-            // Bouton "+" intelligent
             document.getElementById('headerAddOp').onclick = handleAddOperation;
 
             document.getElementById('modalClose').onclick = closeModal;
@@ -3873,7 +3883,6 @@
 
             document.getElementById('saveGitHubBtn').onclick = saveGitHubSettings;
 
-            // Recharger les settings GitHub au chargement
             const tokenInput = document.getElementById('githubToken');
             const repoInput = document.getElementById('githubRepo');
             if (tokenInput) tokenInput.value = githubToken;
