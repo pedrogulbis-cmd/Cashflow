@@ -240,8 +240,14 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .toast.on{transform:translate(-50%,0);opacity:1}
 .toast.agir{pointer-events:auto}
 .toast-act{color:var(--fond);font-weight:600;text-decoration:underline;text-underline-offset:3px;flex:0 0 auto}
-.qb{width:32px;height:32px;flex:0 0 32px}
+.qb{width:30px;height:30px;flex:0 0 30px}
 .pgo{gap:6px}
+.pcorps{flex:1;min-width:0}
+.pl1{display:flex;width:100%;align-items:baseline;gap:12px;text-align:left}
+.pl1 .pname{flex:1;min-width:0}
+.pl1 .pbal{flex:0 0 auto}
+.pl2{display:flex;align-items:center;gap:6px;margin-top:5px}
+.pl2 .psub{flex:1;min-width:0;margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qb.pa{color:var(--acc);border-color:var(--accB)}
 .qb.pa.on{background:var(--accF)}
 .tete{display:grid;grid-template-columns:1fr 1fr}
@@ -320,9 +326,13 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.5.0", d:"2026-09-01", t:"Récurrence en un geste", l:[
+    "Un quatrième bouton sur chaque projet de l'accueil ouvre directement la création d'une récurrence.",
+    "Les gestes rapides passent sous le nom du projet : à quatre sur la même ligne, il ne restait plus de place pour lire le titre."
+  ]},
   { v:"1.4.0", d:"2026-09-01", t:"Roue chromatique", l:[
     "La couleur d'accent se choisit sur une roue dessinée par l'application, identique sur ordinateur et sur téléphone.",
     "Teinte et saturation sur le disque, luminosité sur la glissière, curseur déplaçable au doigt comme à la souris.",
@@ -1181,17 +1191,25 @@ function ligneProjet(p){
       '<div class="pbal num ' + cl$(s) + '">' + fmt(s) + '</div>' +
       '<span class="poig">' + svg("poignee",18,1.9) + '</span></div>';
 
-  return '<div class="prow' + (p.archive ? " arch" : "") + '">' + coeur +
-    // Un projet reçu n'expose aucun geste : on ne dépense pas dans l'enveloppe
-    // d'un autre, et le repartager reviendrait à republier ses données.
-    (p.archive || ab ? "" :
-      '<div class="pgo" style="margin-left:10px">' +
+  // Un projet reçu n'expose aucun geste : on ne dépense pas dans l'enveloppe
+  // d'un autre, et le repartager reviendrait à republier les données de son auteur.
+  if(p.archive || ab) return '<div class="prow' + (p.archive ? " arch" : "") + '">' + coeur + '</div>';
+
+  // Quatre gestes rapides ne tiennent pas sur la ligne du nom et du solde : il
+  // ne resterait qu'une quarantaine de pixels au titre. Ils descendent donc à
+  // hauteur du sous-titre, ce qui ne coûte qu'une vingtaine de pixels de haut.
+  return '<div class="prow" style="align-items:flex-start">' + emo +
+    '<div class="pcorps">' +
+      '<button class="pl1" data-act="ouvrir-projet" data-id="' + p.id + '">' +
+        '<span class="pname">' + esc(p.titre) + '</span>' +
+        '<span class="pbal num ' + cl$(s) + '">' + fmt(s) + '</span></button>' +
+      '<div class="pl2"><span class="psub">' + sous + '</span>' +
       '<button class="qb mo" data-act="rapide-depense" data-id="' + p.id + '" aria-label="Dépenser" title="Dépenser">' + svg("moins",15,2.2) + '</button>' +
       '<button class="qb pl" data-act="rapide-ajout" data-id="' + p.id + '" aria-label="Ajouter" title="Ajouter">' + svg("plus",15,2.2) + '</button>' +
+      '<button class="qb" data-act="nouveau-plan" data-id="' + p.id + '" aria-label="Récurrence" title="Récurrence">' + svg("cal",15,1.9) + '</button>' +
       '<button class="qb pa' + (pa ? " on" : "") + '" data-act="partage" data-id="' + p.id + '" ' +
         'aria-label="Partager" title="Partager">' + svg("partage",15,2) + '</button>' +
-      '</div>') +
-    '</div>';
+      '</div></div></div>';
 }
 
 function vueAccueil(){
