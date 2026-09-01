@@ -244,12 +244,17 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .pgo{gap:6px}
 .qb.pa{color:var(--acc);border-color:var(--accB)}
 .qb.pa.on{background:var(--accF)}
-.tete{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
-.tete .total-val{font-size:clamp(26px,7.6vw,46px);white-space:nowrap}
-.proj{text-align:right;border-left:1px solid var(--trait);padding-left:14px;max-width:48%}
-.proj .total-lbl{font-size:12.5px}
-.proj-val{font-size:19px;font-weight:600;letter-spacing:-.03em;margin-top:5px;display:block;white-space:nowrap}
-.proj-d{font-size:11px;color:var(--gris2);font-family:"IBM Plex Mono",monospace;margin-top:3px}
+.tete{display:grid;grid-template-columns:1fr 1fr}
+.tete .col{min-width:0;text-align:left;display:block}
+.tete .total-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tete .total-val{font-size:clamp(23px,6.2vw,38px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-d{font-size:11px;color:var(--gris2);font-family:"IBM Plex Mono",monospace;margin-top:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tete .proj{border-left:1px solid var(--trait);padding-left:16px}
+.prow.drg{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.prow.drg.drag{cursor:grabbing;background:var(--carte);box-shadow:var(--ombre);
+  border-radius:10px;border-bottom-color:transparent;position:relative;z-index:5}
+.poig{color:var(--gris2);flex:0 0 auto;display:grid;place-items:center;padding-left:8px}
 .emopick{max-height:190px;overflow:auto;padding:2px}
 .part{border-top:1px solid var(--trait2);padding:12px 0}
 .part:first-child{border-top:0;padding-top:0}
@@ -303,9 +308,14 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.2.0";
+const VERSION = "1.3.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.3.0", d:"2026-09-01", t:"Deux colonnes et le glisser-déposer", l:[
+    "Le solde projeté est présenté comme le total disponible : même typographie, même colonne, chacun sous sa date.",
+    "Le montant planifié figure sous les deux, pour qu'on voie d'où vient l'écart entre les deux chiffres.",
+    "Les projets se rangent en les faisant glisser, au doigt ou à la souris, au lieu de flèches."
+  ]},
   { v:"1.2.0", d:"2026-09-01", t:"Projection au long cours", l:[
     "Le solde projeté est affiché en permanence à côté du total disponible.",
     "Il va jusqu'à la dernière échéance planifiée, un an et au-delà s'il le faut, au lieu de s'arrêter à la fin du mois.",
@@ -408,7 +418,8 @@ const DICO = {
   "Encre":"Ink", "Prune":"Plum", "Océan":"Ocean", "Forêt":"Forest",
   "Cuivre":"Copper", "Grenat":"Garnet", "Ardoise":"Slate",
   "Manuel":"Manual", "Réorganiser":"Reorder", "Terminer":"Done",
-  "Monter":"Move up", "Descendre":"Move down",
+  "Fais glisser les projets pour les ranger.":"Drag the projects to arrange them.",
+  "planifié":"planned",
   "Partager":"Share", "Solde initial":"Starting balance",
   "Reçu en partage":"Shared with you", "Actualiser":"Refresh", "Se désabonner":"Unsubscribe",
   "Crée un projet pour commencer à répartir ton argent.":"Create a project to start splitting your money.",
@@ -687,7 +698,8 @@ const ICONES = {
   copier:'<rect x="9" y="9" width="11.5" height="11.5" rx="2.5"/><path d="M15 6.2A2.2 2.2 0 0 0 12.8 4H6.2A2.2 2.2 0 0 0 4 6.2v6.6A2.2 2.2 0 0 0 6.2 15"/>',
   haut:'<path d="M12 19V6M6 11.5 12 5.5l6 6"/>',
   bas:'<path d="M12 5v13M6 12.5 12 18.5l6-6"/>',
-  stop:'<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>'
+  stop:'<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  poignee:'<path d="M7 9h10M7 15h10"/>'
 };
 function svg(n, t, sw){
   return '<svg width="'+(t||20)+'" height="'+(t||20)+'" viewBox="0 0 24 24" fill="none" ' +
@@ -1139,12 +1151,13 @@ function ligneProjet(p){
       '<div class="pbal num ' + cl$(s) + '">' + fmt(s) + '</div></button>';
 
   // En réorganisation, les gestes rapides cèdent la place aux deux flèches.
+  // En rangement, la ligne n'est plus cliquable : elle se saisit et se déplace.
   if(state.reorg && !p.archive)
-    return '<div class="prow">' + coeur +
-      '<div class="pgo" style="margin-left:10px">' +
-      '<button class="qb" data-act="monter" data-id="' + p.id + '" aria-label="Monter" title="Monter">' + svg("haut",15,2.1) + '</button>' +
-      '<button class="qb" data-act="descendre" data-id="' + p.id + '" aria-label="Descendre" title="Descendre">' + svg("bas",15,2.1) + '</button>' +
-      '</div></div>';
+    return '<div class="prow drg" data-id="' + p.id + '">' + emo +
+      '<div class="pmid"><div class="pname">' + esc(p.titre) + '</div>' +
+      '<div class="psub">' + sous + '</div></div>' +
+      '<div class="pbal num ' + cl$(s) + '">' + fmt(s) + '</div>' +
+      '<span class="poig">' + svg("poignee",18,1.9) + '</span></div>';
 
   return '<div class="prow' + (p.archive ? " arch" : "") + '">' + coeur +
     // Un projet reçu n'expose aucun geste : on ne dépense pas dans l'enveloppe
@@ -1165,17 +1178,22 @@ function vueAccueil(){
   const neg = a.filter(p => solde(p.id) < 0).length;
   const hz = horizon();
   const tp = a.reduce((x,p) => x + soldeProjete(p.id, hz), 0);
+  const planifie = tp - t;
   let h = '<section class="total"><div class="tete">' +
-    '<div style="flex:1;min-width:0">' +
-    '<div class="total-lbl">Total disponible</div>' +
-    '<span class="total-val num ' + (t < 0 ? "neg" : "") + '">' + fmt(t) + '</span></div>' +
-    '<button class="proj" data-act="tab" data-id="prev">' +
+    '<div class="col">' +
+      '<div class="total-lbl">Total disponible</div>' +
+      '<span class="total-val num ' + (t < 0 ? "neg" : "") + '">' + fmt(t) + '</span>' +
+      '<div class="col-d">' + esc(frDate(todayISO(), true)) + '</div></div>' +
+    '<button class="col proj" data-act="tab" data-id="prev">' +
       '<div class="total-lbl">Solde projeté</div>' +
-      '<span class="proj-val num ' + (tp < 0 ? "neg" : "") + '">' + fmt(tp) + '</span>' +
-      '<div class="proj-d">' + (horizonPlans() ? esc(frDate(hz, true)) : "rien de planifié") + '</div></button>' +
+      '<span class="total-val num ' + (tp < 0 ? "neg" : "") + '">' + fmt(tp) + '</span>' +
+      '<div class="col-d">' + (horizonPlans() ? esc(frDate(hz, true)) : "rien de planifié") + '</div></button>' +
     '</div><div class="total-bar"></div>' +
     '<div class="total-sub"><span><b>' + a.length + '</b> ' + (a.length > 1 ? "projets actifs" : "projet actif") + '</span>' +
-    (neg ? '<span class="neg">' + neg + ' ' + (neg > 1 ? "en négatif" : "en négatif") + '</span>' : "") +
+    // L'écart entre les deux colonnes, nommé : sans lui, un solde projeté à
+    // zéro laisse croire que la planification n'a pas été prise en compte.
+    (planifie ? '<span>planifié <b class="' + cl$(planifie) + '">' + fmt(planifie, true) + '</b></span>' : "") +
+    (neg ? '<span class="neg">' + neg + ' en négatif</span>' : "") +
     '</div></section>';
 
   h += '<div class="btns grow">' +
@@ -1197,8 +1215,9 @@ function vueAccueil(){
         (state.reorg ? "Terminer" : "Réorganiser") + '</button>' : "") +
     '</div>';
 
-  h += '<div class="plist">' + (a.length ? a.map(ligneProjet).join("")
-      : '<div class="vide">Aucun projet actif.</div>') + '</div>';
+  if(state.reorg) h += '<div class="aide" style="margin:2px 0 8px">Fais glisser les projets pour les ranger.</div>';
+  h += '<div class="plist"' + (state.reorg ? ' data-reorg="1"' : "") + '>' +
+    (a.length ? a.map(ligneProjet).join("") : '<div class="vide">Aucun projet actif.</div>') + '</div>';
 
   if(ar.length){
     h += '<div class="sect" style="margin-top:26px">' +
@@ -1845,16 +1864,6 @@ document.addEventListener("click", async ev => {
     if(state.reorg) figerOrdre();
     render(); return;
   }
-  if(act === "monter" || act === "descendre"){
-    const l = triProjets(actifs());
-    const i = l.findIndex(x => x.id === id);
-    const j = act === "monter" ? i - 1 : i + 1;
-    if(i < 0 || j < 0 || j >= l.length) return;
-    const t = l[i]; l[i] = l[j]; l[j] = t;
-    l.forEach((x,k) => { if(x.ordre !== k){ x.ordre = k; sauverProjet(x); } });
-    DB.settings.triProjets = "manuel"; sauver(); render();
-    return;
-  }
   if(act === "f-type"){ DB.settings.fType = id; sauver(); render(); return; }
   if(act === "f-periode"){ DB.settings.fPeriode = id; sauver(); render(); return; }
   if(act === "fp-type"){ DB.settings.fTypeP = id; sauver(); render(); return; }
@@ -2172,6 +2181,62 @@ document.addEventListener("keydown", ev => {
 document.addEventListener("change", ev => {
   if(ev.target.id === "fichier-json" && ev.target.files && ev.target.files[0]) importerFichier(ev.target.files[0]);
 });
+
+/* ---------- rangement au doigt ou à la souris ----------
+   Un événement « pointer » couvre les deux : le doigt sur le téléphone, la
+   souris sur l'ordinateur, sans code séparé. La ligne saisie suit le geste,
+   et quand son milieu dépasse celui d'une voisine, les deux échangent leur
+   place tout de suite : on voit le résultat avant de lâcher. Le repère
+   vertical est recalé à chaque échange pour que la ligne reste sous le doigt.
+   touch-action:none, posé sur ces lignes seulement, empêche le même geste de
+   faire aussi défiler la page. */
+let glisse = null;
+document.addEventListener("pointerdown", ev => {
+  if(!state.reorg || glisse) return;
+  const row = ev.target.closest(".prow.drg");
+  if(!row) return;
+  const liste = row.closest(".plist[data-reorg]");
+  if(!liste) return;
+  ev.preventDefault();
+  try{ row.setPointerCapture(ev.pointerId); }catch(e){}
+  glisse = { row, liste, y:ev.clientY, pid:ev.pointerId };
+  row.classList.add("drag");
+});
+document.addEventListener("pointermove", ev => {
+  if(!glisse || ev.pointerId !== glisse.pid) return;
+  const row = glisse.row, liste = glisse.liste;
+  row.style.transform = "translateY(" + (ev.clientY - glisse.y) + "px)";
+  const r = row.getBoundingClientRect(), milieu = r.top + r.height / 2;
+  for(const f of Array.prototype.slice.call(liste.children)){
+    if(f === row || !f.dataset || !f.dataset.id) continue;
+    const fr = f.getBoundingClientRect(), fm = fr.top + fr.height / 2;
+    const apres = !!(f.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING);
+    if(apres && milieu < fm) liste.insertBefore(row, f);
+    else if(!apres && milieu > fm) liste.insertBefore(row, f.nextSibling);
+    else continue;
+    glisse.y = ev.clientY;
+    row.style.transform = "";
+    break;
+  }
+});
+function finGlisse(){
+  if(!glisse) return;
+  const row = glisse.row, liste = glisse.liste;
+  glisse = null;
+  row.classList.remove("drag");
+  row.style.transform = "";
+  Array.prototype.slice.call(liste.children).map(x => x.dataset && x.dataset.id)
+    .filter(Boolean)
+    .forEach((id, k) => {
+      const p = DB.projets[id];
+      if(p && p.ordre !== k){ p.ordre = k; sauverProjet(p); }
+    });
+  DB.settings.triProjets = "manuel";
+  sauver();
+  render();
+}
+document.addEventListener("pointerup", finGlisse);
+document.addEventListener("pointercancel", finGlisse);
 
 /* ============================================================
    SAUVEGARDE VERS GOOGLE DRIVE
