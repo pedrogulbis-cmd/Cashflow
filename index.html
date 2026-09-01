@@ -255,6 +255,18 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .prow.drg.drag{cursor:grabbing;background:var(--carte);box-shadow:var(--ombre);
   border-radius:10px;border-bottom-color:transparent;position:relative;z-index:5}
 .poig{color:var(--gris2);flex:0 0 auto;display:grid;place-items:center;padding-left:8px}
+.roue{position:relative;width:min(258px,68vw);margin:10px auto 0;touch-action:none;
+  aspect-ratio:1/1;cursor:crosshair}
+.roue canvas{width:100%;height:100%;display:block;border-radius:50%}
+.curs{position:absolute;width:22px;height:22px;border-radius:50%;border:2.5px solid #fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35),0 2px 7px rgba(0,0,0,.32);
+  transform:translate(-50%,-50%);pointer-events:none}
+.lum{position:relative;height:26px;border-radius:999px;margin:22px 0 0;touch-action:none;
+  border:1px solid var(--trait);cursor:pointer}
+.lum .curs{top:50%;background:transparent}
+.apercu{display:flex;align-items:center;gap:10px;margin-top:16px}
+.apercu i{width:36px;height:36px;border-radius:10px;flex:0 0 36px;border:1px solid var(--trait);display:block}
+.apercu input{font-family:"IBM Plex Mono",monospace;text-transform:uppercase}
 .emopick{max-height:190px;overflow:auto;padding:2px}
 .part{border-top:1px solid var(--trait2);padding:12px 0}
 .part:first-child{border-top:0;padding-top:0}
@@ -308,9 +320,14 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.3.0";
+const VERSION = "1.4.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.4.0", d:"2026-09-01", t:"Roue chromatique", l:[
+    "La couleur d'accent se choisit sur une roue dessinée par l'application, identique sur ordinateur et sur téléphone.",
+    "Teinte et saturation sur le disque, luminosité sur la glissière, curseur déplaçable au doigt comme à la souris.",
+    "L'interface prend la couleur pendant le réglage ; renoncer remet celle d'avant."
+  ]},
   { v:"1.3.0", d:"2026-09-01", t:"Deux colonnes et le glisser-déposer", l:[
     "Le solde projeté est présenté comme le total disponible : même typographie, même colonne, chacun sous sa date.",
     "Le montant planifié figure sous les deux, pour qu'on voie d'où vient l'écart entre les deux chiffres.",
@@ -418,6 +435,8 @@ const DICO = {
   "Encre":"Ink", "Prune":"Plum", "Océan":"Ocean", "Forêt":"Forest",
   "Cuivre":"Copper", "Grenat":"Garnet", "Ardoise":"Slate",
   "Manuel":"Manual", "Réorganiser":"Reorder", "Terminer":"Done",
+  "Couleur personnalisée":"Custom colour",
+  "Fais glisser le curseur : la teinte tourne, la saturation s'éloigne du centre.":"Drag the handle: hue goes around, saturation moves out from the centre.",
   "Fais glisser les projets pour les ranger.":"Drag the projects to arrange them.",
   "planifié":"planned",
   "Partager":"Share", "Solde initial":"Starting balance",
@@ -1122,6 +1141,9 @@ function dessiner(){
   $("#modal").innerHTML = state.modal ? vueModal(state.modal) : "";
   traduire($("#modal"));
 
+  // Le canevas n'existe qu'une fois la fenêtre posée dans la page.
+  if(state.modal && state.modal.type === "couleur") monterRoue();
+
   const couvert = !!($("#sheet").firstChild || $("#modal").firstChild);
   document.body.style.overflow = couvert ? "hidden" : "";
   if(state.modal && state.modal.focus){
@@ -1623,6 +1645,18 @@ function vueModal(m){
         '<button class="btn pri" style="flex:1" data-act="accepter-recu">Ajouter le projet</button></div>';
     }
   }
+  else if(m.type === "couleur"){
+    c = '<h3>Couleur personnalisée</h3>' +
+      '<div class="sous">Fais glisser le curseur : la teinte tourne, la saturation s\'éloigne du centre.</div>' +
+      '<div class="roue" id="roue"><canvas id="roue-c" width="260" height="260"></canvas>' +
+        '<span class="curs" id="roue-cur"></span></div>' +
+      '<div class="lum" id="lum"><span class="curs" id="lum-cur"></span></div>' +
+      '<div class="apercu"><i id="apercu-p"></i>' +
+        '<input type="text" id="m-hex" autocomplete="off" spellcheck="false" maxlength="7" data-act="hex"></div>' +
+      '<div class="btns" style="margin:20px 0 0">' +
+      '<button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
+      '<button class="btn pri" style="flex:1" data-act="couleur-ok">Valider</button></div>';
+  }
   else if(m.type === "zero"){
     c = '<h3>« ' + esc(m.titre) + ' » est à zéro</h3>' +
       '<div class="sous">Tu peux l\'archiver : il sort de la liste active et du total, sans rien perdre.</div>' +
@@ -1694,8 +1728,9 @@ function vueReglages(){
     '<div class="pastilles" style="margin-top:2px">' +
       ACCENTS.map(([c,n]) => '<button class="past ' + (acc.toLowerCase() === c.toLowerCase() ? "on" : "") + '" ' +
         'style="background:' + c + '" data-act="accent" data-id="' + c + '" aria-label="' + n + '" title="' + n + '"></button>').join("") +
-      '<label class="past" style="background:conic-gradient(from 0deg,#f43,#fb3,#3c6,#39f,#a3f,#f43);display:grid;place-items:center;cursor:pointer">' +
-      '<input type="color" value="' + esc(acc) + '" data-act="accent-libre" style="opacity:0;width:28px;height:28px;padding:0;border:0"></label>' +
+      '<button class="past ' + (ACCENTS.some(c => c[0].toLowerCase() === acc.toLowerCase()) ? "" : "on") + '" ' +
+        'style="background:conic-gradient(from 0deg,#f43,#fb3,#3c6,#39f,#a3f,#f43)" data-act="couleur" ' +
+        'aria-label="Couleur personnalisée" title="Couleur personnalisée"></button>' +
     '</div></div></div>';
 
   // Google Drive
@@ -1820,7 +1855,12 @@ function vueReglages(){
 const val = id => { const e = document.getElementById(id); return e ? e.value.trim() : ""; };
 
 function ouvrirModal(m){ state.modal = m; render(); }
-function fermerModal(){ state.modal = null; render(); }
+function fermerModal(){
+  // Renoncer à la roue, c'est aussi rendre à l'interface la couleur d'avant.
+  if(state.modal && state.modal.type === "couleur" && state.modal.avant) appliquerAccent(state.modal.avant);
+  state.modal = null;
+  render();
+}
 
 /* Après une opération, un projet retombé à zéro propose son archivage. */
 function verifierZero(pid, avant){
@@ -2118,6 +2158,20 @@ document.addEventListener("click", async ev => {
   if(act === "theme"){ ecritLS(LSTHEME, id); appliquerTheme(id); DB.settings.theme = id; sauver(); majIcone(); render(); return; }
   if(act === "langue"){ DB.settings.langue = id; DB.settings.langueChoisie = true; sauver(); render(); return; }
   if(act === "accent"){ ecritLS(LSACC, id); appliquerAccent(id); DB.settings.accent = id; sauver(); majIcone(); render(); return; }
+  if(act === "couleur"){
+    const a = accentActuel();
+    const t = hex2hsv(a);
+    teinte.h = t.h; teinte.s = t.s; teinte.v = Math.max(0.04, t.v);
+    ouvrirModal({ type:"couleur", avant:a });
+    return;
+  }
+  if(act === "couleur-ok"){
+    const hex = normHex(val("m-hex")) || hsv2hex(teinte.h, teinte.s, teinte.v);
+    ecritLS(LSACC, hex); appliquerAccent(hex);
+    DB.settings.accent = hex; sauver(); majIcone();
+    state.modal = null; render();
+    return;
+  }
   if(act === "gd-auto"){ DB.settings.gdAuto = id === "1"; sauver(); render(); return; }
   if(act === "effacer"){ ouvrirModal({ type:"effacer", focus:"m-conf" }); return; }
   if(act === "effacer-ok"){
@@ -2148,7 +2202,15 @@ document.addEventListener("change", ev => {
   else if(act === "tri-ops"){ DB.settings.triOps = el.value; sauver(); render(); }
   else if(act === "tri-ops-p"){ DB.settings.triOpsP = el.value; sauver(); render(); }
   else if(act === "prev-date"){ state.prevDate = el.value; render(); }
-  else if(act === "accent-libre"){ ecritLS(LSACC, el.value); appliquerAccent(el.value); DB.settings.accent = el.value; sauver(); majIcone(); render(); }
+  else if(act === "hex"){
+    const h = normHex(el.value);
+    if(!h){ placerCurseurs(); return; }
+    const t = hex2hsv(h);
+    teinte.h = t.h; teinte.s = t.s; teinte.v = Math.max(0.04, t.v);
+    const cv = document.getElementById("roue-c");
+    if(cv) dessinerRoue(cv);
+    placerCurseurs();
+  }
   else if(act === "gid"){ DB.settings.gid = el.value.trim(); GD.client = null; GD.jeton = null; sauver(); render(); }
   else if(act === "gh-token"){ DB.settings.ghToken = el.value.trim(); sauver(); render(); }
   else if(act === "gh-repo"){
@@ -2181,6 +2243,123 @@ document.addEventListener("keydown", ev => {
 document.addEventListener("change", ev => {
   if(ev.target.id === "fichier-json" && ev.target.files && ev.target.files[0]) importerFichier(ev.target.files[0]);
 });
+
+/* ============================================================
+   CHOIX D'UNE COULEUR
+   Le champ « color » du navigateur donne un nuancier convenable sur
+   ordinateur et ce que le téléphone veut bien afficher sur mobile. On dessine
+   donc la roue soi-même : la teinte tourne autour du centre, la saturation
+   s'éloigne du bord, la luminosité se règle en dessous. Le même geste
+   « pointer » vaut pour le doigt et pour la souris.
+   ============================================================ */
+const hex2 = n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2,"0");
+function hsv2rgb(h, s, v){
+  h = ((h % 360) + 360) % 360;
+  const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+  let r, g, b;
+  if(h < 60)       { r=c; g=x; b=0; }
+  else if(h < 120) { r=x; g=c; b=0; }
+  else if(h < 180) { r=0; g=c; b=x; }
+  else if(h < 240) { r=0; g=x; b=c; }
+  else if(h < 300) { r=x; g=0; b=c; }
+  else             { r=c; g=0; b=x; }
+  return [(r+m)*255, (g+m)*255, (b+m)*255];
+}
+const hsv2hex = (h,s,v) => "#" + hsv2rgb(h,s,v).map(hex2).join("");
+function hex2hsv(hex){
+  const n = parseInt((hex || "").replace("#",""), 16);
+  const r = ((n>>16)&255)/255, g = ((n>>8)&255)/255, b = (n&255)/255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b), d = mx - mn;
+  let h = 0;
+  if(d){
+    if(mx === r)      h = 60 * (((g - b) / d) % 6);
+    else if(mx === g) h = 60 * ((b - r) / d + 2);
+    else              h = 60 * ((r - g) / d + 4);
+  }
+  return { h:((h%360)+360)%360, s:mx ? d/mx : 0, v:mx };
+}
+const normHex = t => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(t||"").trim());
+  return m ? "#" + m[1].toLowerCase() : null;
+};
+const teinte = { h:0, s:0, v:0 };
+
+function dessinerRoue(cv){
+  const n = cv.width, R = n / 2, ctx = cv.getContext("2d");
+  const img = ctx.createImageData(n, n), d = img.data;
+  for(let y = 0; y < n; y++){
+    for(let x = 0; x < n; x++){
+      const dx = x - R + .5, dy = y - R + .5;
+      const r = Math.sqrt(dx*dx + dy*dy), i = (y*n + x) * 4;
+      if(r > R){ d[i+3] = 0; continue; }
+      let a = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      const c = hsv2rgb(a, Math.min(1, r / R), teinte.v);
+      d[i] = c[0]; d[i+1] = c[1]; d[i+2] = c[2];
+      // Un bord franc sur un disque tramé fait des marches d'escalier :
+      // le dernier pixel est adouci.
+      d[i+3] = r > R - 1 ? Math.round((R - r) * 255) : 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function placerCurseurs(){
+  const cur = document.getElementById("roue-cur");
+  const lcur = document.getElementById("lum-cur");
+  const lum = document.getElementById("lum");
+  const ap = document.getElementById("apercu-p");
+  const hx = document.getElementById("m-hex");
+  const hex = hsv2hex(teinte.h, teinte.s, teinte.v);
+  if(cur){
+    const a = (teinte.h - 90) * Math.PI / 180;
+    cur.style.left = (50 + Math.cos(a) * teinte.s * 50) + "%";
+    cur.style.top  = (50 + Math.sin(a) * teinte.s * 50) + "%";
+    cur.style.background = hex;
+  }
+  if(lcur) lcur.style.left = (teinte.v * 100) + "%";
+  if(lum) lum.style.background = "linear-gradient(90deg,#000000," + hsv2hex(teinte.h, teinte.s, 1) + ")";
+  if(ap) ap.style.background = hex;
+  if(hx && document.activeElement !== hx) hx.value = hex.toUpperCase();
+  appliquerAccent(hex);
+}
+/* Un pointeur capturé continue d'alimenter la zone qu'il a saisie même quand
+   le doigt en sort : on peut donc glisser jusqu'au bord sans perdre la main. */
+function suivre(zone, calcul){
+  if(!zone) return;
+  let actif = false;
+  const lire = ev => {
+    const r = zone.getBoundingClientRect();
+    calcul((ev.clientX - r.left) / r.width, (ev.clientY - r.top) / r.height);
+    placerCurseurs();
+  };
+  zone.addEventListener("pointerdown", ev => {
+    ev.preventDefault();
+    actif = true;
+    try{ zone.setPointerCapture(ev.pointerId); }catch(e){}
+    lire(ev);
+  });
+  zone.addEventListener("pointermove", ev => { if(actif) lire(ev); });
+  const fin = () => { actif = false; };
+  zone.addEventListener("pointerup", fin);
+  zone.addEventListener("pointercancel", fin);
+}
+function monterRoue(){
+  const cv = document.getElementById("roue-c");
+  if(!cv) return;
+  dessinerRoue(cv);
+  placerCurseurs();
+  suivre(document.getElementById("roue"), (x, y) => {
+    const dx = x - .5, dy = y - .5;
+    const r = Math.sqrt(dx*dx + dy*dy) * 2;
+    teinte.s = Math.max(0, Math.min(1, r));
+    teinte.h = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+  });
+  suivre(document.getElementById("lum"), x => {
+    const av = teinte.v;
+    teinte.v = Math.max(0.04, Math.min(1, x));
+    // La roue ne dépend que de la luminosité : inutile de la refaire autrement.
+    if(Math.abs(teinte.v - av) > 0.001) dessinerRoue(cv);
+  });
+}
 
 /* ---------- rangement au doigt ou à la souris ----------
    Un événement « pointer » couvre les deux : le doigt sur le téléphone, la
