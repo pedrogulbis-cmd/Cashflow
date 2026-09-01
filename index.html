@@ -244,9 +244,11 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .pgo{gap:6px}
 .qb.pa{color:var(--acc);border-color:var(--accB)}
 .qb.pa.on{background:var(--accF)}
-.tete{display:flex;align-items:flex-start;gap:16px}
-.proj{text-align:right;border-left:1px solid var(--trait);padding-left:16px;flex:0 0 auto}
-.proj-val{font-size:21px;font-weight:600;letter-spacing:-.03em;margin-top:5px;display:block}
+.tete{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+.tete .total-val{font-size:clamp(26px,7.6vw,46px);white-space:nowrap}
+.proj{text-align:right;border-left:1px solid var(--trait);padding-left:14px;max-width:48%}
+.proj .total-lbl{font-size:12.5px}
+.proj-val{font-size:19px;font-weight:600;letter-spacing:-.03em;margin-top:5px;display:block;white-space:nowrap}
 .proj-d{font-size:11px;color:var(--gris2);font-family:"IBM Plex Mono",monospace;margin-top:3px}
 .emopick{max-height:190px;overflow:auto;padding:2px}
 .part{border-top:1px solid var(--trait2);padding:12px 0}
@@ -301,9 +303,15 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.2.0", d:"2026-09-01", t:"Projection au long cours", l:[
+    "Le solde projeté est affiché en permanence à côté du total disponible.",
+    "Il va jusqu'à la dernière échéance planifiée, un an et au-delà s'il le faut, au lieu de s'arrêter à la fin du mois.",
+    "L'onglet Prévision s'ouvre sur ce même horizon, à affiner ensuite au calendrier.",
+    "Français par défaut."
+  ]},
   { v:"1.1.0", d:"2026-09-01", t:"Partage et mise en ordre", l:[
     "Partage d'un projet par lien : le contenu est chiffré sur cet appareil, déposé sur un dépôt GitHub, et la clé ne voyage que dans le lien.",
     "Qui ouvre le lien reçoit le projet en lecture seule et voit les modifications suivantes arriver toutes seules.",
@@ -441,7 +449,7 @@ const DICO = {
   "chaque mois":"every month", "restantes":"left", "terminée":"finished",
   "Créée automatiquement":"Created automatically", "échéances passées converties":"past due dates converted",
   // prévision
-  "Solde projeté":"Projected balance", "Total projeté":"Projected total", "À la date du":"As of",
+  "Solde projeté":"Projected balance", "rien de planifié":"nothing planned", "Total projeté":"Projected total", "À la date du":"As of",
   "Mouvements planifiés d'ici là":"Planned movements until then",
   "Rien de planifié d'ici cette date.":"Nothing planned before that date.",
   "Choisis une date future.":"Pick a future date.", "aujourd'hui":"today",
@@ -582,7 +590,7 @@ const p2 = n => String(n).padStart(2,"0");
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
   ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-const LANG = () => (DB.settings && DB.settings.langue) || "en";
+const LANG = () => (DB.settings && DB.settings.langue) || "fr";
 const todayISO = () => { const d = new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); };
 
 /* ---------- argent ----------
@@ -641,19 +649,6 @@ function plusMois(iso, n){
   cible.setDate(Math.min(jour, dernier));
   return cible.getFullYear()+"-"+p2(cible.getMonth()+1)+"-"+p2(cible.getDate());
 }
-function finDeMois(iso){
-  const d = new Date(iso + "T12:00:00");
-  const f = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-  return f.getFullYear()+"-"+p2(f.getMonth()+1)+"-"+p2(f.getDate());
-}
-/* Horizon du solde projeté affiché sur l'accueil : la fin du mois en cours,
-   sauf s'il n'en reste presque rien, auquel cas la fin du mois suivant. */
-function horizon(){
-  const a = todayISO();
-  let f = finDeMois(a);
-  if((new Date(f+"T12:00:00") - new Date(a+"T12:00:00")) / 86400000 < 5) f = finDeMois(plusMois(a, 1));
-  return f;
-}
 function decalerISO(iso, jours){
   const d = new Date(iso+"T12:00:00");
   d.setDate(d.getDate()+jours);
@@ -710,7 +705,7 @@ function svg(n, t, sw){
 const DEFAULTS = {
   version:SCHEMA, projets:{}, ops:{}, plans:{}, partages:{},
   settings:{
-    langue:"en", theme:"clair", accent:ACCENTS[0][0],
+    langue:"fr", langueChoisie:false, theme:"clair", accent:ACCENTS[0][0],
     triProjets:"nom", fType:"tout", fProjet:"", fPeriode:"tout", triOps:"recent",
     gdAuto:true, gdFichier:"", gdDossier:"", gdMail:"", gdNom:"CashFlow", gid:"",
     ghToken:"", ghRepo:"", ghBranche:"", appareil:""
@@ -1034,6 +1029,21 @@ function soldeProjete(pid, date){
   });
   return s;
 }
+/* Horizon de la projection : la dernière échéance encore à venir, tous
+   projets confondus. S'arrêter à la fin du mois masquerait justement ce qu'on
+   veut voir d'un coup d'œil, un plan sur un an ou davantage. */
+function horizonPlans(){
+  let f = "";
+  plansAll().forEach(pl => {
+    const p = DB.projets[pl.projet];
+    if(!p || p.archive || resteOcc(pl) <= 0) return;
+    const d = finPlan(pl);
+    if(d > f) f = d;
+  });
+  return f;
+}
+const horizon = () => horizonPlans() || todayISO();
+
 function mouvementsPrevus(date){
   const out = [];
   plansAll().forEach(pl => {
@@ -1159,10 +1169,10 @@ function vueAccueil(){
     '<div style="flex:1;min-width:0">' +
     '<div class="total-lbl">Total disponible</div>' +
     '<span class="total-val num ' + (t < 0 ? "neg" : "") + '">' + fmt(t) + '</span></div>' +
-    (tp !== t ? '<button class="proj" data-act="tab" data-id="prev">' +
+    '<button class="proj" data-act="tab" data-id="prev">' +
       '<div class="total-lbl">Solde projeté</div>' +
       '<span class="proj-val num ' + (tp < 0 ? "neg" : "") + '">' + fmt(tp) + '</span>' +
-      '<div class="proj-d">' + esc(frDate(hz)) + '</div></button>' : "") +
+      '<div class="proj-d">' + (horizonPlans() ? esc(frDate(hz, true)) : "rien de planifié") + '</div></button>' +
     '</div><div class="total-bar"></div>' +
     '<div class="total-sub"><span><b>' + a.length + '</b> ' + (a.length > 1 ? "projets actifs" : "projet actif") + '</span>' +
     (neg ? '<span class="neg">' + neg + ' ' + (neg > 1 ? "en négatif" : "en négatif") + '</span>' : "") +
@@ -1322,7 +1332,7 @@ function vuePlans(){
    PRÉVISION
    ============================================================ */
 function vuePrevision(){
-  const d = state.prevDate || plusMois(todayISO(), 1);
+  const d = state.prevDate || horizonPlans() || plusMois(todayISO(), 1);
   const a = triProjets(actifs());
   const t = a.reduce((s,p) => s + soldeProjete(p.id, d), 0);
   const maintenant = total();
@@ -2097,7 +2107,7 @@ document.addEventListener("click", async ev => {
 
   /* ---- réglages ---- */
   if(act === "theme"){ ecritLS(LSTHEME, id); appliquerTheme(id); DB.settings.theme = id; sauver(); majIcone(); render(); return; }
-  if(act === "langue"){ DB.settings.langue = id; sauver(); render(); return; }
+  if(act === "langue"){ DB.settings.langue = id; DB.settings.langueChoisie = true; sauver(); render(); return; }
   if(act === "accent"){ ecritLS(LSACC, id); appliquerAccent(id); DB.settings.accent = id; sauver(); majIcone(); render(); return; }
   if(act === "gd-auto"){ DB.settings.gdAuto = id === "1"; sauver(); render(); return; }
   if(act === "effacer"){ ouvrirModal({ type:"effacer", focus:"m-conf" }); return; }
@@ -2966,6 +2976,11 @@ async function demarrer(){
   if(!litLS(LSACC) && DB.settings.accent){ ecritLS(LSACC, DB.settings.accent); appliquerAccent(DB.settings.accent); }
   DB.settings.theme = themeActuel();
   DB.settings.accent = accentActuel();
+
+  // Le français est devenu la langue par défaut ; une installation antérieure
+  // qui n'a jamais fait ce choix explicitement bascule, celle qui l'a fait
+  // garde le sien.
+  if(!DB.settings.langueChoisie && DB.settings.langue !== "fr"){ DB.settings.langue = "fr"; sauver(true); }
 
   state.neuf = DB.meta.vue !== VERSION;
   const n = materialiser();
