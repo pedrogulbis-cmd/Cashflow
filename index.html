@@ -290,8 +290,8 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
     <div class="brand">
       <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true">
         <rect width="64" height="64" rx="14" fill="var(--acc)"/>
-        <path d="M42 20a14 14 0 1 0 0 24" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/>
-        <path d="M18 28h20M18 36h20" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M42 20a14 14 0 1 0 0 24" fill="none" stroke="var(--surAcc)" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M18 28h20M18 36h20" stroke="var(--surAcc)" stroke-width="5.5" stroke-linecap="round"/>
       </svg>
       CashFlow
     </div>
@@ -323,9 +323,14 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.7.0";
+const VERSION = "1.8.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.8.0", d:"2026-09-02", t:"Icône accordée à la couleur", l:[
+    "L'icône est redessinée à la couleur d'accent : onglet du navigateur, écran d'accueil iOS, et raccourci Android au moment où on l'ajoute.",
+    "Le trait du sigle passe au noir sur les accents clairs, il restait invisible en blanc.",
+    "Un aperçu de l'icône figure dans les Réglages, sous la palette."
+  ]},
   { v:"1.7.0", d:"2026-09-02", t:"Lisibilité des listes", l:[
     "Correction : dans toutes les listes d'opérations, le libellé et la date se suivaient sur la même ligne, collés faute d'espace. Chacun a maintenant sa ligne.",
     "La récurrence rejoint Ajouter, Dépenser et Transférer dans la fiche d'un projet, au lieu d'être reléguée plus bas.",
@@ -456,6 +461,8 @@ const DICO = {
   "Cuivre":"Copper", "Grenat":"Garnet", "Ardoise":"Slate",
   "Manuel":"Manual", "Réorganiser":"Reorder", "Terminer":"Done",
   "Couleur personnalisée":"Custom colour",
+  "Icône de l'application":"App icon",
+  "Elle prend la couleur choisie. Un raccourci déjà posé sur l'écran d'accueil garde son ancienne image : le téléphone la fige à l'installation. Retire le raccourci et rajoute-le pour la rafraîchir.":"It takes the colour you picked. A shortcut already sitting on your home screen keeps its old image: the phone freezes it at install time. Remove the shortcut and add it again to refresh it.",
   "Fais glisser le curseur : la teinte tourne, la saturation s'éloigne du centre.":"Drag the handle: hue goes around, saturation moves out from the centre.",
   "Fais glisser les projets pour les ranger.":"Drag the projects to arrange them.",
   "planifié":"planned",
@@ -715,6 +722,15 @@ const ICONES = {
   euro:'<path d="M17 6.5a6.5 6.5 0 1 0 0 11"/><path d="M5.5 10h8M5.5 14h8"/>',
   poignee:'<path d="M7 9h10M7 15h10"/>'
 };
+/* Le sigle de l'application, tracé une seule fois. Il se peint avec les
+   variables du thème, donc il suit la couleur d'accent sans être redessiné,
+   et son trait bascule au noir quand l'accent est trop clair pour du blanc. */
+function icoSVG(t){
+  return '<svg width="' + t + '" height="' + t + '" viewBox="0 0 64 64" aria-hidden="true" style="display:block">' +
+    '<rect width="64" height="64" rx="14" fill="var(--acc)"/>' +
+    '<path d="M42 20a14 14 0 1 0 0 24" fill="none" stroke="var(--surAcc)" stroke-width="5.5" stroke-linecap="round"/>' +
+    '<path d="M18 28h20M18 36h20" stroke="var(--surAcc)" stroke-width="5.5" stroke-linecap="round"/></svg>';
+}
 function svg(n, t, sw){
   return '<svg width="'+(t||20)+'" height="'+(t||20)+'" viewBox="0 0 24 24" fill="none" ' +
     'stroke="currentColor" stroke-width="'+(sw||1.8)+'" stroke-linecap="round" stroke-linejoin="round" ' +
@@ -1707,7 +1723,11 @@ function vueReglages(){
       '<button class="past ' + (ACCENTS.some(c => c[0].toLowerCase() === acc.toLowerCase()) ? "" : "on") + '" ' +
         'style="background:conic-gradient(from 0deg,#f43,#fb3,#3c6,#39f,#a3f,#f43)" data-act="couleur" ' +
         'aria-label="Couleur personnalisée" title="Couleur personnalisée"></button>' +
-    '</div></div></div>';
+    '</div>' +
+    '<div class="lig" style="margin-top:6px"><div style="flex:0 0 46px;width:46px">' + icoSVG(46) + '</div>' +
+      '<div class="l">Icône de l\'application' +
+      '<div class="d">Elle prend la couleur choisie. Un raccourci déjà posé sur l\'écran d\'accueil garde son ancienne image : le téléphone la fige à l\'installation. Retire le raccourci et rajoute-le pour la rafraîchir.</div></div></div>' +
+    '</div></div>';
 
   // Google Drive
   const relie = gdConnecte();
@@ -2702,25 +2722,29 @@ function dessinerIcone(taille, marge){
   c.width = c.height = taille;
   const x = c.getContext("2d");
   const acc = accentActuel();
-  const p = marge ? taille * 0.12 : 0;          // marge pour l'icône « maskable »
+  // « maskable » : Android rogne l'icône en cercle ou en écusson selon le
+  // téléphone. On peint alors tout le carré et on garde le sigle au centre,
+  // à l'abri du rognage. Sinon, carré aux angles arrondis.
+  const p = marge ? taille * 0.12 : 0;
   const t = taille - p * 2, r = t * 0.22;
-  x.fillStyle = marge ? acc : acc;
-  if(marge){ x.fillStyle = acc; x.fillRect(0, 0, taille, taille); }
+  x.fillStyle = acc;
+  if(marge) x.fillRect(0, 0, taille, taille);
   else{
     x.beginPath();
     x.moveTo(r, 0); x.arcTo(t, 0, t, t, r); x.arcTo(t, t, 0, t, r);
     x.arcTo(0, t, 0, 0, r); x.arcTo(0, 0, t, 0, r); x.closePath();
-    x.fillStyle = acc; x.fill();
+    x.fill();
   }
-  const u = taille / 64, o = p;
-  x.strokeStyle = surAccent(acc) === "#000000" ? "#000000" : "#ffffff";
-  x.lineCap = "round"; x.lineWidth = 5.5 * (t/64);
+  const u = t / 64, o = p;
+  // Sur un accent clair, un trait blanc disparaîtrait.
+  x.strokeStyle = surAccent(acc);
+  x.lineCap = "round"; x.lineWidth = 5.5 * u;
   x.beginPath();
-  x.arc(o + 32*(t/64), o + 32*(t/64), 14*(t/64), -Math.PI*0.28, Math.PI*0.28, true);
+  x.arc(o + 32*u, o + 32*u, 14*u, -Math.PI*0.28, Math.PI*0.28, true);
   x.stroke();
   x.beginPath();
-  x.moveTo(o + 18*(t/64), o + 28*(t/64)); x.lineTo(o + 38*(t/64), o + 28*(t/64));
-  x.moveTo(o + 18*(t/64), o + 36*(t/64)); x.lineTo(o + 38*(t/64), o + 36*(t/64));
+  x.moveTo(o + 18*u, o + 28*u); x.lineTo(o + 38*u, o + 28*u);
+  x.moveTo(o + 18*u, o + 36*u); x.lineTo(o + 38*u, o + 36*u);
   x.stroke();
   return c.toDataURL("image/png");
 }
@@ -2732,8 +2756,8 @@ function majIcone(){
     if(fav) fav.href = "data:image/svg+xml," + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
       '<rect width="64" height="64" rx="14" fill="' + acc + '"/>' +
-      '<path d="M42 20a14 14 0 1 0 0 24" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/>' +
-      '<path d="M18 28h20M18 36h20" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/></svg>');
+      '<path d="M42 20a14 14 0 1 0 0 24" fill="none" stroke="' + surAccent(acc) + '" stroke-width="5.5" stroke-linecap="round"/>' +
+      '<path d="M18 28h20M18 36h20" stroke="' + surAccent(acc) + '" stroke-width="5.5" stroke-linecap="round"/></svg>');
 
     const p192 = dessinerIcone(192, false), p512 = dessinerIcone(512, false), pm = dessinerIcone(512, true);
     let at = document.querySelector('link[rel="apple-touch-icon"]');
@@ -2741,7 +2765,7 @@ function majIcone(){
     at.href = p192;
 
     const man = {
-      name:"CashFlow", short_name:"CashFlow", start_url:".", scope:".",
+      id:"cashflow", name:"CashFlow", short_name:"CashFlow", start_url:".", scope:".",
       display:"standalone", orientation:"portrait",
       background_color: themeActuel() === "sombre" ? "#0d0d10" : "#ffffff",
       theme_color: themeActuel() === "sombre" ? "#0d0d10" : "#ffffff",
