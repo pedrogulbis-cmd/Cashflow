@@ -141,8 +141,13 @@ html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-
 .op-ic.pl{color:var(--plus);background:var(--plusF)}
 .op-ic.mo{color:var(--moins);background:var(--moinsF)}
 .op-mid{flex:1;min-width:0}
-.op-lib{font-size:14.5px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.op-met{font-size:11.5px;color:var(--gris2);margin-top:1px;font-family:"IBM Plex Mono",monospace}
+/* En ligne, ces deux éléments se suivaient sans séparation : « Loyer3 août ».
+   Passés en bloc, ils occupent chacun leur ligne, et l'écrêtage du libellé
+   trop long fonctionne enfin, ce qu'un élément en ligne ne permet pas. */
+.op-lib{display:block;font-size:14.5px;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.op-met{display:block;font-size:11.5px;color:var(--gris2);margin-top:2px;
+  font-family:"IBM Plex Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .op-mt{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;white-space:nowrap;padding-top:2px}
 .op.prev{opacity:.72}
 .op.prev .op-ic{border:1px dashed var(--trait);background:transparent}
@@ -165,7 +170,9 @@ html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-
 .sheet-top .t{font-weight:600;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fiche-h{padding:24px 0 18px;border-bottom:1px solid var(--trait)}
 .fiche-emo{font-size:30px;line-height:1}
-.fiche-bal{font-size:clamp(34px,11vw,44px);font-weight:600;letter-spacing:-.045em;margin-top:8px;display:block}
+.fiche-t{font-size:17px;font-weight:600;letter-spacing:-.02em;margin:6px 0 16px}
+.tagrec{display:inline-block;font-size:10px;border:1px solid var(--trait);color:var(--gris2);
+  border-radius:5px;padding:0 4px;margin-left:6px;vertical-align:1px;font-family:"IBM Plex Mono",monospace}
 .badge{display:inline-block;font-size:11px;border:1px solid var(--trait);border-radius:6px;
   padding:1px 6px;color:var(--gris);vertical-align:3px;margin-left:8px}
 .badge.neg{color:var(--moins);border-color:var(--moinsF);background:var(--moinsF)}
@@ -248,8 +255,6 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .pl1 .pbal{flex:0 0 auto}
 .pl2{display:flex;align-items:center;gap:6px;margin-top:5px}
 .pl2 .psub{flex:1;min-width:0;margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.qb.pa{color:var(--acc);border-color:var(--accB)}
-.qb.pa.on{background:var(--accF)}
 .tete{display:grid;grid-template-columns:1fr 1fr}
 .tete .col{min-width:0;text-align:left;display:block}
 .tete .total-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -274,14 +279,6 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
 .apercu i{width:36px;height:36px;border-radius:10px;flex:0 0 36px;border:1px solid var(--trait);display:block}
 .apercu input{font-family:"IBM Plex Mono",monospace;text-transform:uppercase}
 .emopick{max-height:190px;overflow:auto;padding:2px}
-.part{border-top:1px solid var(--trait2);padding:12px 0}
-.part:first-child{border-top:0;padding-top:0}
-.part-h{display:flex;align-items:center;gap:9px}
-.part-n{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.part-c{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--gris2)}
-.lien{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--gris2);
-  background:var(--fond2);border:1px solid var(--trait2);border-radius:8px;padding:7px 9px;margin-top:8px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -326,9 +323,23 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.5.0";
+const VERSION = "1.7.0";
 const SCHEMA  = 2;
 const JOURNAL = [
+  { v:"1.7.0", d:"2026-09-02", t:"Lisibilité des listes", l:[
+    "Correction : dans toutes les listes d'opérations, le libellé et la date se suivaient sur la même ligne, collés faute d'espace. Chacun a maintenant sa ligne.",
+    "La récurrence rejoint Ajouter, Dépenser et Transférer dans la fiche d'un projet, au lieu d'être reléguée plus bas.",
+    "L'onglet Prévision ouvre sur les soldes projetés au premier des quatre mois qui viennent.",
+    "Les onglets suivent l'ordre du regard : Accueil, Prévision, Planifié, Opérations, Réglages."
+  ]},
+  { v:"1.6.0", d:"2026-09-01", t:"Retour au budget seul", l:[
+    "Le partage de projet est retiré : la fonction ne servait pas et emportait avec elle un jeton GitHub à gérer.",
+    "Sur l'accueil, l'ajout passe à gauche, la dépense à droite, et le transfert remplace le partage.",
+    "Une récurrence est un ajout par défaut.",
+    "Correction : la fiche d'un projet n'affichait que les trois échéances des deux mois à venir, la dernière semblait donc perdue. Toutes sont là.",
+    "La fiche d'un projet montre son solde projeté à côté de son solde actuel.",
+    "Une opération née d'une récurrence porte désormais une mention, y compris celle du jour même."
+  ]},
   { v:"1.5.0", d:"2026-09-01", t:"Récurrence en un geste", l:[
     "Un quatrième bouton sur chaque projet de l'accueil ouvre directement la création d'une récurrence.",
     "Les gestes rapides passent sous le nom du projet : à quatre sur la même ligne, il ne restait plus de place pour lire le titre."
@@ -352,7 +363,6 @@ const JOURNAL = [
   { v:"1.1.0", d:"2026-09-01", t:"Partage et mise en ordre", l:[
     "Partage d'un projet par lien : le contenu est chiffré sur cet appareil, déposé sur un dépôt GitHub, et la clé ne voyage que dans le lien.",
     "Qui ouvre le lien reçoit le projet en lecture seule et voit les modifications suivantes arriver toutes seules.",
-    "Récapitulatif des partages dans les Réglages : lien à copier, appareils vus, arrêt du partage.",
     "Un nouveau projet peut démarrer avec un solde initial et ne détourne plus vers sa fiche.",
     "Solde projeté affiché en regard du total disponible.",
     "Ordre des projets réorganisable à la main.",
@@ -449,8 +459,8 @@ const DICO = {
   "Fais glisser le curseur : la teinte tourne, la saturation s'éloigne du centre.":"Drag the handle: hue goes around, saturation moves out from the centre.",
   "Fais glisser les projets pour les ranger.":"Drag the projects to arrange them.",
   "planifié":"planned",
-  "Partager":"Share", "Solde initial":"Starting balance",
-  "Reçu en partage":"Shared with you", "Actualiser":"Refresh", "Se désabonner":"Unsubscribe",
+  "Solde initial":"Starting balance", "Solde actuel":"Current balance",
+  "récurrence":"recurring", "Réduire":"Show less",
   "Crée un projet pour commencer à répartir ton argent.":"Create a project to start splitting your money.",
   "Créer un projet":"Create a project", "Rien dans les archives.":"Nothing archived.",
   "Ajouter":"Add money", "Dépenser":"Spend", "Transférer":"Transfer",
@@ -489,7 +499,8 @@ const DICO = {
   "chaque mois":"every month", "restantes":"left", "terminée":"finished",
   "Créée automatiquement":"Created automatically", "échéances passées converties":"past due dates converted",
   // prévision
-  "Solde projeté":"Projected balance", "rien de planifié":"nothing planned", "Total projeté":"Projected total", "À la date du":"As of",
+  "Solde projeté":"Projected balance", "rien de planifié":"nothing planned",
+  "Aux quatre prochains mois":"Over the next four months", "Récurrence":"Recurring", "Total projeté":"Projected total", "À la date du":"As of",
   "Mouvements planifiés d'ici là":"Planned movements until then",
   "Rien de planifié d'ici cette date.":"Nothing planned before that date.",
   "Choisis une date future.":"Pick a future date.", "aujourd'hui":"today",
@@ -521,25 +532,6 @@ const DICO = {
   "Efface définitivement les projets, les opérations et les récurrences de cet appareil.":"Permanently erases projects, entries and recurring items from this device.",
   "Stockage":"Storage", "utilisés":"used", "Espace occupé":"Space used",
   "Journal des versions":"Release notes", "Déplier":"Expand", "Replier":"Collapse",
-  "Partage":"Sharing", "Partager ce projet":"Share this project", "Gérer le partage":"Manage sharing",
-  "Le partage demande une connexion sécurisée en https.":"Sharing needs a secure https connection.",
-  "Renseigne d'abord un jeton GitHub et un dépôt dans les Réglages.":"Set a GitHub token and a repository in Settings first.",
-  "Ouvrir les Réglages":"Open Settings",
-  "Le projet est chiffré sur cet appareil puis déposé sur ton dépôt. Seul qui reçoit le lien peut le lire, et il le verra évoluer à chaque modification.":"The project is encrypted on this device, then uploaded to your repository. Only whoever holds the link can read it, and they will see every later change.",
-  "Créer le lien de partage":"Create the share link", "Chiffrement en cours":"Encrypting",
-  "Copier le lien":"Copy link", "Arrêter":"Stop",
-  "Projet partagé":"Shared project", "Déchiffrement en cours…":"Decrypting…",
-  "Ajouter ce projet partagé ?":"Add this shared project?",
-  "Il arrivera en lecture seule et se mettra à jour tout seul quand son auteur le modifiera.":"It arrives read-only and updates itself whenever its owner changes it.",
-  "Ajouter le projet":"Add the project",
-  "Jeton GitHub classique":"Classic GitHub token", "Dépôt":"Repository",
-  "Jeton personnel classique, portée repo. Il ne quitte pas cet appareil, sinon dans tes propres sauvegardes.":"Classic personal token with the repo scope. It stays on this device, except inside your own backups.",
-  "Un dépôt public convient : ce qui y est déposé est chiffré, et le destinataire lit sans compte GitHub.":"A public repository works: what lands there is encrypted, and the recipient reads it without a GitHub account.",
-  "Partages en cours":"Active shares", "Aucun partage en cours.":"No active share.",
-  "Reçus en partage":"Shared with you",
-  "Lien copié":"Link copied", "Copie impossible":"Could not copy",
-  "Partage créé":"Share created", "Partage arrêté":"Sharing stopped",
-  "Partage actualisé":"Share refreshed", "Projet ajouté":"Project added", "Désabonné":"Unsubscribed",
   "Une seule couleur porte l'interface.":"A single colour carries the interface.",
   "Identifiant personnel.":"Your own client ID.",
   "Identifiant du site utilisé par défaut.":"Using the site's client ID.",
@@ -575,6 +567,8 @@ const REGLES = [
   [/^(\d+) opérations?$/,            (m,a) => a + " entr" + (+a>1?"ies":"y")],
   [/^(\d+) récurrences?$/,           (m,a) => a + " recurring entr" + (+a>1?"ies":"y")],
   [/^(\d+) restantes?$/,             (m,a) => a + " left"],
+  [/^(\d+) restantes? sur (\d+)$/,   (m,a,b) => a + " left of " + b],
+  [/^Afficher les (\d+) suivantes$/, (m,a) => "Show the next " + a],
   [/^(\d+) sur (\d+)$/,              (m,a,b) => a + " of " + b],
   [/^le (\d+) de chaque mois$/,      (m,a) => "on day " + a + " of every month"],
   [/^Transfert vers (.+)$/,          (m,a) => "Transfer to " + a],
@@ -590,10 +584,6 @@ const REGLES = [
       a + " project" + (+a>1?"s":"") + " and " + b + " entr" + (+b>1?"ies":"y") + " added"],
   [/^(.+) utilisés$/,                (m,a) => a + " used"],
   [/^schéma (\d+)$/,                 (m,a) => "schema " + a],
-  [/^(\d+) appareils?$/,             (m,a) => a + " device" + (+a>1?"s":"")],
-  [/^Publié : (.+)$/,                (m,a) => "Published: " + a],
-  [/^Reçu : (.+)$/,                  (m,a) => "Received: " + a],
-  [/^Dernière mise à jour : (.+)$/,  (m,a) => "Last update: " + a],
   [/^modifications en attente, dépôt dans (\d+) min$/, (m,a) => "changes pending, upload in " + a + " min"],
   [/^dépôt programmé dans (\d+) min$/, (m,a) => "upload scheduled in " + a + " min"],
   [/^dernier dépôt automatique en échec : (.+)$/, (m,a) => "last automatic upload failed: " + a]
@@ -723,11 +713,6 @@ const ICONES = {
   crayon:'<path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20z"/>',
   boite:'<path d="M3.5 8.5h17V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V8.5z"/><path d="M2.8 4.5h18.4v4H2.8zM9.8 12.5h4.4"/>',
   euro:'<path d="M17 6.5a6.5 6.5 0 1 0 0 11"/><path d="M5.5 10h8M5.5 14h8"/>',
-  partage:'<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8 15.8 6.7M8.2 13.2l7.6 4.1"/>',
-  copier:'<rect x="9" y="9" width="11.5" height="11.5" rx="2.5"/><path d="M15 6.2A2.2 2.2 0 0 0 12.8 4H6.2A2.2 2.2 0 0 0 4 6.2v6.6A2.2 2.2 0 0 0 6.2 15"/>',
-  haut:'<path d="M12 19V6M6 11.5 12 5.5l6 6"/>',
-  bas:'<path d="M12 5v13M6 12.5 12 18.5l6-6"/>',
-  stop:'<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
   poignee:'<path d="M7 9h10M7 15h10"/>'
 };
 function svg(n, t, sw){
@@ -744,12 +729,11 @@ function svg(n, t, sw){
    écrit un enregistrement, pas la bibliothèque entière.
    ============================================================ */
 const DEFAULTS = {
-  version:SCHEMA, projets:{}, ops:{}, plans:{}, partages:{},
+  version:SCHEMA, projets:{}, ops:{}, plans:{},
   settings:{
     langue:"fr", langueChoisie:false, theme:"clair", accent:ACCENTS[0][0],
     triProjets:"nom", fType:"tout", fProjet:"", fPeriode:"tout", triOps:"recent",
-    gdAuto:true, gdFichier:"", gdDossier:"", gdMail:"", gdNom:"CashFlow", gid:"",
-    ghToken:"", ghRepo:"", ghBranche:"", appareil:""
+    gdAuto:true, gdFichier:"", gdDossier:"", gdMail:"", gdNom:"CashFlow", gid:""
   },
   meta:{ cree:Date.now(), modifie:0, cloud:0, exporte:0, cloudErr:null, vue:null, materialise:"" }
 };
@@ -757,10 +741,10 @@ let DB = JSON.parse(JSON.stringify(DEFAULTS));
 let pret = false;
 
 const IDB = (() => {
-  const NOM = "cashflow", V = 2;
+  const NOM = "cashflow", V = 3;
   let db = null;
   const prom = r => new Promise((res,rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-  const stores = ["projets","ops","plans","partages","kv"];
+  const stores = ["projets","ops","plans","kv"];
   return {
     ouvrir(){
       return new Promise((res,rej) => {
@@ -771,7 +755,8 @@ const IDB = (() => {
           if(!d.objectStoreNames.contains("projets")) d.createObjectStore("projets", { keyPath:"id" });
           if(!d.objectStoreNames.contains("ops"))     d.createObjectStore("ops",     { keyPath:"id" });
           if(!d.objectStoreNames.contains("plans"))   d.createObjectStore("plans",   { keyPath:"id" });
-          if(!d.objectStoreNames.contains("partages")) d.createObjectStore("partages", { keyPath:"id" });
+          // Le partage a été retiré : son magasin part avec lui.
+          if(d.objectStoreNames.contains("partages")) d.deleteObjectStore("partages");
           if(!d.objectStoreNames.contains("kv"))      d.createObjectStore("kv");
         };
         r.onsuccess = () => { db = r.result; res(db); };
@@ -781,16 +766,15 @@ const IDB = (() => {
     },
     async tout(){
       const t = db.transaction(stores, "readonly");
-      const [projets, ops, plans, partages, kk, kvv] = await Promise.all([
+      const [projets, ops, plans, kk, kvv] = await Promise.all([
         prom(t.objectStore("projets").getAll()),
         prom(t.objectStore("ops").getAll()),
         prom(t.objectStore("plans").getAll()),
-        prom(t.objectStore("partages").getAll()),
         prom(t.objectStore("kv").getAllKeys()),
         prom(t.objectStore("kv").getAll())
       ]);
       const kv = {}; kk.forEach((k,i) => { kv[k] = kvv[i]; });
-      return { projets, ops, plans, partages, kv };
+      return { projets, ops, plans, kv };
     },
     ecrire(lots){
       return new Promise((res,rej) => {
@@ -799,16 +783,13 @@ const IDB = (() => {
         t.onerror = () => rej(t.error);
         t.onabort = () => rej(t.error || new Error("écriture annulée"));
         const P = t.objectStore("projets"), O = t.objectStore("ops"),
-              L = t.objectStore("plans"),   K = t.objectStore("kv"),
-              S = t.objectStore("partages");
+              L = t.objectStore("plans"),   K = t.objectStore("kv");
         (lots.projets||[]).forEach(x => P.put(x));
         (lots.supprProjets||[]).forEach(id => P.delete(String(id)));
         (lots.ops||[]).forEach(x => O.put(x));
         (lots.supprOps||[]).forEach(id => O.delete(String(id)));
         (lots.plans||[]).forEach(x => L.put(x));
         (lots.supprPlans||[]).forEach(id => L.delete(String(id)));
-        (lots.partages||[]).forEach(x => S.put(x));
-        (lots.supprPartages||[]).forEach(id => S.delete(String(id)));
         Object.keys(lots.kv||{}).forEach(k => K.put(lots.kv[k], k));
       });
     },
@@ -824,8 +805,8 @@ const IDB = (() => {
 
 /* ---------- file d'écriture ---------- */
 const sale = { projets:new Set(), supprProjets:new Set(), ops:new Set(), supprOps:new Set(),
-               plans:new Set(), supprPlans:new Set(), partages:new Set(), supprPartages:new Set(), kv:false };
-let _fl, _cloud, _cloudQuand = 0, _gh;
+               plans:new Set(), supprPlans:new Set(), kv:false };
+let _fl, _cloud, _cloudQuand = 0;
 /* interne = true pour les écritures déclenchées par CashFlow lui-même, comme
    l'horodatage d'un dépôt : elles ne comptent pas comme une modification de
    tes données, sinon chaque dépôt en appellerait un autre. */
@@ -833,8 +814,6 @@ function planifier(interne){
   invalider();   // toute écriture rend les soldes en cache caducs
   clearTimeout(_fl); _fl = setTimeout(ecouler, 150);
   if(interne) return;
-  // Un projet partagé est republié peu après avoir bougé, jamais pendant la frappe.
-  clearTimeout(_gh); _gh = setTimeout(pousserPartages, 8000);
   DB.meta.modifie = Date.now();
   clearTimeout(_cloud);
   _cloudQuand = Date.now() + 120000;
@@ -844,14 +823,13 @@ async function ecouler(){
   if(!pret) return;
   const rien = !sale.projets.size && !sale.supprProjets.size && !sale.ops.size &&
                !sale.supprOps.size && !sale.plans.size && !sale.supprPlans.size &&
-               !sale.partages.size && !sale.supprPartages.size && !sale.kv;
+               !sale.kv;
   if(rien) return;
   const lots = { projets:[], supprProjets:[...sale.supprProjets], ops:[], supprOps:[...sale.supprOps],
-                 plans:[], supprPlans:[...sale.supprPlans], partages:[], supprPartages:[...sale.supprPartages], kv:{} };
+                 plans:[], supprPlans:[...sale.supprPlans], kv:{} };
   sale.projets.forEach(id  => { const x = DB.projets[id];  if(x) lots.projets.push(x); });
   sale.ops.forEach(id      => { const x = DB.ops[id];      if(x) lots.ops.push(x); });
   sale.plans.forEach(id    => { const x = DB.plans[id];    if(x) lots.plans.push(x); });
-  sale.partages.forEach(id => { const x = DB.partages[id]; if(x) lots.partages.push(x); });
   if(sale.kv){ lots.kv = { settings:DB.settings, meta:DB.meta, version:SCHEMA }; }
   Object.values(sale).forEach(v => { if(v && v.clear) v.clear(); });
   sale.kv = false;
@@ -862,15 +840,12 @@ function sauver(interne){ sale.kv = true; planifier(interne); }
 function sauverProjet(p){ if(p) sale.projets.add(String(p.id)); sale.kv = true; planifier(); }
 function sauverOp(o){ if(o) sale.ops.add(String(o.id)); sale.kv = true; planifier(); }
 function sauverPlan(x){ if(x) sale.plans.add(String(x.id)); sale.kv = true; planifier(); }
-function sauverPartage(x){ if(x) sale.partages.add(String(x.id)); sale.kv = true; planifier(true); }
-function supprimerPartageDB(id){ delete DB.partages[id]; sale.supprPartages.add(String(id)); sale.kv = true; planifier(true); }
 function supprimerOpDB(id){ delete DB.ops[id]; sale.supprOps.add(String(id)); sale.kv = true; planifier(); }
 function supprimerPlanDB(id){ delete DB.plans[id]; sale.supprPlans.add(String(id)); sale.kv = true; planifier(); }
 function toutSalir(){
   Object.keys(DB.projets).forEach(id => sale.projets.add(id));
   Object.keys(DB.ops).forEach(id => sale.ops.add(id));
   Object.keys(DB.plans).forEach(id => sale.plans.add(id));
-  Object.keys(DB.partages).forEach(id => sale.partages.add(id));
   sale.kv = true; planifier();
 }
 function assembler(k){
@@ -878,7 +853,6 @@ function assembler(k){
   (k.projets||[]).forEach(x => { d.projets[x.id] = x; });
   (k.ops||[]).forEach(x => { d.ops[x.id] = x; });
   (k.plans||[]).forEach(x => { d.plans[x.id] = x; });
-  (k.partages||[]).forEach(x => { d.partages[x.id] = x; });
   d.settings = { ...DEFAULTS.settings, ...(k.kv.settings || {}) };
   d.meta     = { ...DEFAULTS.meta,     ...(k.kv.meta     || {}) };
   return d;
@@ -891,7 +865,6 @@ function fusionnerSauvegarde(d){
   Object.entries(d.projets).forEach(([k,v]) => { if(!DB.projets[k]){ DB.projets[k] = v; np++; } });
   Object.entries(d.ops||{}).forEach(([k,v])   => { if(!DB.ops[k]){ DB.ops[k] = v; no++; } });
   Object.entries(d.plans||{}).forEach(([k,v]) => { if(!DB.plans[k]){ DB.plans[k] = v; nl++; } });
-  Object.entries(d.partages||{}).forEach(([k,v]) => { if(!DB.partages[k] && DB.projets[v.projet]) DB.partages[k] = v; });
   if(d.settings) ["gid","gdFichier","gdDossier","gdMail"].forEach(k => {
     if(d.settings[k] && !DB.settings[k]) DB.settings[k] = d.settings[k];
   });
@@ -1043,10 +1016,7 @@ function materialiser(){
   let n = 0;
   plansAll().forEach(pl => {
     const pp = DB.projets[pl.projet];
-    // Un projet reçu en partage est un miroir : c'est l'émetteur qui convertit
-    // ses échéances, et le résultat arrive déjà converti. Le refaire ici
-    // créerait deux fois la même opération.
-    if(!pp || pp.archive || pp.abonnement) return;
+    if(!pp || pp.archive) return;
     let fait = pl.fait || 0;
     while(fait < (pl.occurrences||1)){
       const d = occDate(pl, fait);
@@ -1084,6 +1054,29 @@ function horizonPlans(){
   return f;
 }
 const horizon = () => horizonPlans() || todayISO();
+/* Même chose pour un projet isolé, ce que sa fiche affiche à côté du solde. */
+function horizonProjet(pid){
+  let f = "";
+  plansAll().forEach(pl => {
+    if(pl.projet !== pid || resteOcc(pl) <= 0) return;
+    const d = finPlan(pl);
+    if(d > f) f = d;
+  });
+  return f;
+}
+
+/* Les premiers jours des n mois qui suivent celui en cours : ce sont les
+   dates où l'on se demande vraiment « il me restera combien ». */
+function premiersMois(n){
+  const d = new Date(todayISO() + "T12:00:00");
+  const out = [];
+  for(let i = 1; i <= n; i++){
+    const m = new Date(d.getFullYear(), d.getMonth() + i, 1);
+    out.push(m.getFullYear() + "-" + p2(m.getMonth() + 1) + "-01");
+  }
+  return out;
+}
+const totalProjete = date => actifs().reduce((s,p) => s + soldeProjete(p.id, date), 0);
 
 function mouvementsPrevus(date){
   const out = [];
@@ -1103,13 +1096,13 @@ function mouvementsPrevus(date){
    ============================================================ */
 const state = {
   tab:"accueil", projet:null, modal:null, archivesOuvertes:false,
-  journal:false, neuf:false, prevDate:"", quota:null, reorg:false, occupe:""
+  journal:false, neuf:false, prevDate:"", quota:null, reorg:false, echAll:false
 };
 const TABS = [
   { id:"accueil",  l:"Accueil",     i:"home" },
-  { id:"ops",      l:"Opérations",  i:"list" },
-  { id:"plans",    l:"Planifié",    i:"cal" },
   { id:"prev",     l:"Prévision",   i:"trend" },
+  { id:"plans",    l:"Planifié",    i:"cal" },
+  { id:"ops",      l:"Opérations",  i:"list" },
   { id:"reglages", l:"Réglages",    i:"cog" }
 ];
 
@@ -1173,9 +1166,7 @@ function ligneProjet(p){
   const emo = p.emoji
     ? '<div class="pemo">' + esc(p.emoji) + '</div>'
     : '<div class="pemo ini">' + esc((p.titre||"?").trim()[0].toUpperCase()) + '</div>';
-  const ab = !!p.abonnement;
-  const pa = partageDe(p.id);
-  const sous = ab ? "Reçu en partage" : (nb ? (nb === 1 ? "1 opération" : nb + " opérations") : "aucun mouvement");
+  const sous = nb ? (nb === 1 ? "1 opération" : nb + " opérations") : "aucun mouvement";
   const coeur = '<button class="pgo" style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left" ' +
       'data-act="ouvrir-projet" data-id="' + p.id + '">' + emo +
       '<div class="pmid"><div class="pname">' + esc(p.titre) + '</div>' +
@@ -1191,9 +1182,8 @@ function ligneProjet(p){
       '<div class="pbal num ' + cl$(s) + '">' + fmt(s) + '</div>' +
       '<span class="poig">' + svg("poignee",18,1.9) + '</span></div>';
 
-  // Un projet reçu n'expose aucun geste : on ne dépense pas dans l'enveloppe
-  // d'un autre, et le repartager reviendrait à republier les données de son auteur.
-  if(p.archive || ab) return '<div class="prow' + (p.archive ? " arch" : "") + '">' + coeur + '</div>';
+  // Un projet archivé est en lecture seule : il n'expose aucun geste.
+  if(p.archive) return '<div class="prow arch">' + coeur + '</div>';
 
   // Quatre gestes rapides ne tiennent pas sur la ligne du nom et du solde : il
   // ne resterait qu'une quarantaine de pixels au titre. Ils descendent donc à
@@ -1204,11 +1194,11 @@ function ligneProjet(p){
         '<span class="pname">' + esc(p.titre) + '</span>' +
         '<span class="pbal num ' + cl$(s) + '">' + fmt(s) + '</span></button>' +
       '<div class="pl2"><span class="psub">' + sous + '</span>' +
-      '<button class="qb mo" data-act="rapide-depense" data-id="' + p.id + '" aria-label="Dépenser" title="Dépenser">' + svg("moins",15,2.2) + '</button>' +
       '<button class="qb pl" data-act="rapide-ajout" data-id="' + p.id + '" aria-label="Ajouter" title="Ajouter">' + svg("plus",15,2.2) + '</button>' +
+      '<button class="qb mo" data-act="rapide-depense" data-id="' + p.id + '" aria-label="Dépenser" title="Dépenser">' + svg("moins",15,2.2) + '</button>' +
       '<button class="qb" data-act="nouveau-plan" data-id="' + p.id + '" aria-label="Récurrence" title="Récurrence">' + svg("cal",15,1.9) + '</button>' +
-      '<button class="qb pa' + (pa ? " on" : "") + '" data-act="partage" data-id="' + p.id + '" ' +
-        'aria-label="Partager" title="Partager">' + svg("partage",15,2) + '</button>' +
+      '<button class="qb" data-act="transfert" data-id="' + p.id + '" aria-label="Transférer" title="Transférer"' +
+        (actifs().length < 2 ? " disabled" : "") + '>' + svg("ech",15,1.9) + '</button>' +
       '</div></div></div>';
 }
 
@@ -1284,7 +1274,8 @@ function ligneOp(o, pid, prev){
     (prev ? 'data-act="ouvrir-plan" data-id="' + o.plan + '"' : 'data-act="modifier-op" data-id="' + o.id + '"') + '>' +
     '<span class="op-ic ' + cls + '">' + svg(ic,15,2.1) + '</span>' +
     '<span class="op-mid"><span class="op-lib">' + esc(libelleOp(o, pid)) +
-      (prev ? '<span class="tagprev">prévu</span>' : "") + '</span>' +
+      (prev ? '<span class="tagprev">prévu</span>'
+            : (o.plan ? '<span class="tagrec">récurrence</span>' : "")) + '</span>' +
       '<span class="op-met">' + esc(meta) + '</span></span>' +
     '<span class="op-mt ' + (pid ? cl$(mt) : (o.type === "transfert" ? "" : cl$(mt))) + '">' +
       (o.type === "transfert" && !pid ? fmt(o.montant) : fmt(mt, true)) + '</span>' +
@@ -1361,7 +1352,8 @@ function lignePlan(pl){
   const reste = resteOcc(pl);
   const jour = Number(pl.debut.slice(8,10));
   const mt = pl.type === "ajout" ? pl.montant : -pl.montant;
-  const etat = reste ? (reste + " " + (reste > 1 ? "restantes" : "restante")) : "terminée";
+  const etat = reste ? (reste + " " + (reste > 1 ? "restantes" : "restante") + " sur " + (pl.occurrences || 1))
+                     : "terminée";
   return '<button class="op" data-act="modifier-plan" data-id="' + pl.id + '">' +
     '<span class="op-ic ' + (pl.type === "ajout" ? "pl" : "mo") + '">' + svg(pl.type === "ajout" ? "plus" : "moins",15,2.1) + '</span>' +
     '<span class="op-mid"><span class="op-lib">' + esc(pl.libelle || (pl.type === "ajout" ? "Ajout" : "Dépense")) + '</span>' +
@@ -1402,7 +1394,17 @@ function vuePrevision(){
     '<div class="total-sub"><span class="delta ' + cl$(delta) + '">' + fmt(delta, true) + '</span>' +
     '<span>' + esc(fmt(maintenant)) + ' aujourd\'hui</span></div></section>';
 
-  h += '<div class="champ" style="margin-top:16px"><label for="prev-date">À la date du</label>' +
+  h += '<div class="sect" style="margin-top:20px"><h2>Aux quatre prochains mois</h2></div>';
+  h += '<div class="plist">' + premiersMois(4).map(m => {
+    const v = totalProjete(m), dl = v - maintenant;
+    return '<button class="prow" data-act="prev-mois" data-id="' + m + '"' +
+      (m === d ? ' style="background:var(--accF)"' : "") + '>' +
+      '<div class="pmid"><div class="pname">' + esc(moisAn(m).replace(/^./, c => c.toUpperCase())) + '</div>' +
+      '<div class="psub mono">' + esc("au 1er  ·  ") + (dl >= 0 ? "+" : "−") + esc(fmt(Math.abs(dl)).replace("-","")) + '</div></div>' +
+      '<div class="pbal num ' + cl$(v) + '">' + fmt(v) + '</div></button>';
+  }).join("") + '</div>';
+
+  h += '<div class="champ" style="margin-top:22px"><label for="prev-date">À la date du</label>' +
     '<input type="date" id="prev-date" data-act="prev-date" value="' + esc(d) + '" min="' + todayISO() + '"></div>';
 
   if(!a.length) return h + '<div class="vide"><b>Aucun projet pour l\'instant</b>Crée un projet pour commencer à répartir ton argent.</div>';
@@ -1438,10 +1440,7 @@ function vuePrevision(){
    ============================================================ */
 function vueProjet(p){
   const s = solde(p.id);
-  // Archivé, ou reçu en partage : dans les deux cas la fiche est en lecture
-  // seule. Un projet reçu appartient à celui qui le publie ; le modifier ici
-  // ne servirait qu'à voir ses changements écrasés au prochain rafraîchissement.
-  const lu = !!p.archive || !!p.abonnement;
+  const lu = !!p.archive;   // archivé = lecture seule
   const fT = DB.settings.fTypeP || "tout";
   let l = opsDe(p.id);
   if(fT === "ajout")     l = l.filter(o => o.type !== "transfert" && effet(o,p.id) > 0);
@@ -1449,13 +1448,20 @@ function vueProjet(p){
   else if(fT === "transfert") l = l.filter(o => o.type === "transfert");
   l = trierOps(l, DB.settings.triOpsP || "recent");
 
-  const prochaines = [];
+  // Toutes les échéances encore à venir, y compris la dernière : les borner à
+  // deux mois donnait l'impression qu'une récurrence perdait sa fin de course.
+  // Au-delà de six, le reste se déplie à la demande pour ne pas enterrer
+  // l'historique sous la liste des prévisions.
+  const toutes = [];
   plansAll().filter(pl => pl.projet === p.id).forEach(pl => {
-    echeances(pl, plusMois(todayISO(), 2)).slice(0,3).forEach(e =>
-      prochaines.push({ id:"prev-"+pl.id+"-"+e.i, plan:pl.id, type:pl.type, projet:p.id,
-                        montant:pl.montant, libelle:pl.libelle, date:e.date }));
+    echeances(pl).forEach(e =>
+      toutes.push({ id:"prev-"+pl.id+"-"+e.i, plan:pl.id, type:pl.type, projet:p.id,
+                    montant:pl.montant, libelle:pl.libelle, date:e.date }));
   });
-  prochaines.sort((a,b) => a.date.localeCompare(b.date));
+  toutes.sort((a,b) => a.date.localeCompare(b.date));
+  const LIM = 6;
+  const prochaines = state.echAll ? toutes : toutes.slice(0, LIM);
+  const reste = toutes.length - prochaines.length;
 
   let h = '<div class="sheet-bg" data-act="fermer-projet"></div><div class="sheet"><div class="sheet-top">' +
     '<button class="iconbtn" data-act="fermer-projet" aria-label="Retour">' + svg("fleche",18) + '</button>' +
@@ -1464,31 +1470,37 @@ function vueProjet(p){
     '<button class="iconbtn" data-act="modifier-projet" data-id="' + p.id + '" aria-label="Modifier">' + svg("crayon",17) + '</button>' +
     '</div><div class="sheet-in">';
 
+  const hzp = horizonProjet(p.id);
+  const sp = hzp ? soldeProjete(p.id, hzp) : s;
   h += '<div class="fiche-h">' +
     (p.emoji ? '<div class="fiche-emo">' + esc(p.emoji) + '</div>' : "") +
-    '<div class="total-lbl">' + esc(p.titre) +
+    '<div class="fiche-t">' + esc(p.titre) +
       (p.archive ? '<span class="badge">Archivé</span>' : "") +
-      (p.abonnement ? '<span class="badge">Reçu en partage</span>' : "") +
       (s < 0 ? '<span class="badge neg">négatif</span>' : "") + '</div>' +
-    '<span class="fiche-bal num ' + cl$(s) + '">' + fmt(s) + '</span></div>';
+    '<div class="tete">' +
+      '<div class="col"><div class="total-lbl">Solde actuel</div>' +
+        '<span class="total-val num ' + cl$(s) + '">' + fmt(s) + '</span>' +
+        '<div class="col-d">' + esc(frDate(todayISO(), true)) + '</div></div>' +
+      '<div class="col proj"><div class="total-lbl">Solde projeté</div>' +
+        '<span class="total-val num ' + cl$(sp) + '">' + fmt(sp) + '</span>' +
+        '<div class="col-d">' + (hzp ? esc(frDate(hzp, true)) : "rien de planifié") + '</div></div>' +
+    '</div></div>';
 
   if(!lu){
     h += '<div class="btns grow">' +
       '<button class="btn pri" data-act="rapide-ajout" data-id="' + p.id + '">' + svg("plus",16,2.2) + 'Ajouter</button>' +
       '<button class="btn" data-act="rapide-depense" data-id="' + p.id + '">' + svg("moins",16,2.2) + 'Dépenser</button>' +
+      '<button class="btn" data-act="nouveau-plan" data-id="' + p.id + '">' + svg("cal",16,1.9) + 'Récurrence</button>' +
       '<button class="btn" data-act="transfert" data-id="' + p.id + '"' + (actifs().length < 2 ? " disabled" : "") + '>' + svg("ech",16) + 'Transférer</button>' +
       '</div>';
-    h += '<div class="btns"><button class="btn wide" data-act="partage" data-id="' + p.id + '">' +
-      svg("partage",16,2) + (partageDe(p.id) ? "Gérer le partage" : "Partager ce projet") + '</button></div>';
   }
 
   if(prochaines.length){
-    h += '<div class="sect"><h2>Planifié</h2><span class="cnt">' + prochaines.length + '</span><span class="sp"></span>' +
-      '<button class="chip" data-act="nouveau-plan" data-id="' + p.id + '">Ajouter</button></div>' +
+    h += '<div class="sect"><h2>Planifié</h2><span class="cnt">' + toutes.length + '</span></div>' +
       '<div class="ops">' + prochaines.map(o => ligneOp(o, p.id, true)).join("") + '</div>';
-  }else if(!lu){
-    h += '<div class="sect"><h2>Planifié</h2><span class="sp"></span>' +
-      '<button class="chip" data-act="nouveau-plan" data-id="' + p.id + '">Ajouter une récurrence</button></div>';
+    if(reste > 0 || state.echAll)
+      h += '<div class="btns" style="margin:10px 0 0"><button class="btn wide" data-act="voir-echeances">' +
+        (state.echAll ? "Réduire" : "Afficher les " + reste + " suivantes") + '</button></div>';
   }
 
   h += '<div class="sect" style="margin-top:24px"><h2>Historique</h2><span class="cnt">' + l.length + '</span></div>';
@@ -1505,15 +1517,6 @@ function vueProjet(p){
   h += l.length ? '<div class="ops">' + l.map(o => ligneOp(o, p.id, false)).join("") + '</div>'
                 : '<div class="vide">Aucun mouvement pour l\'instant.</div>';
 
-  if(p.abonnement){
-    const e = p.abonnement.err;
-    h += '<div class="aide" style="margin-top:22px">' +
-      (e ? '<span class="neg">' + esc(e) + '</span>' : 'Dernière mise à jour : ' + esc(quand(p.abonnement.recu))) + '</div>' +
-      '<div class="btns">' +
-      '<button class="btn" data-act="rafraichir-abonnement" data-id="' + p.id + '">Actualiser</button>' +
-      '<button class="btn dang" data-act="desabonner" data-id="' + p.id + '">Se désabonner</button></div>';
-    return h + '</div></div>';
-  }
   h += '<div class="btns" style="margin-top:26px">' +
     '<button class="btn" data-act="' + (p.archive ? "desarchiver" : "archiver") + '" data-id="' + p.id + '">' +
       svg("boite",16) + (p.archive ? "Désarchiver" : "Archiver") + '</button>' +
@@ -1607,8 +1610,8 @@ function vueModal(m){
     c = '<h3>' + (m.id ? "Modifier la récurrence" : "Nouvelle récurrence") + '</h3>' +
       '<div class="champ"><label for="m-projet">Projet</label><select id="m-projet">' + optionsProjets(m.projet) + '</select></div>' +
       '<div class="champ"><label for="m-type">Type</label><select id="m-type">' +
-        '<option value="depense"' + (m.type2 === "ajout" ? "" : " selected") + '>Dépense</option>' +
-        '<option value="ajout"' + (m.type2 === "ajout" ? " selected" : "") + '>Ajout</option></select></div>' +
+        '<option value="ajout"' + (m.type2 === "depense" ? "" : " selected") + '>Ajout</option>' +
+        '<option value="depense"' + (m.type2 === "depense" ? " selected" : "") + '>Dépense</option></select></div>' +
       champMontant(m.montant, false) + champLibelle(m.libelle, "Loyer") +
       '<div class="deux">' +
         '<div class="champ"><label for="m-debut">Date de début</label><input type="date" id="m-debut" value="' + esc(deb) + '" data-live="plan"></div>' +
@@ -1617,51 +1620,6 @@ function vueModal(m){
       '<div class="aide"><span>Dernière échéance</span> : <b id="m-fin" class="mono">' + esc(frDate(plusMois(deb, occ-1), true)) + '</b></div>' +
       (m.id ? '<div class="btns" style="margin:16px 0 0"><button class="btn dang wide" data-act="supprimer-plan" data-id="' + m.id + '">Supprimer</button></div>' : "") +
       boiteBoutons("Enregistrer", m.id ? "plan-enregistrer" : "plan-creer");
-  }
-  else if(m.type === "partage"){
-    const p = DB.projets[m.id], pa = p ? partageDe(p.id) : null;
-    c = '<h3>Partager ce projet</h3><div class="sous">' +
-        esc(p ? (p.emoji ? p.emoji + " " : "") + p.titre : "—") + '</div>';
-    if(!chiffrable())
-      c += '<div class="aide neg">Le partage demande une connexion sécurisée en https.</div>' +
-           '<div class="btns"><button class="btn wide" data-act="fermer-modal">Fermer</button></div>';
-    else if(!ghPret())
-      c += '<div class="aide">Renseigne d\'abord un jeton GitHub et un dépôt dans les Réglages.</div>' +
-           '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
-           '<button class="btn pri" style="flex:1" data-act="aller-reglages">Ouvrir les Réglages</button></div>';
-    else if(!pa)
-      c += '<div class="aide">Le projet est chiffré sur cet appareil puis déposé sur ton dépôt. ' +
-           'Seul qui reçoit le lien peut le lire, et il le verra évoluer à chaque modification.</div>' +
-           '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
-           '<button class="btn pri" style="flex:1" data-act="partage-creer" data-id="' + m.id + '"' + (m.busy ? " disabled" : "") + '>' +
-           (m.busy ? "Chiffrement en cours" : "Créer le lien de partage") + '</button></div>';
-    else{
-      const n = actifsPartage(pa);
-      c += '<div class="lien">' + esc(lienPartage(pa)) + '</div>' +
-        '<div class="aide">' + (pa.err ? '<span class="neg">' + esc(pa.err) + '</span>'
-          : esc("Publié : " + quand(pa.pousse)) + '  ·  ' + n + " " + (n > 1 ? "appareils" : "appareil")) + '</div>' +
-        '<div class="btns grow"><button class="btn pri" data-act="partage-copier" data-id="' + pa.id + '">' +
-          svg("copier",15) + 'Copier le lien</button>' +
-        '<button class="btn dang" data-act="partage-arreter" data-id="' + pa.id + '"' + (m.busy ? " disabled" : "") + '>' +
-          svg("stop",15) + 'Arrêter</button></div>' +
-        '<div class="btns"><button class="btn wide" data-act="fermer-modal">Fermer</button></div>';
-    }
-  }
-  else if(m.type === "recu"){
-    if(m.etat === "charge")
-      c = '<h3>Projet partagé</h3><div class="sous">Déchiffrement en cours…</div>';
-    else if(m.etat === "ko")
-      c = '<h3>Projet partagé</h3><div class="sous neg">' + esc(m.msg) + '</div>' +
-          '<div class="btns"><button class="btn wide" data-act="fermer-modal">Fermer</button></div>';
-    else{
-      const sc = soldeCharge(m.charge);
-      c = '<h3>Ajouter ce projet partagé ?</h3>' +
-        '<div class="sous">' + esc((m.charge.emoji ? m.charge.emoji + " " : "") + (m.charge.titre || "")) + '</div>' +
-        '<span class="fiche-bal num ' + cl$(sc) + '" style="font-size:34px">' + fmt(sc) + '</span>' +
-        '<div class="aide">Il arrivera en lecture seule et se mettra à jour tout seul quand son auteur le modifiera.</div>' +
-        '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
-        '<button class="btn pri" style="flex:1" data-act="accepter-recu">Ajouter le projet</button></div>';
-    }
   }
   else if(m.type === "couleur"){
     c = '<h3>Couleur personnalisée</h3>' +
@@ -1778,56 +1736,6 @@ function vueReglages(){
     '<div class="aide">' + (s.gid ? "Identifiant personnel." : (CFG.gid ? "Identifiant du site utilisé par défaut." : "Aucun identifiant.")) + '</div></div>';
   h += '</div></div>';
 
-  // Partage
-  h += '<div class="bloc"><div class="bloc-h">' + svg("partage",17,2) + 'Partage</div><div class="bloc-b">';
-  if(!chiffrable())
-    h += '<div class="lig" style="padding-top:0"><div class="l neg">Le partage demande une connexion sécurisée en https.</div></div>';
-  h += '<div class="champ" style="margin-top:0"><label for="m-ghtok">Jeton GitHub classique</label>' +
-    '<input type="password" id="m-ghtok" autocomplete="off" spellcheck="false" placeholder="ghp_…" value="' +
-      esc(s.ghToken || "") + '" data-act="gh-token">' +
-    '<div class="aide">Jeton personnel classique, portée repo. Il ne quitte pas cet appareil, sinon dans tes propres sauvegardes.</div></div>' +
-    '<div class="champ"><label for="m-ghrepo">Dépôt</label>' +
-    '<input type="text" id="m-ghrepo" autocomplete="off" spellcheck="false" placeholder="utilisateur/depot" value="' +
-      esc(s.ghRepo || "") + '" data-act="gh-repo">' +
-    '<div class="aide">Un dépôt public convient : ce qui y est déposé est chiffré, et le destinataire lit sans compte GitHub.</div></div>';
-
-  const ps = Object.values(DB.partages);
-  h += '<div class="sect" style="margin:16px 0 2px"><h2 style="font-size:14px">Partages en cours</h2>' +
-       '<span class="cnt">' + ps.length + '</span></div>';
-  if(!ps.length) h += '<div class="aide">Aucun partage en cours.</div>';
-  ps.forEach(pa => {
-    const pr = DB.projets[pa.projet];
-    const n = actifsPartage(pa);
-    h += '<div class="part"><div class="part-h">' +
-      '<span class="part-n">' + esc(pr ? (pr.emoji ? pr.emoji + " " : "") + pr.titre : "—") + '</span>' +
-      '<span class="part-c">' + n + ' ' + (n > 1 ? "appareils" : "appareil") + '</span></div>' +
-      '<div class="lien">' + esc(lienPartage(pa)) + '</div>' +
-      '<div class="aide">' + (pa.err ? '<span class="neg">' + esc(pa.err) + '</span>'
-        : esc("Publié : " + quand(pa.pousse))) + '</div>' +
-      '<div class="btns grow" style="margin:8px 0 0">' +
-      '<button class="btn" data-act="partage-copier" data-id="' + pa.id + '">' + svg("copier",15) + 'Copier le lien</button>' +
-      '<button class="btn dang" data-act="partage-arreter" data-id="' + pa.id + '">' + svg("stop",15) + 'Arrêter</button>' +
-      '</div></div>';
-  });
-
-  const abs = abonnements();
-  if(abs.length){
-    h += '<div class="sect" style="margin:18px 0 2px"><h2 style="font-size:14px">Reçus en partage</h2>' +
-         '<span class="cnt">' + abs.length + '</span></div>';
-    abs.forEach(pr => {
-      h += '<div class="part"><div class="part-h">' +
-        '<span class="part-n">' + esc((pr.emoji ? pr.emoji + " " : "") + pr.titre) + '</span>' +
-        '<span class="part-c">' + esc(pr.abonnement.depot) + '</span></div>' +
-        '<div class="aide">' + (pr.abonnement.err ? '<span class="neg">' + esc(pr.abonnement.err) + '</span>'
-          : esc("Reçu : " + quand(pr.abonnement.recu))) + '</div>' +
-        '<div class="btns grow" style="margin:8px 0 0">' +
-        '<button class="btn" data-act="rafraichir-abonnement" data-id="' + pr.id + '">Actualiser</button>' +
-        '<button class="btn dang" data-act="desabonner" data-id="' + pr.id + '">Se désabonner</button>' +
-        '</div></div>';
-    });
-  }
-  h += '</div></div>';
-
   // Données
   h += '<div class="bloc"><div class="bloc-h">Données</div><div class="bloc-b">' +
     '<div class="btns grow" style="margin-top:0">' +
@@ -1898,15 +1806,11 @@ document.addEventListener("click", async ev => {
   /* ---- navigation ---- */
   if(act === "tab"){
     state.tab = id; state.reorg = false; render(); window.scrollTo(0,0);
-    if(id === "reglages") Object.values(DB.partages).forEach(rafraichirPresence);
     return;
   }
-  if(act === "aller-reglages"){
-    state.modal = null; state.tab = "reglages"; render(); window.scrollTo(0,0);
-    Object.values(DB.partages).forEach(rafraichirPresence);
-    return;
-  }
-  if(act === "ouvrir-projet"){ state.projet = id; render(); return; }
+  if(act === "ouvrir-projet"){ state.projet = id; state.echAll = false; render(); return; }
+  if(act === "prev-mois"){ state.prevDate = id; render(); return; }
+  if(act === "voir-echeances"){ state.echAll = !state.echAll; render(); return; }
   if(act === "fermer-projet"){ state.projet = null; render(); return; }
   if(act === "fermer-modal"){ fermerModal(); return; }
   if(act === "basculer-archives"){ state.archivesOuvertes = !state.archivesOuvertes; render(); return; }
@@ -1976,8 +1880,6 @@ document.addEventListener("click", async ev => {
     const p = DB.projets[id];
     if(!p) return fermerModal();
     if(val("m-conf").toLowerCase() !== p.titre.trim().toLowerCase()) return toast("Le titre ne correspond pas.");
-    const pa = partageDe(id);
-    if(pa) arreterPartage(pa.id);   // le lien ne doit pas survivre au projet
     corbeille = supprimerProjet(id);
     state.modal = null; state.projet = null;
     toast("Projet supprimé", "annuler-suppr"); render();
@@ -2090,7 +1992,7 @@ document.addEventListener("click", async ev => {
   /* ---- planification ---- */
   if(act === "nouveau-plan"){
     if(!actifs().length) return;
-    ouvrirModal({ type:"plan", projet:id || actifs()[0].id, type2:"depense", focus:"m-montant" });
+    ouvrirModal({ type:"plan", projet:id || actifs()[0].id, type2:"ajout", focus:"m-montant" });
     return;
   }
   if(act === "modifier-plan" || act === "ouvrir-plan"){
@@ -2121,8 +2023,12 @@ document.addEventListener("click", async ev => {
       }
     }
     state.modal = null;
+    // Une échéance dont la date est déjà atteinte devient tout de suite une
+    // opération réelle, y compris celle du jour : le dire évite de croire
+    // qu'elle a été oubliée, puisqu'elle quitte aussitôt la liste du planifié.
     const n = materialiser();
-    toast(n ? "Récurrence enregistrée" : "Récurrence enregistrée");
+    if(n) toast(n > 1 ? (n + " échéances passées converties") : (n + " échéance passée convertie"));
+    else toast("Récurrence enregistrée");
     render();
     return;
   }
@@ -2133,43 +2039,6 @@ document.addEventListener("click", async ev => {
     supprimerPlanDB(id);
     state.modal = null; toast("Récurrence supprimée", "annuler-suppr"); render();
     return;
-  }
-
-  /* ---- partage ---- */
-  if(act === "partage"){ ouvrirModal({ type:"partage", id }); return; }
-  if(act === "partage-creer"){
-    if(state.modal){ state.modal.busy = true; render(); }
-    try{ await creerPartage(id); toast("Partage créé"); }
-    catch(e){ toast(String((e && e.message) || e)); }
-    if(state.modal) state.modal.busy = false;
-    render(); return;
-  }
-  if(act === "partage-copier"){
-    const pa = DB.partages[id];
-    if(pa) copier(lienPartage(pa));
-    return;
-  }
-  if(act === "partage-arreter"){
-    if(state.modal){ state.modal.busy = true; render(); }
-    await arreterPartage(id);
-    if(state.modal) state.modal = null;
-    toast("Partage arrêté"); render(); return;
-  }
-  if(act === "accepter-recu"){
-    const m = state.modal;
-    if(!m || !m.charge) return;
-    abonner(m.ref, m.charge);
-    state.modal = null; state.tab = "accueil"; state.projet = null;
-    toast("Projet ajouté"); render(); return;
-  }
-  if(act === "rafraichir-abonnement"){
-    await synchroniserAbonnements();
-    toast("Partage actualisé"); render(); return;
-  }
-  if(act === "desabonner"){
-    corbeille = supprimerProjet(id);
-    state.projet = null; state.modal = null;
-    toast("Désabonné", "annuler-suppr"); render(); return;
   }
 
   /* ---- réglages ---- */
@@ -2230,12 +2099,6 @@ document.addEventListener("change", ev => {
     placerCurseurs();
   }
   else if(act === "gid"){ DB.settings.gid = el.value.trim(); GD.client = null; GD.jeton = null; sauver(); render(); }
-  else if(act === "gh-token"){ DB.settings.ghToken = el.value.trim(); sauver(); render(); }
-  else if(act === "gh-repo"){
-    DB.settings.ghRepo = el.value.trim();
-    DB.settings.ghBranche = "";   // la branche par défaut sera relue
-    sauver(); render();
-  }
 });
 /* La date de fin d'une récurrence se déduit de la date de début et du nombre
    d'occurrences : elle s'écrit toute seule pendant la saisie. */
@@ -2517,7 +2380,7 @@ async function gdDossier(interactif){
 }
 function contenuSauvegarde(){
   return JSON.stringify({ app:"cashflow", appVersion:VERSION, schema:SCHEMA,
-    exportedAt:new Date().toISOString(), projets:DB.projets, ops:DB.ops, plans:DB.plans, partages:DB.partages,
+    exportedAt:new Date().toISOString(), projets:DB.projets, ops:DB.ops, plans:DB.plans,
     settings:DB.settings, meta:DB.meta });
 }
 async function gdRetenirCompte(){
@@ -2829,319 +2692,6 @@ function exporterXLSX(){
 }
 
 /* ============================================================
-   PARTAGE D'UN PROJET
-   Le contenu du projet est chiffré ici, sur l'appareil, puis déposé sur un
-   dépôt GitHub. La clé ne part jamais avec lui : elle vit dans le fragment
-   du lien, cette partie de l'URL que le navigateur ne transmet à personne.
-   GitHub n'héberge donc qu'un bloc illisible ; qui n'a pas le lien n'a rien.
-   Le partage va dans un seul sens : celui qui reçoit voit, ne modifie pas.
-   ============================================================ */
-const chiffrable = () => !!(window.crypto && window.crypto.subtle && window.isSecureContext);
-
-function b64(u8){
-  let s = "";
-  const pas = 0x8000;
-  for(let i = 0; i < u8.length; i += pas) s += String.fromCharCode.apply(null, u8.subarray(i, i + pas));
-  return btoa(s);
-}
-function deb64(t){
-  const b = atob(t), u = new Uint8Array(b.length);
-  for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
-  return u;
-}
-const b64u   = t => t.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-const deb64u = t => t.replace(/-/g,"+").replace(/_/g,"/");
-const enOctets = t => new TextEncoder().encode(t);
-const enTexte  = u => new TextDecoder().decode(u);
-
-async function cleDe(cle, usages){
-  return crypto.subtle.importKey("raw", deb64(deb64u(cle)), { name:"AES-GCM" }, false, usages);
-}
-async function chiffrer(texte, cle){
-  const k = await cleDe(cle, ["encrypt"]);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const c = new Uint8Array(await crypto.subtle.encrypt({ name:"AES-GCM", iv }, k, enOctets(texte)));
-  return { iv:b64(iv), d:b64(c) };
-}
-async function dechiffrer(paquet, cle){
-  const k = await cleDe(cle, ["decrypt"]);
-  try{
-    return enTexte(new Uint8Array(await crypto.subtle.decrypt(
-      { name:"AES-GCM", iv:deb64(paquet.iv) }, k, deb64(paquet.d))));
-  }catch(e){ throw new Error("lien invalide ou clé incorrecte"); }
-}
-
-/* ---------- dépôt GitHub ---------- */
-const ghDepot = () => (DB.settings.ghRepo || "").trim()
-  .replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/i, "").replace(/^\/+|\/+$/g, "");
-const ghJeton = () => (DB.settings.ghToken || "").trim();
-const ghPret  = () => !!(ghJeton() && /^[^\/\s]+\/[^\/\s]+$/.test(ghDepot()));
-const CHEMIN  = id => "partages/" + id + ".json";
-
-async function ghAppel(chemin, opts){
-  const r = await fetch("https://api.github.com" + chemin, {
-    ...(opts || {}),
-    headers:{ Authorization:"Bearer " + ghJeton(), Accept:"application/vnd.github+json",
-              "X-GitHub-Api-Version":"2022-11-28", ...((opts && opts.headers) || {}) }
-  });
-  if(r.status === 401) throw new Error("jeton GitHub refusé");
-  if(r.status === 403) throw new Error("droits insuffisants : il faut la portée repo");
-  if(r.status === 404) throw new Error("introuvable sur " + ghDepot());
-  if(!r.ok) throw new Error("GitHub " + r.status + " " + (await r.text()).slice(0,110));
-  return r;
-}
-async function ghBrancheDefaut(){
-  if(DB.settings.ghBranche) return DB.settings.ghBranche;
-  const d = await (await ghAppel("/repos/" + ghDepot())).json();
-  DB.settings.ghBranche = d.default_branch || "main";
-  sauver(true);
-  return DB.settings.ghBranche;
-}
-async function ghSha(chemin){
-  try{
-    const b = await ghBrancheDefaut();
-    const r = await ghAppel("/repos/" + ghDepot() + "/contents/" + chemin + "?ref=" + encodeURIComponent(b));
-    return (await r.json()).sha || "";
-  }catch(e){ return ""; }
-}
-async function ghEcrire(chemin, contenu, sha, message){
-  const branch = await ghBrancheDefaut();
-  const corps = { message, branch, content:b64(enOctets(contenu)) };
-  if(sha) corps.sha = sha;
-  let r;
-  try{
-    r = await ghAppel("/repos/" + ghDepot() + "/contents/" + chemin, { method:"PUT", body:JSON.stringify(corps) });
-  }catch(e){
-    // Le sha retenu peut être périmé si un autre appareil a publié entre-temps.
-    if(!/GitHub 409|GitHub 422/.test(e.message)) throw e;
-    corps.sha = await ghSha(chemin);
-    r = await ghAppel("/repos/" + ghDepot() + "/contents/" + chemin, { method:"PUT", body:JSON.stringify(corps) });
-  }
-  const d = await r.json();
-  return (d.content && d.content.sha) || "";
-}
-async function ghSupprimer(chemin, sha){
-  const branch = await ghBrancheDefaut();
-  await ghAppel("/repos/" + ghDepot() + "/contents/" + chemin, {
-    method:"DELETE", body:JSON.stringify({ message:"cashflow retrait", sha, branch }) });
-}
-/* Lecture sans jeton : le destinataire n'a rien à configurer. Le paramètre
-   d'horodatage contourne le cache du CDN, qui servirait sinon une version
-   vieille de plusieurs minutes. */
-async function ghLireBrut(depot, branche, chemin){
-  const u = "https://raw.githubusercontent.com/" + depot + "/" + (branche || "main") + "/" + chemin + "?t=" + Date.now();
-  const r = await fetch(u, { cache:"no-store" });
-  if(r.status === 404) throw new Error("partage introuvable : il a peut-être été arrêté");
-  if(!r.ok) throw new Error("lecture impossible (" + r.status + ")");
-  return r.json();
-}
-
-/* ---------- côté émetteur ---------- */
-function partageDe(pid){ return Object.values(DB.partages).find(x => x.projet === pid) || null; }
-function appareil(){
-  if(!DB.settings.appareil){ DB.settings.appareil = uid(); sauver(true); }
-  return DB.settings.appareil;
-}
-/* Un transfert relie deux projets ; celui qui reçoit n'a que l'un des deux.
-   Il est donc converti en ajout ou en dépense, ce qui laisse le solde juste
-   et garde la trace de l'autre projet dans le libellé. */
-function chargeProjet(pid){
-  const p = DB.projets[pid];
-  const ops = opsDe(pid).map(o => o.type === "transfert"
-    ? { id:o.id, type:(o.vers === pid ? "ajout" : "depense"), montant:o.montant, date:o.date,
-        libelle:o.libelle || (o.vers === pid ? "Transfert depuis " + nomProjet(o.de) : "Transfert vers " + nomProjet(o.vers)) }
-    : { id:o.id, type:o.type, montant:o.montant, date:o.date, libelle:o.libelle || "" });
-  const plans = plansAll().filter(x => x.projet === pid).map(x =>
-    ({ id:x.id, type:x.type, montant:x.montant, libelle:x.libelle || "",
-       debut:x.debut, occurrences:x.occurrences, fait:x.fait || 0 }));
-  return { v:1, titre:p.titre, emoji:p.emoji || "", ops, plans };
-}
-function actifsPartage(pa){
-  const pr = (pa && pa.presence) || {};
-  const seuil = Date.now() - 30 * 86400000;
-  return Object.values(pr).filter(t => t > seuil).length;
-}
-async function pousserPartage(pa, force){
-  const p = DB.projets[pa.projet];
-  if(!p) return;
-  const charge = chargeProjet(pa.projet);
-  const sig = JSON.stringify(charge);
-  if(!force && sig === pa.sig) return;
-  const presence = { ...(pa.presence || {}) };
-  presence[appareil()] = Date.now();
-  charge.presence = presence;
-  charge.maj = Date.now();
-  const q = await chiffrer(JSON.stringify(charge), pa.cle);
-  const contenu = JSON.stringify({ app:"cashflow", partage:pa.id, maj:charge.maj, iv:q.iv, d:q.d });
-  pa.sha = await ghEcrire(CHEMIN(pa.id), contenu, pa.sha, "cashflow " + pa.id);
-  pa.sig = sig; pa.presence = presence; pa.pousse = Date.now(); pa.err = null;
-  sauverPartage(pa);
-}
-async function pousserPartages(){
-  if(!ghPret() || !chiffrable()) return;
-  const l = Object.values(DB.partages).filter(pa => DB.projets[pa.projet]);
-  if(!l.length) return;
-  let bouge = false;
-  for(const pa of l){
-    try{ const av = pa.pousse; await pousserPartage(pa, false); if(pa.pousse !== av) bouge = true; }
-    catch(e){ pa.err = String((e && e.message) || e).slice(0,140); sauverPartage(pa); bouge = true; }
-  }
-  if(bouge && (state.tab === "reglages" || state.tab === "accueil")) render();
-}
-async function creerPartage(pid){
-  const cle = b64u(b64(crypto.getRandomValues(new Uint8Array(32))));
-  const pa = { id:uid() + Math.random().toString(36).slice(2,8), projet:pid, cle, cree:Date.now(),
-               sha:"", sig:"", pousse:0, presence:{}, depot:ghDepot(), branche:await ghBrancheDefaut() };
-  DB.partages[pa.id] = pa;
-  sauverPartage(pa);
-  await pousserPartage(pa, true);
-  return pa;
-}
-function lienPartage(pa){
-  const d = { r:pa.depot || ghDepot(), b:pa.branche || "main", i:pa.id, k:pa.cle };
-  return location.origin + location.pathname + "#p=" + b64u(b64(enOctets(JSON.stringify(d))));
-}
-async function arreterPartage(id){
-  const pa = DB.partages[id];
-  if(!pa) return;
-  try{
-    const sha = pa.sha || await ghSha(CHEMIN(pa.id));
-    if(sha) await ghSupprimer(CHEMIN(pa.id), sha);
-  }catch(e){ /* le fichier a pu disparaître : le partage s'arrête quand même */ }
-  supprimerPartageDB(id);
-}
-/* Les appareils abonnés s'inscrivent dans le fichier ; l'émetteur relit cette
-   liste de temps en temps pour savoir combien le suivent. */
-async function rafraichirPresence(pa){
-  if(!ghPret() || Date.now() - (pa.luPresence || 0) < 300000) return;
-  try{
-    const f = await ghLireBrut(pa.depot || ghDepot(), pa.branche, CHEMIN(pa.id));
-    const c = JSON.parse(await dechiffrer(f, pa.cle));
-    pa.presence = { ...(pa.presence || {}), ...(c.presence || {}) };
-    pa.luPresence = Date.now();
-    sauverPartage(pa);
-    if(state.tab === "reglages") render();
-  }catch(e){}
-}
-async function copier(t){
-  try{ await navigator.clipboard.writeText(t); toast("Lien copié"); return; }catch(e){}
-  const a = document.createElement("textarea");
-  a.value = t; a.style.position = "fixed"; a.style.opacity = "0";
-  document.body.appendChild(a); a.select();
-  try{ document.execCommand("copy"); toast("Lien copié"); }
-  catch(e){ toast("Copie impossible"); }
-  a.remove();
-}
-
-/* ---------- côté destinataire ---------- */
-function decoderLien(h){
-  const m = /[#&]p=([A-Za-z0-9\-_]+)/.exec(h || "");
-  if(!m) return null;
-  try{ return JSON.parse(enTexte(deb64(deb64u(m[1])))); }catch(e){ return null; }
-}
-async function lirePartage(ref){
-  const f = await ghLireBrut(ref.r, ref.b || "main", CHEMIN(ref.i));
-  return JSON.parse(await dechiffrer(f, ref.k));
-}
-const soldeCharge = c => (c.ops || []).reduce((s,o) => s + (o.type === "ajout" ? o.montant : -o.montant), 0);
-/* Le contenu reçu remplace le miroir au lieu de s'y ajouter : une opération
-   effacée chez l'émetteur doit disparaître ici aussi. Les écritures sont
-   marquées internes, sinon chaque rafraîchissement passerait pour une
-   modification de tes données et relancerait les sauvegardes. */
-function appliquerCharge(p, charge){
-  opsDe(p.id).forEach(o => { delete DB.ops[o.id]; sale.supprOps.add(String(o.id)); });
-  plansAll().filter(x => x.projet === p.id).forEach(x => { delete DB.plans[x.id]; sale.supprPlans.add(String(x.id)); });
-  (charge.ops || []).forEach(o => {
-    const id = p.id + "~" + o.id;
-    DB.ops[id] = { id, type:o.type, projet:p.id, montant:o.montant, libelle:o.libelle || "", date:o.date, cree:0 };
-    sale.ops.add(id); sale.supprOps.delete(id);
-  });
-  (charge.plans || []).forEach(x => {
-    const id = p.id + "~" + x.id;
-    DB.plans[id] = { id, projet:p.id, type:x.type, montant:x.montant, libelle:x.libelle || "",
-                     debut:x.debut, occurrences:x.occurrences, fait:x.fait || 0, cree:0 };
-    sale.plans.add(id); sale.supprPlans.delete(id);
-  });
-  if(charge.titre) p.titre = charge.titre;
-  p.emoji = charge.emoji || "";
-  p.abonnement.maj = charge.maj || Date.now();
-  p.abonnement.recu = Date.now();
-  p.abonnement.err = null;
-  sale.projets.add(String(p.id));
-  sale.kv = true;
-  planifier(true);
-}
-function abonner(ref, charge){
-  const der = projets().reduce((m,x) => Math.max(m, typeof x.ordre === "number" ? x.ordre : -1), -1);
-  const p = { id:uid(), cree:Date.now(), titre:charge.titre || "Projet partagé", emoji:charge.emoji || "",
-              archive:0, ordre:der + 1,
-              abonnement:{ id:ref.i, cle:ref.k, depot:ref.r, branche:ref.b || "main", maj:0, recu:0, ping:0 } };
-  DB.projets[p.id] = p;
-  sale.projets.add(String(p.id)); sale.kv = true; planifier(true);
-  appliquerCharge(p, charge);
-  return p;
-}
-/* Si le destinataire a lui aussi un jeton sur ce dépôt — le cas quand il
-   s'agit d'un autre de tes propres appareils — il signale sa présence, ce qui
-   alimente le compteur d'appareils actifs côté émetteur. */
-async function signalerPresence(p){
-  const ab = p.abonnement;
-  if(!ghPret() || ghDepot() !== ab.depot) return;
-  if(Date.now() - (ab.ping || 0) < 3600000) return;
-  try{
-    const sha = await ghSha(CHEMIN(ab.id));
-    if(!sha) return;
-    const f = await ghLireBrut(ab.depot, ab.branche, CHEMIN(ab.id));
-    const c = JSON.parse(await dechiffrer(f, ab.cle));
-    c.presence = c.presence || {};
-    c.presence[appareil()] = Date.now();
-    const q = await chiffrer(JSON.stringify(c), ab.cle);
-    await ghEcrire(CHEMIN(ab.id), JSON.stringify({ app:"cashflow", partage:ab.id, maj:c.maj, iv:q.iv, d:q.d }),
-      sha, "cashflow presence");
-    ab.ping = Date.now();
-    sale.projets.add(String(p.id)); sale.kv = true; planifier(true);
-  }catch(e){}
-}
-const abonnements = () => projets().filter(x => x.abonnement);
-async function synchroniserAbonnements(){
-  const l = abonnements();
-  if(!l.length || !chiffrable()) return;
-  let bouge = false;
-  for(const p of l){
-    const ab = p.abonnement;
-    try{
-      const c = await lirePartage({ r:ab.depot, b:ab.branche, i:ab.id, k:ab.cle });
-      if((c.maj || 0) > (ab.maj || 0)){ appliquerCharge(p, c); bouge = true; }
-      else{ ab.recu = Date.now(); ab.err = null; sale.projets.add(String(p.id)); sale.kv = true; planifier(true); }
-      signalerPresence(p);
-    }catch(e){
-      ab.err = String((e && e.message) || e).slice(0,140);
-      sale.projets.add(String(p.id)); sale.kv = true; planifier(true);
-      bouge = true;
-    }
-  }
-  if(bouge) render();
-}
-async function ouvrirRecu(ref){
-  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
-  const deja = abonnements().find(x => x.abonnement.id === ref.i);
-  state.modal = { type:"recu", etat:"charge" };
-  render();
-  try{
-    const c = await lirePartage(ref);
-    if(deja){
-      appliquerCharge(deja, c);
-      state.modal = null; toast("Partage actualisé"); render();
-      return;
-    }
-    state.modal = { type:"recu", etat:"pret", ref, charge:c };
-  }catch(e){
-    state.modal = { type:"recu", etat:"ko", msg:String((e && e.message) || e) };
-  }
-  render();
-}
-
-/* ============================================================
    ICÔNE ET MANIFESTE
    Dessinés à la volée pour reprendre la couleur d'accent choisie : l'icône
    posée sur l'écran d'accueil ressemble à l'application ouverte. Le
@@ -3244,6 +2794,10 @@ async function demarrer(){
   // garde le sien.
   if(!DB.settings.langueChoisie && DB.settings.langue !== "fr"){ DB.settings.langue = "fr"; sauver(true); }
 
+  // Le partage a été retiré : un projet reçu autrefois redevient un projet
+  // ordinaire, modifiable, au lieu de rester figé en lecture seule.
+  projets().forEach(x => { if(x.abonnement){ delete x.abonnement; sauverProjet(x); } });
+
   state.neuf = DB.meta.vue !== VERSION;
   const n = materialiser();
   render();
@@ -3251,12 +2805,6 @@ async function demarrer(){
   majQuota();
   if(n) toast(n + (n > 1 ? " échéances passées converties" : " échéance passée convertie"));
   if(gdConnecte() && DB.settings.gdAuto && (DB.meta.modifie || 0) > (DB.meta.cloud || 0)) gdAuto();
-
-  // Un lien de partage ouvert dans le navigateur arrive dans le fragment.
-  const recu = decoderLien(location.hash);
-  if(recu) ouvrirRecu(recu);
-  else synchroniserAbonnements();
-  setInterval(() => { if(document.visibilityState === "visible") synchroniserAbonnements(); }, 180000);
 }
 
 /* Un téléphone rouvert le lendemain doit rattraper ses échéances sans qu'on
@@ -3268,11 +2816,6 @@ document.addEventListener("visibilitychange", () => {
     render();
     if(n) toast(n + (n > 1 ? " échéances passées converties" : " échéance passée convertie"));
   }
-  synchroniserAbonnements();
-});
-window.addEventListener("hashchange", () => {
-  const r = decoderLien(location.hash);
-  if(r) ouvrirRecu(r);
 });
 window.addEventListener("pagehide", () => { ecouler(); });
 
