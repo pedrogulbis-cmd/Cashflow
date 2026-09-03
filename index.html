@@ -67,6 +67,16 @@ header.top{position:sticky;top:0;z-index:30;background:var(--voile);
 .ver{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--gris);
   border:1px solid var(--trait);border-radius:7px;padding:3px 7px;background:var(--fond2)}
 .ver.neuf{color:var(--acc);border-color:var(--accB);background:var(--accF)}
+.pf-chip{display:flex;align-items:center;gap:5px;min-width:0;max-width:40vw;
+  font-size:12.5px;font-weight:500;border:1px solid var(--trait);border-radius:8px;
+  padding:4px 8px;background:var(--carte);color:var(--texte)}
+.pf-chip b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-chip svg{flex:0 0 auto;color:var(--gris2)}
+.pf-chip:active{background:var(--fond2)}
+.pfrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  padding:11px 2px;border-bottom:1px solid var(--trait2)}
+.pfrow.on .pfn{color:var(--acc)}
+.pfn{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .iconbtn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
   border:1px solid var(--trait);color:var(--texte);background:var(--carte)}
 .iconbtn:active{background:var(--fond2)}
@@ -296,6 +306,7 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
       CashFlow
     </div>
     <button class="ver" id="ver-chip" data-act="journal-ouvrir" title="Voir les nouveautés"></button>
+    <button class="pf-chip" id="pf-chip" data-act="portefeuilles" title="Changer de portefeuille"></button>
     <div class="top-sp"></div>
     <button class="iconbtn" data-act="nouveau-projet" aria-label="Nouveau projet" title="Nouveau projet">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -323,9 +334,15 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.8.0";
-const SCHEMA  = 2;
+const VERSION = "1.9.0";
+const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"1.9.0", d:"2026-09-02", t:"Portefeuilles", l:[
+    "Plusieurs portefeuilles cohabitent sans que leurs projets ni leurs chiffres se mélangent.",
+    "Le portefeuille en cours s'affiche dans l'entête ; on en change, on en crée et on les renomme depuis là.",
+    "Les récurrences des portefeuilles au repos continuent d'échoir : rien ne se fige quand on regarde ailleurs.",
+    "Les données existantes sont regroupées dans un portefeuille nommé Principal."
+  ]},
   { v:"1.8.0", d:"2026-09-02", t:"Icône accordée à la couleur", l:[
     "L'icône est redessinée à la couleur d'accent : onglet du navigateur, écran d'accueil iOS, et raccourci Android au moment où on l'ajoute.",
     "Le trait du sigle passe au noir sur les accents clairs, il restait invisible en blanc.",
@@ -460,6 +477,16 @@ const DICO = {
   "Encre":"Ink", "Prune":"Plum", "Océan":"Ocean", "Forêt":"Forest",
   "Cuivre":"Copper", "Grenat":"Garnet", "Ardoise":"Slate",
   "Manuel":"Manual", "Réorganiser":"Reorder", "Terminer":"Done",
+  "Portefeuilles":"Wallets", "Nouveau portefeuille":"New wallet",
+  "Modifier le portefeuille":"Edit wallet", "Changer de portefeuille":"Switch wallet",
+  "Chacun tient ses propres projets et ses propres chiffres.":"Each keeps its own projects and its own figures.",
+  "Nom":"Name", "Un nom est obligatoire.":"A name is required.",
+  "Le nom ne correspond pas.":"The name does not match.",
+  "Tape le nom pour confirmer":"Type the name to confirm",
+  "Portefeuille créé":"Wallet created", "Portefeuille modifié":"Wallet updated",
+  "Portefeuille supprimé":"Wallet deleted",
+  "Son projet et toutes ses opérations partent avec lui.":"Its project and all its entries go with it.",
+  "C'est définitif.":"This cannot be undone.",
   "Couleur personnalisée":"Custom colour",
   "Icône de l'application":"App icon",
   "Elle prend la couleur choisie. Un raccourci déjà posé sur l'écran d'accueil garde son ancienne image : le téléphone la fige à l'installation. Retire le raccourci et rajoute-le pour la rafraîchir.":"It takes the colour you picked. A shortcut already sitting on your home screen keeps its old image: the phone freezes it at install time. Remove the shortcut and add it again to refresh it.",
@@ -570,6 +597,10 @@ const DICO = {
 /* Règles pour les phrases qui portent un nombre ou un nom. */
 const REGLES = [
   [/^(\d+) projets? actifs?$/,       (m,a) => a + " active project" + (+a>1?"s":"")],
+  [/^(\d+) projets?$/,               (m,a) => a + " project" + (+a>1?"s":"")],
+  [/^Ses (\d+) projets et toutes leurs opérations partent avec lui\.$/,
+     (m,a) => "Its " + a + " projects and all their entries go with it."],
+  [/^Supprimer « (.+) » \?$/,        (m,a) => "Delete \u201c" + a + "\u201d?"],
   [/^(\d+) projets? archivés?$/,     (m,a) => a + " archived project" + (+a>1?"s":"")],
   [/^(\d+) opérations?$/,            (m,a) => a + " entr" + (+a>1?"ies":"y")],
   [/^(\d+) récurrences?$/,           (m,a) => a + " recurring entr" + (+a>1?"ies":"y")],
@@ -720,7 +751,10 @@ const ICONES = {
   crayon:'<path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20z"/>',
   boite:'<path d="M3.5 8.5h17V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V8.5z"/><path d="M2.8 4.5h18.4v4H2.8zM9.8 12.5h4.4"/>',
   euro:'<path d="M17 6.5a6.5 6.5 0 1 0 0 11"/><path d="M5.5 10h8M5.5 14h8"/>',
-  poignee:'<path d="M7 9h10M7 15h10"/>'
+  poignee:'<path d="M7 9h10M7 15h10"/>',
+  chev:'<path d="M6 9.5 12 15l6-5.5"/>',
+  check:'<path d="M5 12.5 9.5 17 19 7"/>',
+  bourse:'<path d="M4 9.5h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9z"/><path d="M8.5 9.5V6a3.5 3.5 0 0 1 7 0v3.5"/>'
 };
 /* Le sigle de l'application, tracé une seule fois. Il se peint avec les
    variables du thème, donc il suit la couleur d'accent sans être redessiné,
@@ -745,9 +779,9 @@ function svg(n, t, sw){
    écrit un enregistrement, pas la bibliothèque entière.
    ============================================================ */
 const DEFAULTS = {
-  version:SCHEMA, projets:{}, ops:{}, plans:{},
+  version:SCHEMA, portefeuilles:{}, projets:{}, ops:{}, plans:{},
   settings:{
-    langue:"fr", langueChoisie:false, theme:"clair", accent:ACCENTS[0][0],
+    pf:"", langue:"fr", langueChoisie:false, theme:"clair", accent:ACCENTS[0][0],
     triProjets:"nom", fType:"tout", fProjet:"", fPeriode:"tout", triOps:"recent",
     gdAuto:true, gdFichier:"", gdDossier:"", gdMail:"", gdNom:"CashFlow", gid:""
   },
@@ -757,10 +791,10 @@ let DB = JSON.parse(JSON.stringify(DEFAULTS));
 let pret = false;
 
 const IDB = (() => {
-  const NOM = "cashflow", V = 3;
+  const NOM = "cashflow", V = 4;
   let db = null;
   const prom = r => new Promise((res,rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-  const stores = ["projets","ops","plans","kv"];
+  const stores = ["portefeuilles","projets","ops","plans","kv"];
   return {
     ouvrir(){
       return new Promise((res,rej) => {
@@ -768,6 +802,7 @@ const IDB = (() => {
         const r = indexedDB.open(NOM, V);
         r.onupgradeneeded = () => {
           const d = r.result;
+          if(!d.objectStoreNames.contains("portefeuilles")) d.createObjectStore("portefeuilles", { keyPath:"id" });
           if(!d.objectStoreNames.contains("projets")) d.createObjectStore("projets", { keyPath:"id" });
           if(!d.objectStoreNames.contains("ops"))     d.createObjectStore("ops",     { keyPath:"id" });
           if(!d.objectStoreNames.contains("plans"))   d.createObjectStore("plans",   { keyPath:"id" });
@@ -782,7 +817,8 @@ const IDB = (() => {
     },
     async tout(){
       const t = db.transaction(stores, "readonly");
-      const [projets, ops, plans, kk, kvv] = await Promise.all([
+      const [portefeuilles, projets, ops, plans, kk, kvv] = await Promise.all([
+        prom(t.objectStore("portefeuilles").getAll()),
         prom(t.objectStore("projets").getAll()),
         prom(t.objectStore("ops").getAll()),
         prom(t.objectStore("plans").getAll()),
@@ -790,7 +826,7 @@ const IDB = (() => {
         prom(t.objectStore("kv").getAll())
       ]);
       const kv = {}; kk.forEach((k,i) => { kv[k] = kvv[i]; });
-      return { projets, ops, plans, kv };
+      return { portefeuilles, projets, ops, plans, kv };
     },
     ecrire(lots){
       return new Promise((res,rej) => {
@@ -799,7 +835,10 @@ const IDB = (() => {
         t.onerror = () => rej(t.error);
         t.onabort = () => rej(t.error || new Error("écriture annulée"));
         const P = t.objectStore("projets"), O = t.objectStore("ops"),
-              L = t.objectStore("plans"),   K = t.objectStore("kv");
+              L = t.objectStore("plans"),   K = t.objectStore("kv"),
+              F = t.objectStore("portefeuilles");
+        (lots.portefeuilles||[]).forEach(x => F.put(x));
+        (lots.supprPortefeuilles||[]).forEach(id => F.delete(String(id)));
         (lots.projets||[]).forEach(x => P.put(x));
         (lots.supprProjets||[]).forEach(id => P.delete(String(id)));
         (lots.ops||[]).forEach(x => O.put(x));
@@ -820,7 +859,8 @@ const IDB = (() => {
 })();
 
 /* ---------- file d'écriture ---------- */
-const sale = { projets:new Set(), supprProjets:new Set(), ops:new Set(), supprOps:new Set(),
+const sale = { portefeuilles:new Set(), supprPortefeuilles:new Set(),
+               projets:new Set(), supprProjets:new Set(), ops:new Set(), supprOps:new Set(),
                plans:new Set(), supprPlans:new Set(), kv:false };
 let _fl, _cloud, _cloudQuand = 0;
 /* interne = true pour les écritures déclenchées par CashFlow lui-même, comme
@@ -839,10 +879,12 @@ async function ecouler(){
   if(!pret) return;
   const rien = !sale.projets.size && !sale.supprProjets.size && !sale.ops.size &&
                !sale.supprOps.size && !sale.plans.size && !sale.supprPlans.size &&
-               !sale.kv;
+               !sale.portefeuilles.size && !sale.supprPortefeuilles.size && !sale.kv;
   if(rien) return;
-  const lots = { projets:[], supprProjets:[...sale.supprProjets], ops:[], supprOps:[...sale.supprOps],
+  const lots = { portefeuilles:[], supprPortefeuilles:[...sale.supprPortefeuilles],
+                 projets:[], supprProjets:[...sale.supprProjets], ops:[], supprOps:[...sale.supprOps],
                  plans:[], supprPlans:[...sale.supprPlans], kv:{} };
+  sale.portefeuilles.forEach(id => { const x = DB.portefeuilles[id]; if(x) lots.portefeuilles.push(x); });
   sale.projets.forEach(id  => { const x = DB.projets[id];  if(x) lots.projets.push(x); });
   sale.ops.forEach(id      => { const x = DB.ops[id];      if(x) lots.ops.push(x); });
   sale.plans.forEach(id    => { const x = DB.plans[id];    if(x) lots.plans.push(x); });
@@ -856,16 +898,20 @@ function sauver(interne){ sale.kv = true; planifier(interne); }
 function sauverProjet(p){ if(p) sale.projets.add(String(p.id)); sale.kv = true; planifier(); }
 function sauverOp(o){ if(o) sale.ops.add(String(o.id)); sale.kv = true; planifier(); }
 function sauverPlan(x){ if(x) sale.plans.add(String(x.id)); sale.kv = true; planifier(); }
+function sauverPf(x){ if(x) sale.portefeuilles.add(String(x.id)); sale.kv = true; planifier(); }
+function supprimerPfDB(id){ delete DB.portefeuilles[id]; sale.supprPortefeuilles.add(String(id)); sale.kv = true; planifier(); }
 function supprimerOpDB(id){ delete DB.ops[id]; sale.supprOps.add(String(id)); sale.kv = true; planifier(); }
 function supprimerPlanDB(id){ delete DB.plans[id]; sale.supprPlans.add(String(id)); sale.kv = true; planifier(); }
 function toutSalir(){
   Object.keys(DB.projets).forEach(id => sale.projets.add(id));
   Object.keys(DB.ops).forEach(id => sale.ops.add(id));
   Object.keys(DB.plans).forEach(id => sale.plans.add(id));
+  Object.keys(DB.portefeuilles).forEach(id => sale.portefeuilles.add(id));
   sale.kv = true; planifier();
 }
 function assembler(k){
   const d = JSON.parse(JSON.stringify(DEFAULTS));
+  (k.portefeuilles||[]).forEach(x => { d.portefeuilles[x.id] = x; });
   (k.projets||[]).forEach(x => { d.projets[x.id] = x; });
   (k.ops||[]).forEach(x => { d.ops[x.id] = x; });
   (k.plans||[]).forEach(x => { d.plans[x.id] = x; });
@@ -878,6 +924,7 @@ function assembler(k){
 function fusionnerSauvegarde(d){
   if(!d || !d.projets) throw new Error("format inattendu");
   let np = 0, no = 0, nl = 0;
+  Object.entries(d.portefeuilles||{}).forEach(([k,v]) => { if(!DB.portefeuilles[k]) DB.portefeuilles[k] = v; });
   Object.entries(d.projets).forEach(([k,v]) => { if(!DB.projets[k]){ DB.projets[k] = v; np++; } });
   Object.entries(d.ops||{}).forEach(([k,v])   => { if(!DB.ops[k]){ DB.ops[k] = v; no++; } });
   Object.entries(d.plans||{}).forEach(([k,v]) => { if(!DB.plans[k]){ DB.plans[k] = v; nl++; } });
@@ -889,6 +936,9 @@ function fusionnerSauvegarde(d){
     const refs = o.type === "transfert" ? [o.de,o.vers] : [o.projet];
     if(refs.some(r => !DB.projets[r])){ delete DB.ops[k]; no = Math.max(0, no-1); }
   });
+  const refuge = pfs()[0] && pfs()[0].id;
+  if(refuge) [DB.projets, DB.ops, DB.plans].forEach(table =>
+    Object.values(table).forEach(x => { if(!x.pf) x.pf = refuge; }));
   toutSalir();
   return { np, no, nl };
 }
@@ -898,11 +948,53 @@ function fusionnerSauvegarde(d){
    Règle unique : solde = ajouts − dépenses + transferts entrants
    − transferts sortants. Il n'est jamais stocké, toujours recalculé.
    ============================================================ */
-const projets = () => Object.values(DB.projets);
+/* Chaque enregistrement porte le portefeuille auquel il appartient, et tout
+   l'affichage passe par ces quatre fonctions. Le tri se fait donc à la
+   lecture, jamais à l'écriture : changer de portefeuille ne déplace rien en
+   base, et une sauvegarde contient l'ensemble. */
+const PF = () => DB.settings.pf;
+const pfs = () => Object.values(DB.portefeuilles)
+  .sort((a,b) => (a.ordre||0) - (b.ordre||0) || (a.cree||0) - (b.cree||0));
+const pfActuel = () => DB.portefeuilles[PF()] || pfs()[0] || null;
+const projets = () => Object.values(DB.projets).filter(p => p.pf === PF());
 const actifs  = () => projets().filter(p => !p.archive);
 const archives= () => projets().filter(p => p.archive);
-const opsAll  = () => Object.values(DB.ops);
-const plansAll= () => Object.values(DB.plans);
+const opsAll  = () => Object.values(DB.ops).filter(o => o.pf === PF());
+const plansAll= () => Object.values(DB.plans).filter(x => x.pf === PF());
+/* Le total d'un portefeuille qu'on ne regarde pas : la liste des
+   portefeuilles a besoin de chiffrer chacun d'eux, hors du cache courant. */
+function totalPf(id){
+  const actifsPf = new Set(Object.values(DB.projets)
+    .filter(p => p.pf === id && !p.archive).map(p => p.id));
+  let s = 0;
+  Object.values(DB.ops).forEach(o => {
+    if(o.pf !== id) return;
+    if(o.type === "transfert"){
+      if(actifsPf.has(o.vers)) s += o.montant;
+      if(actifsPf.has(o.de))   s -= o.montant;
+    }else if(actifsPf.has(o.projet)) s += (o.type === "ajout" ? o.montant : -o.montant);
+  });
+  return s;
+}
+function creerPf(nom, emoji){
+  const der = pfs().reduce((m,x) => Math.max(m, x.ordre || 0), -1);
+  const x = { id:uid(), cree:Date.now(), nom, emoji:emoji || "", ordre:der + 1 };
+  DB.portefeuilles[x.id] = x; sauverPf(x);
+  return x;
+}
+/* Vider un portefeuille : ses projets, ses opérations et ses récurrences
+   partent avec lui. Le paquet rendu permet de revenir en arrière. */
+function supprimerPf(id){
+  const pf = DB.portefeuilles[id];
+  const pr = Object.values(DB.projets).filter(x => x.pf === id);
+  const op = Object.values(DB.ops).filter(x => x.pf === id);
+  const pl = Object.values(DB.plans).filter(x => x.pf === id);
+  pr.forEach(x => { delete DB.projets[x.id]; sale.supprProjets.add(String(x.id)); });
+  op.forEach(x => { delete DB.ops[x.id];     sale.supprOps.add(String(x.id)); });
+  pl.forEach(x => { delete DB.plans[x.id];   sale.supprPlans.add(String(x.id)); });
+  supprimerPfDB(id);
+  return { pf, projets:pr, ops:op, plans:pl };
+}
 
 function opsDe(pid){
   return opsAll().filter(o => o.type === "transfert" ? (o.de === pid || o.vers === pid) : o.projet === pid);
@@ -923,7 +1015,7 @@ function invalider(){ _cache = null; }
 function calculer(){
   if(_cache) return _cache;
   const s = {}, d = {};
-  Object.keys(DB.projets).forEach(id => { s[id] = 0; d[id] = ""; });
+  projets().forEach(p => { s[p.id] = 0; d[p.id] = ""; });
   const marque = (id, v, date) => {
     if(s[id] === undefined) return;
     s[id] += v;
@@ -976,13 +1068,13 @@ function trierOps(l, mode){
 
 /* ---------- création d'opérations ---------- */
 function creerOp(o){
-  const x = { id:uid(), cree:Date.now(), ...o };
+  const x = { id:uid(), cree:Date.now(), pf:PF(), ...o };
   DB.ops[x.id] = x; sauverOp(x);
   return x;
 }
 function creerProjet(p){
   const der = projets().reduce((m,x) => Math.max(m, typeof x.ordre === "number" ? x.ordre : -1), -1);
-  const x = { id:uid(), cree:Date.now(), titre:p.titre, emoji:p.emoji || "", archive:0, ordre:der + 1 };
+  const x = { id:uid(), cree:Date.now(), pf:PF(), titre:p.titre, emoji:p.emoji || "", archive:0, ordre:der + 1 };
   DB.projets[x.id] = x; sauverProjet(x);
   return x;
 }
@@ -998,6 +1090,8 @@ function supprimerProjet(pid){
   return { projet:p, ops, plans };
 }
 function restaurerPaquet(paq){
+  if(paq.pf){ DB.portefeuilles[paq.pf.id] = paq.pf; sale.supprPortefeuilles.delete(String(paq.pf.id)); sauverPf(paq.pf); }
+  (paq.projets||[]).forEach(p => { DB.projets[p.id] = p; sale.supprProjets.delete(String(p.id)); sauverProjet(p); });
   if(paq.projet){ DB.projets[paq.projet.id] = paq.projet; sale.supprProjets.delete(String(paq.projet.id)); sauverProjet(paq.projet); }
   (paq.ops||[]).forEach(o => { DB.ops[o.id] = o; sale.supprOps.delete(String(o.id)); sauverOp(o); });
   (paq.plans||[]).forEach(x => { DB.plans[x.id] = x; sale.supprPlans.delete(String(x.id)); sauverPlan(x); });
@@ -1030,7 +1124,10 @@ function echeances(pl, jusqu){
 function materialiser(){
   const auj = todayISO();
   let n = 0;
-  plansAll().forEach(pl => {
+  // Volontairement sur tous les portefeuilles, pas seulement celui affiché :
+  // les échéances d'un portefeuille au repos tombent quand même, sinon en
+  // changer ferait apparaître d'un coup des mois de retard.
+  Object.values(DB.plans).forEach(pl => {
     const pp = DB.projets[pl.projet];
     if(!pp || pp.archive) return;
     let fait = pl.fait || 0;
@@ -1038,8 +1135,9 @@ function materialiser(){
       const d = occDate(pl, fait);
       if(d > auj) break;
       creerOp({ type:pl.type, projet:pl.projet, montant:pl.montant, libelle:pl.libelle || "",
-                date:d, plan:pl.id, occ:fait });
-      fait++; n++;
+                date:d, plan:pl.id, occ:fait, pf:pl.pf || pp.pf });
+      fait++;
+      if((pl.pf || pp.pf) === PF()) n++;   // le décompte annoncé ne parle que d'ici
     }
     if(fait !== (pl.fait||0)){ pl.fait = fait; sauverPlan(pl); }
   });
@@ -1144,6 +1242,12 @@ function dessiner(){
 
   const chip = $("#ver-chip");
   if(chip){ chip.textContent = "v" + VERSION; chip.classList.toggle("neuf", state.neuf); }
+
+  const pc = $("#pf-chip"), pf = pfActuel();
+  if(pc){
+    pc.innerHTML = '<b>' + esc(pf ? (pf.emoji ? pf.emoji + " " : "") + pf.nom : "—") + '</b>' + svg("chev",13,2);
+    traduire(pc);
+  }
 
   const v = $("#view");
   if(state.tab === "accueil")       v.innerHTML = vueAccueil();
@@ -1637,6 +1741,52 @@ function vueModal(m){
       (m.id ? '<div class="btns" style="margin:16px 0 0"><button class="btn dang wide" data-act="supprimer-plan" data-id="' + m.id + '">Supprimer</button></div>' : "") +
       boiteBoutons("Enregistrer", m.id ? "plan-enregistrer" : "plan-creer");
   }
+  else if(m.type === "portefeuilles"){
+    c = '<h3>Portefeuilles</h3>' +
+      '<div class="sous">Chacun tient ses propres projets et ses propres chiffres.</div>' +
+      pfs().map(x => {
+        const nb = Object.values(DB.projets).filter(p => p.pf === x.id && !p.archive).length;
+        const v = totalPf(x.id);
+        return '<div class="pfrow' + (x.id === PF() ? " on" : "") + '">' +
+          '<button style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left" ' +
+            'data-act="pf-choisir" data-id="' + x.id + '">' +
+            '<span style="width:26px;flex:0 0 26px;display:grid;place-items:center;color:var(--acc)">' +
+              (x.id === PF() ? svg("check",16,2.2) : (x.emoji ? esc(x.emoji) : svg("bourse",15,1.7))) + '</span>' +
+            '<span class="pfn">' + esc(x.nom) + '<span class="psub">' +
+              (nb === 1 ? "1 projet" : nb + " projets") + '</span></span>' +
+            '<span class="num ' + cl$(v) + '" style="font-weight:600;white-space:nowrap">' + fmt(v) + '</span>' +
+          '</button>' +
+          '<button class="qb" data-act="modifier-pf" data-id="' + x.id + '" aria-label="Modifier" title="Modifier">' +
+            svg("crayon",15,1.9) + '</button></div>';
+      }).join("") +
+      '<div class="btns" style="margin:16px 0 0">' +
+      '<button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Fermer</button>' +
+      '<button class="btn pri" style="flex:1" data-act="nouveau-pf">' + svg("plus",16,2.2) + 'Nouveau portefeuille</button></div>';
+  }
+  else if(m.type === "pf"){
+    c = '<h3>' + (m.id ? "Modifier le portefeuille" : "Nouveau portefeuille") + '</h3>' +
+      '<div class="champ"><label for="m-nom">Nom</label>' +
+      '<input type="text" id="m-nom" autocomplete="off" placeholder="Perso" value="' + esc(m.nom || "") + '"></div>' +
+      '<div class="champ"><label>Émoticône <span style="color:var(--gris2)">facultatif</span></label>' +
+      '<input type="hidden" id="m-emoji" value="' + esc(m.emoji || "") + '">' +
+      '<div class="emopick"><button data-act="emoji" data-id="" class="' + (!m.emoji ? "on" : "") + '" title="Aucune">' + svg("croix",14,2) + '</button>' +
+      EMOJIS.map(e => '<button data-act="emoji" data-id="' + e + '" class="' + (m.emoji === e ? "on" : "") + '">' + e + '</button>').join("") +
+      '</div></div>' +
+      (m.id && pfs().length > 1 ? '<div class="btns" style="margin:16px 0 0">' +
+        '<button class="btn dang wide" data-act="supprimer-pf" data-id="' + m.id + '">Supprimer</button></div>' : "") +
+      boiteBoutons("Enregistrer", m.id ? "pf-enregistrer" : "pf-creer");
+  }
+  else if(m.type === "supprimer-pf"){
+    const nb = Object.values(DB.projets).filter(p => p.pf === m.id).length;
+    c = '<h3>Supprimer « ' + esc(m.nom) + ' » ?</h3>' +
+      '<div class="sous"><span>' + (nb === 1 ? "Son projet et toutes ses opérations partent avec lui."
+        : "Ses " + nb + " projets et toutes leurs opérations partent avec lui.") + '</span> ' +
+        '<span>C\'est définitif.</span></div>' +
+      '<div class="champ"><label for="m-conf">Tape le nom pour confirmer</label>' +
+      '<input type="text" id="m-conf" autocomplete="off" placeholder="' + esc(m.nom) + '"></div>' +
+      '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
+      '<button class="btn dang" style="flex:1" data-act="supprimer-pf-ok" data-id="' + m.id + '">Supprimer définitivement</button></div>';
+  }
   else if(m.type === "couleur"){
     c = '<h3>Couleur personnalisée</h3>' +
       '<div class="sous">Fais glisser le curseur : la teinte tourne, la saturation s\'éloigne du centre.</div>' +
@@ -1856,8 +2006,68 @@ document.addEventListener("click", async ev => {
 
   /* ---- annulation ---- */
   if(act === "annuler-suppr"){
-    if(corbeille){ restaurerPaquet(corbeille); corbeille = null; toast("Restauré"); render(); }
+    if(corbeille){
+      const rev = corbeille.pf;
+      restaurerPaquet(corbeille);
+      corbeille = null;
+      if(rev){ DB.settings.pf = rev.id; DB.settings.fProjet = ""; invalider(); sauver(); }
+      toast("Restauré"); render();
+    }
     fermerToast(); return;
+  }
+
+  /* ---- portefeuilles ---- */
+  if(act === "portefeuilles"){ ouvrirModal({ type:"portefeuilles" }); return; }
+  if(act === "pf-choisir"){
+    if(id !== PF()){
+      DB.settings.pf = id;
+      // Un filtre pointant sur un projet d'ailleurs ne rendrait plus rien.
+      DB.settings.fProjet = "";
+      invalider();
+      state.projet = null; state.reorg = false; state.prevDate = ""; state.archivesOuvertes = false;
+      sauver();
+    }
+    state.modal = null; render(); window.scrollTo(0,0);
+    return;
+  }
+  if(act === "nouveau-pf"){ ouvrirModal({ type:"pf", focus:"m-nom" }); return; }
+  if(act === "modifier-pf"){
+    const x = DB.portefeuilles[id];
+    if(x) ouvrirModal({ type:"pf", id:x.id, nom:x.nom, emoji:x.emoji, focus:"m-nom" });
+    return;
+  }
+  if(act === "pf-creer" || act === "pf-enregistrer"){
+    const nom = val("m-nom");
+    if(!nom) return toast("Un nom est obligatoire.");
+    const emoji = val("m-emoji");
+    if(act === "pf-creer"){
+      const x = creerPf(nom, emoji);
+      DB.settings.pf = x.id; DB.settings.fProjet = "";
+      invalider();
+      state.modal = null; state.projet = null; state.tab = "accueil";
+      sauver(); toast("Portefeuille créé"); render();
+    }else{
+      const x = DB.portefeuilles[state.modal.id];
+      if(x){ x.nom = nom; x.emoji = emoji; sauverPf(x); toast("Portefeuille modifié"); }
+      state.modal = { type:"portefeuilles" }; render();
+    }
+    return;
+  }
+  if(act === "supprimer-pf"){
+    const x = DB.portefeuilles[id];
+    if(x && pfs().length > 1) ouvrirModal({ type:"supprimer-pf", id:x.id, nom:x.nom, focus:"m-conf" });
+    return;
+  }
+  if(act === "supprimer-pf-ok"){
+    const x = DB.portefeuilles[id];
+    if(!x) return fermerModal();
+    if(val("m-conf").toLowerCase() !== x.nom.trim().toLowerCase()) return toast("Le nom ne correspond pas.");
+    corbeille = supprimerPf(id);
+    if(PF() === id){ DB.settings.pf = (pfs()[0] || {}).id || ""; DB.settings.fProjet = ""; sauver(); }
+    invalider();
+    state.modal = null; state.projet = null;
+    toast("Portefeuille supprimé", "annuler-suppr"); render();
+    return;
   }
 
   /* ---- projets ---- */
@@ -2029,7 +2239,7 @@ document.addEventListener("click", async ev => {
     const occ = Math.max(1, Math.min(600, parseInt(val("m-occ"), 10) || 1));
     const base = { projet:val("m-projet"), type:val("m-type"), montant, libelle:val("m-lib"), debut, occurrences:occ };
     if(act === "plan-creer"){
-      const x = { id:uid(), cree:Date.now(), fait:0, ...base };
+      const x = { id:uid(), cree:Date.now(), pf:PF(), fait:0, ...base };
       DB.plans[x.id] = x; sauverPlan(x);
     }else{
       const pl = DB.plans[state.modal.id];
@@ -2400,7 +2610,7 @@ async function gdDossier(interactif){
 }
 function contenuSauvegarde(){
   return JSON.stringify({ app:"cashflow", appVersion:VERSION, schema:SCHEMA,
-    exportedAt:new Date().toISOString(), projets:DB.projets, ops:DB.ops, plans:DB.plans,
+    exportedAt:new Date().toISOString(), portefeuilles:DB.portefeuilles, projets:DB.projets, ops:DB.ops, plans:DB.plans,
     settings:DB.settings, meta:DB.meta });
 }
 async function gdRetenirCompte(){
@@ -2821,6 +3031,22 @@ async function demarrer(){
   // Le partage a été retiré : un projet reçu autrefois redevient un projet
   // ordinaire, modifiable, au lieu de rester figé en lecture seule.
   projets().forEach(x => { if(x.abonnement){ delete x.abonnement; sauverProjet(x); } });
+
+  // Les données d'avant les portefeuilles sont regroupées dans un premier
+  // portefeuille. Une sauvegarde plus ancienne réimportée retombe ici aussi :
+  // tout enregistrement sans appartenance rejoint le premier de la liste.
+  if(!Object.keys(DB.portefeuilles).length){
+    const x = { id:uid(), cree:Date.now(), nom:"Principal", emoji:"", ordre:0 };
+    DB.portefeuilles[x.id] = x;
+    sale.portefeuilles.add(x.id);
+    DB.settings.pf = x.id;
+  }
+  if(!DB.portefeuilles[DB.settings.pf]) DB.settings.pf = pfs()[0].id;
+  const parDefaut = pfs()[0].id;
+  [["projets", DB.projets], ["ops", DB.ops], ["plans", DB.plans]].forEach(([nom, table]) => {
+    Object.values(table).forEach(x => { if(!x.pf){ x.pf = parDefaut; sale[nom].add(String(x.id)); } });
+  });
+  sauver(true);
 
   state.neuf = DB.meta.vue !== VERSION;
   const n = materialiser();
