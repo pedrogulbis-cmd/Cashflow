@@ -163,7 +163,12 @@ html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-
    plutôt que de se faire couper. */
 .op.plan{align-items:flex-start;padding:13px 2px}
 .op.plan .op-lib,.op.plan .op-met{white-space:normal;overflow:visible;text-overflow:clip}
-.op.plan .op-met{margin-top:3px;line-height:1.5}
+/* Le libellé est en 14,5 px et les deux lignes de détail en 11,5 px : à
+   hauteur de ligne proportionnelle, la première boîte mesurait 21 px et les
+   autres 17,25 px, d'où un premier écart plus large. Une hauteur de ligne
+   absolue, identique pour les trois, et plus aucune marge entre elles : tous
+   les écarts valent alors 19 px, y compris ceux d'une ligne qui se replie. */
+.op.plan .op-lib,.op.plan .op-met{line-height:19px;margin-top:0}
 /* Une émoticône est tirée d'une autre police, aux métriques plus hautes :
    sans line-height propre, sa boîte gonfle la ligne qui la contient et
    décale l'écart avec la ligne suivante. */
@@ -338,11 +343,14 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.2.0";
+const VERSION = "2.2.1";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.2.1", d:"2026-09-05", t:"Interligne du Planifié", l:[
+    "Les trois lignes d'une récurrence partagent la même hauteur de ligne : les écarts sont enfin égaux, y compris quand une ligne se replie."
+  ]},
   { v:"2.2.0", d:"2026-09-02", t:"Retouches", l:[
-    "Onglet Planifié : l'émoticône du projet ne creuse plus l'interligne, les trois lignes sont régulières.",
+    "Onglet Planifié : l'émoticône du projet ne creuse plus l'interligne.",
     "La pastille de tri active n'affiche plus de flèche.",
     "L'onglet n'est retenu que le temps d'un rafraîchissement : rouvrir l'application ou changer de portefeuille ramène à l'accueil.",
     "Renoncer devient Annuler."
