@@ -67,12 +67,6 @@ header.top{position:sticky;top:0;z-index:30;background:var(--voile);
 .ver{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--gris);
   border:1px solid var(--trait);border-radius:7px;padding:3px 7px;background:var(--fond2)}
 .ver.neuf{color:var(--acc);border-color:var(--accB);background:var(--accF)}
-.pf-chip{display:flex;align-items:center;gap:5px;min-width:0;max-width:40vw;
-  font-size:12.5px;font-weight:500;border:1px solid var(--trait);border-radius:8px;
-  padding:4px 8px;background:var(--carte);color:var(--texte)}
-.pf-chip b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pf-chip svg{flex:0 0 auto;color:var(--gris2)}
-.pf-chip:active{background:var(--fond2)}
 .pfrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
   padding:11px 2px;border-bottom:1px solid var(--trait2)}
 .pfrow.on .pfn{color:var(--acc)}
@@ -164,6 +158,11 @@ html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-
 .op.prev .op-mt{font-style:italic}
 .tagprev{display:inline-block;font-size:10px;border:1px dashed var(--trait);color:var(--gris2);
   border-radius:5px;padding:0 4px;margin-left:6px;vertical-align:1px;font-family:"IBM Plex Mono",monospace}
+/* Une récurrence porte deux lignes de détail longues : elles s'enroulent
+   plutôt que de se faire couper. */
+.op.plan{align-items:flex-start;padding:13px 2px}
+.op.plan .op-lib,.op.plan .op-met{white-space:normal;overflow:visible;text-overflow:clip}
+.op.plan .op-met{margin-top:3px;line-height:1.5}
 .jour{font-size:11.5px;color:var(--gris2);padding:14px 2px 5px;font-family:"IBM Plex Mono",monospace;
   border-bottom:1px solid var(--trait2)}
 
@@ -306,10 +305,9 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
       CashFlow
     </div>
     <button class="ver" id="ver-chip" data-act="journal-ouvrir" title="Voir les nouveautés"></button>
-    <button class="pf-chip" id="pf-chip" data-act="portefeuilles" title="Changer de portefeuille"></button>
     <div class="top-sp"></div>
-    <button class="iconbtn" data-act="nouveau-projet" aria-label="Nouveau projet" title="Nouveau projet">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    <button class="iconbtn" id="pf-chip" data-act="portefeuilles" aria-label="Changer de portefeuille" title="Changer de portefeuille">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5 12 15l6-5.5"/></svg>
     </button>
   </div>
 </header>
@@ -334,9 +332,16 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "1.9.0";
+const VERSION = "2.0.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.0.0", d:"2026-09-02", t:"Opérations datées plus tard", l:[
+    "Une opération datée dans le futur ne pèse plus sur le solde : elle attend son jour parmi les échéances à venir, comme une occurrence de récurrence.",
+    "Un projet se duplique dans le portefeuille en cours, sous un nouveau nom, avec ou sans son historique.",
+    "Le sélecteur de portefeuille remplace le bouton d'ajout en haut de l'écran.",
+    "Supprimer un projet ne demande plus d'en retaper le nom : l'annulation de quelques secondes suffit.",
+    "L'onglet Planifié laisse ses lignes respirer au lieu de couper le texte."
+  ]},
   { v:"1.9.0", d:"2026-09-02", t:"Portefeuilles", l:[
     "Plusieurs portefeuilles cohabitent sans que leurs projets ni leurs chiffres se mélangent.",
     "Le portefeuille en cours s'affiche dans l'entête ; on en change, on en crée et on les renomme depuis là.",
@@ -485,6 +490,13 @@ const DICO = {
   "Tape le nom pour confirmer":"Type the name to confirm",
   "Portefeuille créé":"Wallet created", "Portefeuille modifié":"Wallet updated",
   "Portefeuille supprimé":"Wallet deleted",
+  "Dupliquer":"Duplicate", "Dupliquer le projet":"Duplicate project",
+  "La copie arrive dans ce portefeuille, avec ses récurrences.":"The copy lands in this wallet, with its recurring entries.",
+  "Copier aussi les opérations":"Copy the entries too",
+  "Sinon la copie part d'un solde à zéro.":"Otherwise the copy starts from zero.",
+  "Projet dupliqué":"Project duplicated",
+  "Opérations à venir":"Upcoming entries",
+  "Le projet et toutes ses opérations sont effacés. Un délai de quelques secondes permet de revenir en arrière.":"The project and all its entries are erased. A few seconds are given to undo it.",
   "Son projet et toutes ses opérations partent avec lui.":"Its project and all its entries go with it.",
   "C'est définitif.":"This cannot be undone.",
   "Couleur personnalisée":"Custom colour",
@@ -754,7 +766,8 @@ const ICONES = {
   poignee:'<path d="M7 9h10M7 15h10"/>',
   chev:'<path d="M6 9.5 12 15l6-5.5"/>',
   check:'<path d="M5 12.5 9.5 17 19 7"/>',
-  bourse:'<path d="M4 9.5h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9z"/><path d="M8.5 9.5V6a3.5 3.5 0 0 1 7 0v3.5"/>'
+  bourse:'<path d="M4 9.5h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9z"/><path d="M8.5 9.5V6a3.5 3.5 0 0 1 7 0v3.5"/>',
+  copier:'<rect x="9" y="9" width="11.5" height="11.5" rx="2.5"/><path d="M15 6.2A2.2 2.2 0 0 0 12.8 4H6.2A2.2 2.2 0 0 0 4 6.2v6.6A2.2 2.2 0 0 0 6.2 15"/>'
 };
 /* Le sigle de l'application, tracé une seule fois. Il se peint avec les
    variables du thème, donc il suit la couleur d'accent sans être redessiné,
@@ -968,7 +981,7 @@ function totalPf(id){
     .filter(p => p.pf === id && !p.archive).map(p => p.id));
   let s = 0;
   Object.values(DB.ops).forEach(o => {
-    if(o.pf !== id) return;
+    if(o.pf !== id || aVenir(o)) return;
     if(o.type === "transfert"){
       if(actifsPf.has(o.vers)) s += o.montant;
       if(actifsPf.has(o.de))   s -= o.montant;
@@ -1010,10 +1023,17 @@ function effet(o, pid){
 /* Les soldes sont recalculés en une seule passe et gardés jusqu'à la
    prochaine écriture : l'accueil demande le solde de chaque projet, sans quoi
    chaque affichage relirait la table des opérations autant de fois. */
-let _cache = null;
+/* Une opération datée plus tard est une intention, pas un mouvement : elle
+   attend son jour. Le cache retient donc aussi la date pour laquelle il a été
+   calculé, sinon une application laissée ouverte pendant la nuit continuerait
+   d'écarter une opération devenue échue. */
+const aVenir = o => o.date > todayISO();
+let _cache = null, _cacheJour = "";
 function invalider(){ _cache = null; }
 function calculer(){
-  if(_cache) return _cache;
+  const auj = todayISO();
+  if(_cache && _cacheJour === auj) return _cache;
+  _cacheJour = auj;
   const s = {}, d = {};
   projets().forEach(p => { s[p.id] = 0; d[p.id] = ""; });
   const marque = (id, v, date) => {
@@ -1022,6 +1042,7 @@ function calculer(){
     if(date > d[id]) d[id] = date;
   };
   for(const o of opsAll()){
+    if(aVenir(o)) continue;
     if(o.type === "transfert"){ marque(o.de, -o.montant, o.date); marque(o.vers, o.montant, o.date); }
     else marque(o.projet, o.type === "ajout" ? o.montant : -o.montant, o.date);
   }
@@ -1077,6 +1098,27 @@ function creerProjet(p){
   const x = { id:uid(), cree:Date.now(), pf:PF(), titre:p.titre, emoji:p.emoji || "", archive:0, ordre:der + 1 };
   DB.projets[x.id] = x; sauverProjet(x);
   return x;
+}
+/* Copie un projet dans le portefeuille en cours. Les récurrences suivent
+   avec leur compteur d'échéances déjà converties, ce qui évite que la copie
+   recrée d'un coup tout l'historique de l'originale. Un transfert n'a pas de
+   sens hors de sa paire de projets : il devient un ajout ou une dépense du
+   montant qu'il apportait ou retirait. */
+function dupliquerProjet(pid, titre, avecOps){
+  const src = DB.projets[pid];
+  if(!src) return null;
+  const copie = creerProjet({ titre, emoji:src.emoji });
+  plansAll().filter(x => x.projet === pid).forEach(x => {
+    const y = { ...x, id:uid(), cree:Date.now(), projet:copie.id, pf:PF() };
+    DB.plans[y.id] = y; sauverPlan(y);
+  });
+  if(avecOps) opsDe(pid).forEach(o => {
+    const mt = effet(o, pid);
+    if(!mt) return;
+    creerOp({ type:mt > 0 ? "ajout" : "depense", projet:copie.id, montant:Math.abs(mt),
+              libelle:libelleOp(o, pid), date:o.date });
+  });
+  return copie;
 }
 /* Supprime un projet et tout ce qui s'y rattache. Ce qui part est rendu sous
    forme de paquet, pour pouvoir revenir en arrière quelques secondes. */
@@ -1152,7 +1194,15 @@ function soldeProjete(pid, date){
   plansAll().filter(pl => pl.projet === pid).forEach(pl => {
     echeances(pl, date).forEach(() => { s += pl.type === "ajout" ? pl.montant : -pl.montant; });
   });
+  // Les opérations déjà saisies mais datées plus tard comptent au même titre
+  // qu'une échéance de récurrence, dès lors qu'elles tombent avant la date.
+  opsDe(pid).forEach(o => { if(aVenir(o) && o.date <= date) s += effet(o, pid); });
   return s;
+}
+/* Les opérations en attente d'un projet, ou de tout le portefeuille. */
+function opsAVenir(pid, jusqu){
+  const l = (pid ? opsDe(pid) : opsAll()).filter(o => aVenir(o) && (!jusqu || o.date <= jusqu));
+  return l.sort((a,b) => a.date.localeCompare(b.date));
 }
 /* Horizon de la projection : la dernière échéance encore à venir, tous
    projets confondus. S'arrêter à la fin du mois masquerait justement ce qu'on
@@ -1165,10 +1215,17 @@ function horizonPlans(){
     const d = finPlan(pl);
     if(d > f) f = d;
   });
+  opsAll().forEach(o => {
+    if(!aVenir(o)) return;
+    const p = DB.projets[o.type === "transfert" ? o.vers : o.projet];
+    if(p && !p.archive && o.date > f) f = o.date;
+  });
   return f;
 }
 const horizon = () => horizonPlans() || todayISO();
-/* Même chose pour un projet isolé, ce que sa fiche affiche à côté du solde. */
+/* Même chose pour un projet isolé, ce que sa fiche affiche à côté du solde :
+   la dernière échéance de ses récurrences ou sa dernière opération en
+   attente, celle des deux qui vient le plus tard. */
 function horizonProjet(pid){
   let f = "";
   plansAll().forEach(pl => {
@@ -1176,6 +1233,7 @@ function horizonProjet(pid){
     const d = finPlan(pl);
     if(d > f) f = d;
   });
+  opsDe(pid).forEach(o => { if(aVenir(o) && o.date > f) f = o.date; });
   return f;
 }
 
@@ -1243,11 +1301,6 @@ function dessiner(){
   const chip = $("#ver-chip");
   if(chip){ chip.textContent = "v" + VERSION; chip.classList.toggle("neuf", state.neuf); }
 
-  const pc = $("#pf-chip"), pf = pfActuel();
-  if(pc){
-    pc.innerHTML = '<b>' + esc(pf ? (pf.emoji ? pf.emoji + " " : "") + pf.nom : "—") + '</b>' + svg("chev",13,2);
-    traduire(pc);
-  }
 
   const v = $("#view");
   if(state.tab === "accueil")       v.innerHTML = vueAccueil();
@@ -1390,8 +1443,13 @@ function ligneOp(o, pid, prev){
   const nomP = pid ? "" : (o.type === "transfert"
       ? nomProjet(o.de) + " → " + nomProjet(o.vers) : nomProjet(o.projet));
   const meta = [frDate(o.date, true), nomP].filter(Boolean).join("  ·  ");
+  // Une échéance de récurrence n'existe pas encore : la toucher ouvre sa
+  // récurrence. Une opération déjà saisie mais datée plus tard existe, elle :
+  // elle se modifie comme n'importe quelle autre.
+  const reelle = !!DB.ops[o.id];
   return '<button class="op' + (prev ? " prev" : "") + '" ' +
-    (prev ? 'data-act="ouvrir-plan" data-id="' + o.plan + '"' : 'data-act="modifier-op" data-id="' + o.id + '"') + '>' +
+    (prev && !reelle ? 'data-act="ouvrir-plan" data-id="' + o.plan + '"'
+                     : 'data-act="modifier-op" data-id="' + o.id + '"') + '>' +
     '<span class="op-ic ' + cls + '">' + svg(ic,15,2.1) + '</span>' +
     '<span class="op-mid"><span class="op-lib">' + esc(libelleOp(o, pid)) +
       (prev ? '<span class="tagprev">prévu</span>'
@@ -1424,7 +1482,8 @@ function vueOperations(){
   const s = DB.settings;
   const tout = opsAll();
   const l = filtrerOps(tout);
-  const somme = l.reduce((a,o) => a + (o.type === "ajout" ? o.montant : o.type === "depense" ? -o.montant : 0), 0);
+  const somme = l.reduce((a,o) => a + (aVenir(o) ? 0
+    : o.type === "ajout" ? o.montant : o.type === "depense" ? -o.montant : 0), 0);
 
   let h = '<section class="total" style="padding:22px 0 16px">' +
     '<div class="total-lbl">' + (l.length === 1 ? "1 opération" : l.length + " opérations") + '</div>' +
@@ -1459,7 +1518,7 @@ function vueOperations(){
       const m = o.date.slice(0,7);
       if(m !== moisCourant){ moisCourant = m; h += '<div class="jour">' + esc(moisAn(o.date + "").replace(/^(.)/, c => c.toUpperCase())) + '</div>'; }
     }
-    h += ligneOp(o, null, false);
+    h += ligneOp(o, null, aVenir(o));
   });
   return h + '</div>';
 }
@@ -1474,7 +1533,7 @@ function lignePlan(pl){
   const mt = pl.type === "ajout" ? pl.montant : -pl.montant;
   const etat = reste ? (reste + " " + (reste > 1 ? "restantes" : "restante") + " sur " + (pl.occurrences || 1))
                      : "terminée";
-  return '<button class="op" data-act="modifier-plan" data-id="' + pl.id + '">' +
+  return '<button class="op plan" data-act="modifier-plan" data-id="' + pl.id + '">' +
     '<span class="op-ic ' + (pl.type === "ajout" ? "pl" : "mo") + '">' + svg(pl.type === "ajout" ? "plus" : "moins",15,2.1) + '</span>' +
     '<span class="op-mid"><span class="op-lib">' + esc(pl.libelle || (pl.type === "ajout" ? "Ajout" : "Dépense")) + '</span>' +
     '<span class="op-met">' + (p ? '<span>' + esc((p.emoji ? p.emoji + " " : "") + p.titre) + '</span>  ·  ' : "") +
@@ -1495,8 +1554,23 @@ function vuePlans(){
   h += '<div class="btns"><button class="btn pri wide" data-act="nouveau-plan"' +
        (actifs().length ? "" : " disabled") + '>' + svg("plus",16,2.2) + 'Ajouter une récurrence</button></div>';
   if(!l.length)
-    return h + '<div class="vide"><b>Aucune récurrence</b>Les ajouts et dépenses qui reviennent chaque mois se déclarent ici.</div>';
-  return h + '<div class="ops">' + l.map(lignePlan).join("") + '</div>';
+    // Même sans récurrence, des opérations peuvent attendre leur date.
+    return h + '<div class="vide"><b>Aucune récurrence</b>Les ajouts et dépenses qui reviennent chaque mois se déclarent ici.</div>' +
+      blocAVenir();
+  h += '<div class="ops">' + l.map(lignePlan).join("") + '</div>';
+  return h + blocAVenir();
+}
+/* Les opérations ponctuelles datées plus tard, listées à part des
+   récurrences : ce sont des engagements uniques, pas un rythme. */
+function blocAVenir(){
+  const l = opsAVenir(null);
+  if(!l.length) return "";
+  const somme = l.reduce((a,o) => a + (o.type === "transfert" ? 0
+    : o.type === "ajout" ? o.montant : -o.montant), 0);
+  return '<div class="sect" style="margin-top:26px"><h2>Opérations à venir</h2>' +
+    '<span class="cnt">' + l.length + '</span><span class="sp"></span>' +
+    '<span class="delta ' + cl$(somme) + '">' + fmt(somme, true) + '</span></div>' +
+    '<div class="ops">' + l.map(o => ligneOp(o, null, true)).join("") + '</div>';
 }
 
 /* ============================================================
@@ -1542,9 +1616,11 @@ function vuePrevision(){
   h += '</div>';
 
   const mv = mouvementsPrevus(d);
-  h += '<div class="sect" style="margin-top:24px"><h2>Mouvements planifiés d\'ici là</h2><span class="cnt">' + mv.length + '</span></div>';
-  if(!mv.length) return h + '<div class="vide">Rien de planifié d\'ici cette date.</div>';
-  h += '<div class="ops">' + mv.map(m => {
+  const av = opsAVenir(null, d);
+  h += '<div class="sect" style="margin-top:24px"><h2>Mouvements planifiés d\'ici là</h2>' +
+    '<span class="cnt">' + (mv.length + av.length) + '</span></div>';
+  if(!mv.length && !av.length) return h + '<div class="vide">Rien de planifié d\'ici cette date.</div>';
+  h += '<div class="ops">' + av.map(o => ligneOp(o, null, true)).join("") + mv.map(m => {
     const pl = m.plan, mt = pl.type === "ajout" ? pl.montant : -pl.montant;
     return '<button class="op prev" data-act="modifier-plan" data-id="' + pl.id + '">' +
       '<span class="op-ic">' + svg(pl.type === "ajout" ? "plus" : "moins",15,2.1) + '</span>' +
@@ -1562,7 +1638,9 @@ function vueProjet(p){
   const s = solde(p.id);
   const lu = !!p.archive;   // archivé = lecture seule
   const fT = DB.settings.fTypeP || "tout";
-  let l = opsDe(p.id);
+  // Ce qui n'est pas encore échu figure plus haut, dans la section Planifié :
+  // le répéter ici laisserait croire à deux mouvements.
+  let l = opsDe(p.id).filter(o => !aVenir(o));
   if(fT === "ajout")     l = l.filter(o => o.type !== "transfert" && effet(o,p.id) > 0);
   else if(fT === "depense")   l = l.filter(o => o.type !== "transfert" && effet(o,p.id) < 0);
   else if(fT === "transfert") l = l.filter(o => o.type === "transfert");
@@ -1578,6 +1656,8 @@ function vueProjet(p){
       toutes.push({ id:"prev-"+pl.id+"-"+e.i, plan:pl.id, type:pl.type, projet:p.id,
                     montant:pl.montant, libelle:pl.libelle, date:e.date }));
   });
+  // Une opération datée plus tard attend ici, aux côtés des échéances.
+  opsAVenir(p.id).forEach(o => toutes.push(o));
   toutes.sort((a,b) => a.date.localeCompare(b.date));
   const LIM = 6;
   const prochaines = state.echAll ? toutes : toutes.slice(0, LIM);
@@ -1640,6 +1720,7 @@ function vueProjet(p){
   h += '<div class="btns" style="margin-top:26px">' +
     '<button class="btn" data-act="' + (p.archive ? "desarchiver" : "archiver") + '" data-id="' + p.id + '">' +
       svg("boite",16) + (p.archive ? "Désarchiver" : "Archiver") + '</button>' +
+    '<button class="btn" data-act="dupliquer" data-id="' + p.id + '">' + svg("copier",16,1.8) + 'Dupliquer</button>' +
     '<button class="btn dang" data-act="supprimer-projet" data-id="' + p.id + '">Supprimer</button>' +
     '</div>';
   return h + '</div></div>';
@@ -1655,7 +1736,8 @@ const EMOJIS = [
   "🏦","💳","💶","🪙","📈","🎯","🛠️","🪑","🛋️","🧺","🚿","🔌","📱","💻","🎧","📷","🚲","🛵","⛽","🅿️",
   "🍕","🍔","🍎","🥐","🍷","🎂","🍿","🧁","🏋️","⚽","🎾","🏔️","🏖️","⛺","🎪","🎨","🎸","🎲","🃏","🧩",
   "😀","😎","🥰","🤩","🤗","😇","🙂","😴","🤑","🥳","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💖","💫",
-  "⭐","✨","🔥","🌈","🍀","🌸","🌞","🌙","🎄","🎃","🐶","🐱","🦊","🐼","🦉","🐢","🦋","🌊","⛰️","🗝️"
+  "⭐","✨","🔥","🌈","🍀","🌸","🌞","🌙","🎄","🎃","🐶","🐱","🦊","🐼","🦉","🐢","🦋","🌊","⛰️","🗝️",
+  "🔒","🔓","🛡️","⏳","📌","🧭"
 ];
 
 function champMontant(val, avecSolde, pid){
@@ -1752,7 +1834,8 @@ function vueModal(m){
             'data-act="pf-choisir" data-id="' + x.id + '">' +
             '<span style="width:26px;flex:0 0 26px;display:grid;place-items:center;color:var(--acc)">' +
               (x.id === PF() ? svg("check",16,2.2) : (x.emoji ? esc(x.emoji) : svg("bourse",15,1.7))) + '</span>' +
-            '<span class="pfn">' + esc(x.nom) + '<span class="psub">' +
+            '<span class="pfn"><span style="display:block">' + esc(x.nom) + '</span>' +
+              '<span class="psub" style="display:block">' +
               (nb === 1 ? "1 projet" : nb + " projets") + '</span></span>' +
             '<span class="num ' + cl$(v) + '" style="font-weight:600;white-space:nowrap">' + fmt(v) + '</span>' +
           '</button>' +
@@ -1818,11 +1901,20 @@ function vueModal(m){
   }
   else if(m.type === "supprimer-projet"){
     c = '<h3>Supprimer « ' + esc(m.titre) + ' » ?</h3>' +
-      '<div class="sous">La suppression efface le projet et toutes ses opérations. Elle est définitive.</div>' +
-      '<div class="champ"><label for="m-conf">Tape le titre pour confirmer</label>' +
-      '<input type="text" id="m-conf" autocomplete="off" placeholder="' + esc(m.titre) + '"></div>' +
+      '<div class="sous">Le projet et toutes ses opérations sont effacés. Un délai de quelques secondes permet de revenir en arrière.</div>' +
       '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Renoncer</button>' +
       '<button class="btn dang" style="flex:1" data-act="supprimer-projet-ok" data-id="' + m.id + '">Supprimer définitivement</button></div>';
+  }
+  else if(m.type === "dupliquer"){
+    c = '<h3>Dupliquer le projet</h3>' +
+      '<div class="sous">La copie arrive dans ce portefeuille, avec ses récurrences.</div>' +
+      '<div class="champ"><label for="m-titre">Titre</label>' +
+      '<input type="text" id="m-titre" autocomplete="off" value="' + esc(m.titre || "") + '"></div>' +
+      '<div class="lig"><div class="l">Copier aussi les opérations<div class="d">Sinon la copie part d\'un solde à zéro.</div></div>' +
+      '<div class="seg">' + [["0","Non"],["1","Oui"]].map(([k,l]) =>
+        '<button class="' + ((m.avecOps ? "1" : "0") === k ? "on" : "") + '" data-act="dup-ops" data-id="' + k + '">' + l + '</button>').join("") +
+      '</div></div>' +
+      boiteBoutons("Dupliquer", "dupliquer-ok");
   }
   else if(m.type === "effacer"){
     c = '<h3>Tout effacer</h3>' +
@@ -2106,10 +2198,30 @@ document.addEventListener("click", async ev => {
     if(p) ouvrirModal({ type:"supprimer-projet", id:p.id, titre:p.titre, focus:"m-conf" });
     return;
   }
+  if(act === "dupliquer"){
+    const p = DB.projets[id];
+    if(p) ouvrirModal({ type:"dupliquer", id:p.id, titre:p.titre, avecOps:false, focus:"m-titre" });
+    return;
+  }
+  if(act === "dup-ops"){
+    // La saisie en cours est reprise avant le redessin, sinon le titre tapé
+    // disparaîtrait à chaque bascule.
+    state.modal.titre = val("m-titre") || state.modal.titre;
+    state.modal.avecOps = id === "1";
+    render();
+    return;
+  }
+  if(act === "dupliquer-ok"){
+    const titre = val("m-titre");
+    if(!titre) return toast("Un titre est obligatoire.");
+    const copie = dupliquerProjet(state.modal.id, titre, !!state.modal.avecOps);
+    state.modal = null; state.projet = copie ? copie.id : null;
+    toast("Projet dupliqué"); render();
+    return;
+  }
   if(act === "supprimer-projet-ok"){
     const p = DB.projets[id];
     if(!p) return fermerModal();
-    if(val("m-conf").toLowerCase() !== p.titre.trim().toLowerCase()) return toast("Le titre ne correspond pas.");
     corbeille = supprimerProjet(id);
     state.modal = null; state.projet = null;
     toast("Projet supprimé", "annuler-suppr"); render();
@@ -2839,13 +2951,14 @@ function exporterXLSX(){
   if(!l.length) return toast("Aucune opération");
   const entete = ["Date","Type","Libellé","Montant","Projet"];
   const TYPE = { ajout:"Ajout", depense:"Dépense", transfert:"Transfert" };
+  const APREVOIR = { ajout:"Ajout prévu", depense:"Dépense prévue", transfert:"Transfert prévu" };
 
   function ligne(o, pid){
     const mt = pid ? effet(o, pid) : (o.type === "depense" ? -o.montant : o.type === "ajout" ? o.montant : o.montant);
     const nom = o.type === "transfert" ? nomProjet(o.de) + " → " + nomProjet(o.vers) : nomProjet(o.projet);
     const ser = serieDate(o.date);
     return [ ser === null ? { t:o.date } : { n:ser, s:1 },
-             { t:TYPE[o.type] || o.type },
+             { t:(aVenir(o) ? APREVOIR : TYPE)[o.type] || o.type },
              { t:libelleOp(o, pid) },
              { n:(mt/100).toFixed(2), s:2 },
              { t:pid ? nomProjet(pid) : nom } ];
@@ -2855,7 +2968,8 @@ function exporterXLSX(){
   // la colonne compterait donc un mouvement neutre. Les deux totaux justes
   // sont écrits en pied de feuille.
   const global = [entete].concat(l.map(o => ligne(o, null)));
-  const flux = l.reduce((a,o) => a + (o.type === "ajout" ? o.montant : o.type === "depense" ? -o.montant : 0), 0);
+  const flux = l.reduce((a,o) => a + (aVenir(o) ? 0
+    : o.type === "ajout" ? o.montant : o.type === "depense" ? -o.montant : 0), 0);
   global.push(["", "", "", "", ""]);
   global.push(["", "", "Total hors transferts", { n:(flux/100).toFixed(2), s:2 }, ""]);
   global.push(["", "", "Total disponible", { n:(total()/100).toFixed(2), s:2 }, ""]);
@@ -3063,6 +3177,7 @@ document.addEventListener("visibilitychange", () => {
   if(document.visibilityState !== "visible" || !pret) return;
   if(DB.meta.materialise !== todayISO()){
     const n = materialiser();
+    invalider();   // une opération datée d'hier pour demain est échue ce matin
     render();
     if(n) toast(n + (n > 1 ? " échéances passées converties" : " échéance passée convertie"));
   }
