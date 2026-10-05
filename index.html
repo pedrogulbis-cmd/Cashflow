@@ -162,6 +162,7 @@ html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-
 /* Une récurrence porte deux lignes de détail longues : elles s'enroulent
    plutôt que de se faire couper. */
 .op.plan{align-items:flex-start;padding:13px 2px}
+.op.plan.fini{opacity:.45}
 .op.plan .op-lib,.op.plan .op-met{white-space:normal;overflow:visible;text-overflow:clip}
 /* Le libellé est en 14,5 px et les deux lignes de détail en 11,5 px : à
    hauteur de ligne proportionnelle, la première boîte mesurait 21 px et les
@@ -343,9 +344,17 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.2.1";
+const VERSION = "2.3.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.3.0", d:"2026-10-05", t:"Planifié et prévision", l:[
+    "Ouvrir une opération existante ne place plus le curseur dans le montant : le clavier ne surgit plus.",
+    "Prévision : les quatre prochains mois passent en bas de page, et un projet du solde projeté s'ouvre d'un appui.",
+    "Prévision : l'écart affiché sous chaque mois est celui du mois, plus le cumul depuis aujourd'hui.",
+    "Planifié : une récurrence terminée est grisée le mois de sa dernière échéance, puis quitte l'onglet.",
+    "Planifié : les récurrences et opérations à venir d'un projet archivé n'apparaissent plus.",
+    "Une récurrence modifiée ne recrée plus les échéances déjà converties."
+  ]},
   { v:"2.2.1", d:"2026-09-05", t:"Interligne du Planifié", l:[
     "Les trois lignes d'une récurrence partagent la même hauteur de ligne : les écarts sont enfin égaux, y compris quand une ligne se replie."
   ]},
@@ -1201,6 +1210,13 @@ function echeances(pl, jusqu){
 function materialiser(){
   const auj = todayISO();
   let n = 0;
+  // Une récurrence ne tombe qu'une fois par mois. Le compteur « fait » ne
+  // suffit pas à le garantir : il repart de zéro quand la date de début
+  // change, recule quand on réduit le nombre d'occurrences, et n'est pas
+  // fusionné quand une sauvegarde apporte des opérations converties ailleurs.
+  // Les opérations déjà issues du plan font donc foi, mois par mois.
+  const deja = new Set();
+  Object.values(DB.ops).forEach(o => { if(o.plan) deja.add(o.plan + "|" + o.date.slice(0,7)); });
   // Volontairement sur tous les portefeuilles, pas seulement celui affiché :
   // les échéances d'un portefeuille au repos tombent quand même, sinon en
   // changer ferait apparaître d'un coup des mois de retard.
@@ -1210,11 +1226,18 @@ function materialiser(){
     let fait = pl.fait || 0;
     while(fait < (pl.occurrences||1)){
       const d = occDate(pl, fait);
-      if(d > auj) break;
-      creerOp({ type:pl.type, projet:pl.projet, montant:pl.montant, libelle:pl.libelle || "",
-                date:d, plan:pl.id, occ:fait, pf:pl.pf || pp.pf });
+      const cle = pl.id + "|" + d.slice(0,7);
+      // Une échéance encore à venir dans un mois déjà tombé (le jour a été
+      // repoussé après coup) est soldée d'avance : la prévision ne la
+      // compterait sinon une seconde fois.
+      if(d > auj && !deja.has(cle)) break;
+      if(!deja.has(cle)){
+        creerOp({ type:pl.type, projet:pl.projet, montant:pl.montant, libelle:pl.libelle || "",
+                  date:d, plan:pl.id, occ:fait, pf:pl.pf || pp.pf });
+        deja.add(cle);
+        if((pl.pf || pp.pf) === PF()) n++;   // le décompte annoncé ne parle que d'ici
+      }
       fait++;
-      if((pl.pf || pp.pf) === PF()) n++;   // le décompte annoncé ne parle que d'ici
     }
     if(fait !== (pl.fait||0)){ pl.fait = fait; sauverPlan(pl); }
   });
@@ -1234,9 +1257,14 @@ function soldeProjete(pid, date){
   opsDe(pid).forEach(o => { if(aVenir(o) && o.date <= date) s += effet(o, pid); });
   return s;
 }
+/* Une opération qui ne touche que des projets archivés ne pèsera sur aucun
+   solde suivi : elle reste dans l'historique du projet, pas dans le planifié. */
+const opSuivie = o => (o.type === "transfert" ? [o.de, o.vers] : [o.projet])
+  .some(id => DB.projets[id] && !DB.projets[id].archive);
 /* Les opérations en attente d'un projet, ou de tout le portefeuille. */
 function opsAVenir(pid, jusqu){
-  const l = (pid ? opsDe(pid) : opsAll()).filter(o => aVenir(o) && (!jusqu || o.date <= jusqu));
+  const l = (pid ? opsDe(pid) : opsAll().filter(opSuivie))
+    .filter(o => aVenir(o) && (!jusqu || o.date <= jusqu));
   return l.sort((a,b) => a.date.localeCompare(b.date));
 }
 /* Horizon de la projection : la dernière échéance encore à venir, tous
@@ -1568,7 +1596,7 @@ function lignePlan(pl){
   const mt = pl.type === "ajout" ? pl.montant : -pl.montant;
   const etat = reste ? (reste + " " + (reste > 1 ? "restantes" : "restante") + " sur " + (pl.occurrences || 1))
                      : "terminée";
-  return '<button class="op plan" data-act="modifier-plan" data-id="' + pl.id + '">' +
+  return '<button class="op plan' + (reste ? "" : " fini") + '" data-act="modifier-plan" data-id="' + pl.id + '">' +
     '<span class="op-ic ' + (pl.type === "ajout" ? "pl" : "mo") + '">' + svg(pl.type === "ajout" ? "plus" : "moins",15,2.1) + '</span>' +
     '<span class="op-mid"><span class="op-lib">' + esc(pl.libelle || (pl.type === "ajout" ? "Ajout" : "Dépense")) + '</span>' +
     '<span class="op-met">' + (p ? '<span>' +
@@ -1579,7 +1607,15 @@ function lignePlan(pl){
     '<span class="op-mt ' + cl$(mt) + '">' + fmt(mt, true) + '</span></button>';
 }
 function vuePlans(){
-  const l = plansAll().sort((a,b) => Number(a.debut.slice(8,10)) - Number(b.debut.slice(8,10)));
+  // Une récurrence terminée reste visible, grisée, jusqu'à la fin du mois de
+  // sa dernière échéance, puis quitte l'onglet : ses opérations demeurent dans
+  // l'historique. Celles d'un projet archivé n'y figurent pas non plus.
+  const mois = todayISO().slice(0,7);
+  const l = plansAll().filter(pl => {
+    const p = DB.projets[pl.projet];
+    if(p && p.archive) return false;
+    return resteOcc(pl) > 0 || finPlan(pl).slice(0,7) >= mois;
+  }).sort((a,b) => Number(a.debut.slice(8,10)) - Number(b.debut.slice(8,10)));
   const mens = l.filter(pl => resteOcc(pl) > 0)
                 .reduce((s,pl) => s + (pl.type === "ajout" ? pl.montant : -pl.montant), 0);
   let h = '<section class="total" style="padding:22px 0 16px">' +
@@ -1624,9 +1660,13 @@ function vuePrevision(){
     '<div class="total-sub"><span class="delta ' + cl$(delta) + '">' + fmt(delta, true) + '</span>' +
     '<span>' + esc(fmt(maintenant)) + ' aujourd\'hui</span></div></section>';
 
-  h += '<div class="sect" style="margin-top:20px"><h2>Aux quatre prochains mois</h2></div>';
-  h += '<div class="plist">' + premiersMois(4).map(m => {
-    const v = totalProjete(m), dl = v - maintenant;
+  // L'écart affiché sous chaque mois est celui du mois écoulé, pas le cumul
+  // depuis aujourd'hui : deux mois au même total affichent donc zéro.
+  let avant = maintenant;
+  const quatre = '<div class="sect" style="margin-top:24px"><h2>Aux quatre prochains mois</h2></div>' +
+    '<div class="plist">' + premiersMois(4).map(m => {
+    const v = totalProjete(m), dl = v - avant;
+    avant = v;
     return '<button class="prow" data-act="prev-mois" data-id="' + m + '"' +
       (m === d ? ' style="background:var(--accF)"' : "") + '>' +
       '<div class="pmid"><div class="pname">' + esc(moisAn(m).replace(/^./, c => c.toUpperCase())) + '</div>' +
@@ -1637,17 +1677,17 @@ function vuePrevision(){
   h += '<div class="champ" style="margin-top:22px"><label for="prev-date">À la date du</label>' +
     '<input type="date" id="prev-date" data-act="prev-date" value="' + esc(d) + '" min="' + todayISO() + '"></div>';
 
-  if(!a.length) return h + '<div class="vide"><b>Aucun projet pour l\'instant</b>Crée un projet pour commencer à répartir ton argent.</div>';
+  if(!a.length) return h + quatre +'<div class="vide"><b>Aucun projet pour l\'instant</b>Crée un projet pour commencer à répartir ton argent.</div>';
 
   h += '<div class="sect"><h2>Solde projeté</h2></div><div class="plist">';
   a.forEach(p => {
     const s0 = solde(p.id), s1 = soldeProjete(p.id, d), dl = s1 - s0;
     const emo = p.emoji ? '<div class="pemo">' + esc(p.emoji) + '</div>'
       : '<div class="pemo ini">' + esc((p.titre||"?").trim()[0].toUpperCase()) + '</div>';
-    h += '<div class="prow">' + emo +
+    h += '<button class="prow" data-act="ouvrir-projet" data-id="' + p.id + '">' + emo +
       '<div class="pmid"><div class="pname">' + esc(p.titre) + '</div>' +
       '<div class="psub mono">' + esc(fmt(s0)) + (dl ? '  ' + (dl > 0 ? "+" : "−") + ' ' + esc(fmt(Math.abs(dl)).replace("-","")) : "") + '</div></div>' +
-      '<div class="pbal num ' + cl$(s1) + '">' + fmt(s1) + '</div></div>';
+      '<div class="pbal num ' + cl$(s1) + '">' + fmt(s1) + '</div></button>';
   });
   h += '</div>';
 
@@ -1655,7 +1695,7 @@ function vuePrevision(){
   const av = opsAVenir(null, d);
   h += '<div class="sect" style="margin-top:24px"><h2>Mouvements planifiés d\'ici là</h2>' +
     '<span class="cnt">' + (mv.length + av.length) + '</span></div>';
-  if(!mv.length && !av.length) return h + '<div class="vide">Rien de planifié d\'ici cette date.</div>';
+  if(!mv.length && !av.length) return h + '<div class="vide">Rien de planifié d\'ici cette date.</div>' + quatre;
   h += '<div class="ops">' + av.map(o => ligneOp(o, null, true)).join("") + mv.map(m => {
     const pl = m.plan, mt = pl.type === "ajout" ? pl.montant : -pl.montant;
     return '<button class="op prev" data-act="modifier-plan" data-id="' + pl.id + '">' +
@@ -1664,7 +1704,7 @@ function vuePrevision(){
       '<span class="op-met">' + esc(frDate(m.date, true) + "  ·  " + nomProjet(pl.projet)) + '</span></span>' +
       '<span class="op-mt ' + cl$(mt) + '">' + fmt(mt, true) + '</span></button>';
   }).join("") + '</div>';
-  return h;
+  return h + quatre;
 }
 
 /* ============================================================
@@ -2295,12 +2335,12 @@ document.addEventListener("click", async ev => {
 
   /* ---- opérations ---- */
   if(act === "rapide-ajout" || act === "rapide-depense"){
-    ouvrirModal({ type:"op", op:(act === "rapide-ajout" ? "ajout" : "depense"), projet:id, date:todayISO(), focus:"m-montant" });
+    ouvrirModal({ type:"op", op:(act === "rapide-ajout" ? "ajout" : "depense"), projet:id, date:todayISO() });
     return;
   }
   if(act === "tout-le-solde"){
     const e = document.getElementById("m-montant");
-    if(e){ e.value = brut(Math.max(0, solde(id))); e.focus(); }
+    if(e){ e.value = brut(Math.max(0, solde(id))); }
     return;
   }
   if(act === "op-creer"){
@@ -2317,9 +2357,9 @@ document.addEventListener("click", async ev => {
     const o = DB.ops[id];
     if(!o) return;
     if(o.type === "transfert")
-      ouvrirModal({ type:"transfert", id:o.id, de:o.de, vers:o.vers, montant:brut(o.montant), libelle:o.libelle, date:o.date, focus:"m-montant" });
+      ouvrirModal({ type:"transfert", id:o.id, de:o.de, vers:o.vers, montant:brut(o.montant), libelle:o.libelle, date:o.date });
     else
-      ouvrirModal({ type:"op", id:o.id, op:o.type, projet:o.projet, montant:brut(o.montant), libelle:o.libelle, date:o.date, focus:"m-montant" });
+      ouvrirModal({ type:"op", id:o.id, op:o.type, projet:o.projet, montant:brut(o.montant), libelle:o.libelle, date:o.date });
     return;
   }
   if(act === "op-enregistrer"){
@@ -2346,7 +2386,7 @@ document.addEventListener("click", async ev => {
     if(a.length < 2) return toast("Il faut au moins deux projets actifs pour faire un transfert.");
     const de = id || a[0].id;
     const vers = a.find(p => p.id !== de).id;
-    ouvrirModal({ type:"transfert", de, vers, date:todayISO(), focus:"m-montant" });
+    ouvrirModal({ type:"transfert", de, vers, date:todayISO() });
     return;
   }
   if(act === "transfert-creer" || act === "transfert-enregistrer"){
@@ -2369,14 +2409,14 @@ document.addEventListener("click", async ev => {
   /* ---- planification ---- */
   if(act === "nouveau-plan"){
     if(!actifs().length) return;
-    ouvrirModal({ type:"plan", projet:id || actifs()[0].id, type2:"ajout", focus:"m-montant" });
+    ouvrirModal({ type:"plan", projet:id || actifs()[0].id, type2:"ajout" });
     return;
   }
   if(act === "modifier-plan" || act === "ouvrir-plan"){
     const pl = DB.plans[id];
     if(!pl) return;
     ouvrirModal({ type:"plan", id:pl.id, projet:pl.projet, type2:pl.type, montant:brut(pl.montant),
-                  libelle:pl.libelle, debut:pl.debut, occurrences:pl.occurrences, focus:"m-montant" });
+                  libelle:pl.libelle, debut:pl.debut, occurrences:pl.occurrences });
     return;
   }
   if(act === "plan-creer" || act === "plan-enregistrer"){
@@ -2392,7 +2432,8 @@ document.addEventListener("click", async ev => {
       const pl = DB.plans[state.modal.id];
       if(pl){
         // Changer la date de début rebat les échéances : on repart de zéro,
-        // les opérations déjà créées restent en place.
+        // les opérations déjà créées restent en place. materialiser() ne
+        // recrée pas celles des mois où le plan est déjà tombé.
         if(pl.debut !== debut) pl.fait = 0;
         Object.assign(pl, base);
         pl.fait = Math.min(pl.fait || 0, occ);
