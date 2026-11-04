@@ -344,9 +344,13 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.3.0";
+const VERSION = "2.4.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.4.0", d:"2026-11-04", t:"Déplacer une opération", l:[
+    "Un ajout ou une dépense se déplace vers un autre projet depuis sa fenêtre, avec le bouton Déplacer.",
+    "Un projet retombé à zéro ne propose plus son archivage."
+  ]},
   { v:"2.3.0", d:"2026-10-05", t:"Planifié et prévision", l:[
     "Ouvrir une opération existante ne place plus le curseur dans le montant : le clavier ne surgit plus.",
     "Prévision : les quatre prochains mois passent en bas de page, et un projet du solde projeté s'ouvre d'un appui.",
@@ -512,7 +516,8 @@ const DICO = {
   "Accueil":"Home", "Opérations":"Activity", "Planifié":"Planned", "Prévision":"Forecast",
   "Réglages":"Settings", "Retour":"Back", "Fermer":"Close", "Annuler":"Cancel",
   "Enregistrer":"Save", "Valider":"Confirm", "Supprimer":"Delete", "Modifier":"Edit",
-  "Plus tard":"Not now", "Continuer":"Continue",
+  "Plus tard":"Not now", "Continuer":"Continue", "Déplacer":"Move", "Vers le projet":"To project",
+  "Opération déplacée":"Entry moved",
   // accueil
   "Total disponible":"Available total", "Nouveau projet":"New project", "Transfert":"Transfer",
   "Projets archivés":"Archived projects", "Projets actifs":"Active projects",
@@ -1855,7 +1860,13 @@ function vueModal(m){
       champMontant(m.montant, dep && !m.id, m.projet) +
       champLibelle(m.libelle, dep ? "Course" : "Salaire") +
       champDate(m.date) +
-      (m.id ? '<div class="btns" style="margin:16px 0 0"><button class="btn dang wide" data-act="supprimer-op" data-id="' + m.id + '">Supprimer</button></div>' : "") +
+      // Déplacer révèle le choix du projet sans quitter la fenêtre : ce qui a
+      // déjà été retouché dans le montant ou le libellé est gardé.
+      (m.id ? '<div class="champ" id="m-depl" hidden><label for="m-projet">Vers le projet</label><select id="m-projet">' +
+          optionsProjets(m.projet) + '</select></div>' +
+        '<div class="btns" style="margin:16px 0 0">' +
+        '<button class="btn" style="flex:0 0 auto" data-act="deplacer-op">' + svg("ech",16) + 'Déplacer</button>' +
+        '<button class="btn dang" style="flex:1" data-act="supprimer-op" data-id="' + m.id + '">Supprimer</button></div>' : "") +
       boiteBoutons("Valider", m.id ? "op-enregistrer" : "op-creer");
   }
   else if(m.type === "transfert"){
@@ -1958,12 +1969,6 @@ function vueModal(m){
       '<div class="btns" style="margin:20px 0 0">' +
       '<button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Annuler</button>' +
       '<button class="btn pri" style="flex:1" data-act="couleur-ok">Valider</button></div>';
-  }
-  else if(m.type === "zero"){
-    c = '<h3>« ' + esc(m.titre) + ' » est à zéro</h3>' +
-      '<div class="sous">Tu peux l\'archiver : il sort de la liste active et du total, sans rien perdre.</div>' +
-      '<div class="btns"><button class="btn" style="flex:0 0 auto" data-act="fermer-modal">Plus tard</button>' +
-      '<button class="btn pri" style="flex:1" data-act="archiver-net" data-id="' + m.id + '">Archiver ce projet</button></div>';
   }
   else if(m.type === "archiver"){
     const s = solde(m.id);
@@ -2123,14 +2128,6 @@ function fermerModal(){
   render();
 }
 
-/* Après une opération, un projet retombé à zéro propose son archivage. */
-function verifierZero(pid, avant){
-  const p = DB.projets[pid];
-  if(!p || p.archive) return false;
-  if(avant === 0 || solde(pid) !== 0) return false;
-  ouvrirModal({ type:"zero", id:pid, titre:p.titre });
-  return true;
-}
 
 document.addEventListener("click", async ev => {
   const el = ev.target.closest("[data-act]");
@@ -2346,11 +2343,9 @@ document.addEventListener("click", async ev => {
   if(act === "op-creer"){
     const m = state.modal, montant = cents(val("m-montant"));
     if(montant <= 0) return toast("Un montant supérieur à zéro est obligatoire.");
-    const avant = solde(m.projet);
     creerOp({ type:m.op, projet:m.projet, montant, libelle:val("m-lib"), date:val("m-date") || todayISO() });
     state.modal = null;
-    toast("Opération ajoutée");
-    if(!verifierZero(m.projet, avant)) render();
+    toast("Opération ajoutée"); render();
     return;
   }
   if(act === "modifier-op"){
@@ -2368,7 +2363,14 @@ document.addEventListener("click", async ev => {
     const montant = cents(val("m-montant"));
     if(montant <= 0) return toast("Un montant supérieur à zéro est obligatoire.");
     o.montant = montant; o.libelle = val("m-lib"); o.date = val("m-date") || o.date;
-    sauverOp(o); state.modal = null; toast("Opération modifiée"); render();
+    const dest = val("m-projet"), deplacee = !!dest && dest !== o.projet && !!DB.projets[dest];
+    if(deplacee) o.projet = dest;
+    sauverOp(o); state.modal = null; toast(deplacee ? "Opération déplacée" : "Opération modifiée"); render();
+    return;
+  }
+  if(act === "deplacer-op"){
+    const z = document.getElementById("m-depl");
+    if(z){ z.hidden = false; el.remove(); }
     return;
   }
   if(act === "supprimer-op"){
@@ -2394,10 +2396,8 @@ document.addEventListener("click", async ev => {
     if(!de || !vers || de === vers) return toast("Choisis deux projets différents.");
     if(montant <= 0) return toast("Un montant supérieur à zéro est obligatoire.");
     if(act === "transfert-creer"){
-      const avant = solde(de);
       creerOp({ type:"transfert", de, vers, montant, libelle:val("m-lib"), date:val("m-date") || todayISO() });
-      state.modal = null; toast("Transfert enregistré");
-      if(!verifierZero(de, avant)) render();
+      state.modal = null; toast("Transfert enregistré"); render();
     }else{
       const o = DB.ops[state.modal.id];
       if(o){ o.de = de; o.vers = vers; o.montant = montant; o.libelle = val("m-lib"); o.date = val("m-date") || o.date; sauverOp(o); }
