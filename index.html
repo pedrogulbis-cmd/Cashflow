@@ -344,9 +344,13 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.4.0";
+const VERSION = "2.5.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.5.0", d:"2026-11-23", t:"Retour et mouvements regroupés", l:[
+    "Prévision : chaque récurrence tient sur une ligne dans les mouvements planifiés, à la date de sa prochaine échéance, avec le total des échéances d'ici la date choisie.",
+    "Le bouton retour du téléphone referme la fiche ou la fenêtre ouverte, puis revient à l'onglet précédent ; il ne quitte l'application qu'une fois revenu au premier onglet."
+  ]},
   { v:"2.4.0", d:"2026-11-04", t:"Déplacer une opération", l:[
     "Un ajout ou une dépense se déplace vers un autre projet depuis sa fenêtre, avec le bouton Déplacer.",
     "Un projet retombé à zéro ne propose plus son archivage."
@@ -660,6 +664,7 @@ const REGLES = [
   [/^(\d+) projets? archivés?$/,     (m,a) => a + " archived project" + (+a>1?"s":"")],
   [/^(\d+) opérations?$/,            (m,a) => a + " entr" + (+a>1?"ies":"y")],
   [/^(\d+) récurrences?$/,           (m,a) => a + " recurring entr" + (+a>1?"ies":"y")],
+  [/^(\d+) échéances?$/,             (m,a) => a + " occurrence" + (+a>1?"s":"")],
   [/^(\d+) restantes?$/,             (m,a) => a + " left"],
   [/^(\d+) restantes? sur (\d+)$/,   (m,a,b) => a + " left of " + b],
   [/^Afficher les (\d+) suivantes$/, (m,a) => "Show the next " + a],
@@ -1318,12 +1323,16 @@ function premiersMois(n){
 }
 const totalProjete = date => actifs().reduce((s,p) => s + soldeProjete(p.id, date), 0);
 
+/* Une ligne par récurrence : sa prochaine échéance, le nombre d'échéances
+   qui tomberont d'ici la date et ce qu'elles pèsent ensemble. */
 function mouvementsPrevus(date){
   const out = [];
   plansAll().forEach(pl => {
     const p = DB.projets[pl.projet];
     if(!p || p.archive) return;
-    echeances(pl, date).forEach(e => out.push({ plan:pl, date:e.date, i:e.i }));
+    const e = echeances(pl, date);
+    if(e.length) out.push({ plan:pl, date:e[0].date, n:e.length,
+                            total:e.length * (pl.type === "ajout" ? pl.montant : -pl.montant) });
   });
   out.sort((a,b) => a.date.localeCompare(b.date));
   return out;
@@ -1358,7 +1367,46 @@ function render(){
   const neuf = document.querySelector(".sheet");
   if(neuf && posSheet) neuf.scrollTop = posSheet;
   if(window.scrollY !== posPage) window.scrollTo(0, posPage);
+  synchroHistorique();
 }
+
+/* ============================================================
+   BOUTON RETOUR
+   Chaque onglet visité et chaque fiche ou fenêtre ouverte laisse une entrée
+   dans l'historique du navigateur : le bouton retour du téléphone referme
+   d'abord ce qui est ouvert, puis remonte les onglets. Il ne quitte
+   l'application qu'une fois revenu à la première entrée.
+   ============================================================ */
+function synchroHistorique(){
+  const couvert = !!(state.projet || state.modal);
+  const h = history.state || {};
+  try{
+    if(couvert && !h.couvert) history.pushState({ tab:state.tab, couvert:true }, "");
+    else if(h.tab !== state.tab)
+      history[h.couvert ? "replaceState" : "pushState"]({ tab:state.tab, couvert }, "");
+    // Une fiche refermée par ses propres boutons laisse une entrée en double,
+    // que le retour saute (voir plus bas).
+    else if(!couvert && h.couvert) history.replaceState({ tab:state.tab }, "");
+  }catch(e){}
+}
+window.addEventListener("popstate", ev => {
+  const h = ev.state || {};
+  let ferme = false;
+  if(state.modal){
+    if(state.modal.type === "couleur" && state.modal.avant) appliquerAccent(state.modal.avant);
+    state.modal = null; ferme = true;
+  }
+  else if(state.projet){ state.projet = null; ferme = true; }
+  // Rien à refermer et même onglet : entrée en double, on la saute. Sur la
+  // première entrée, ce retour-là quitte l'application.
+  if(!ferme && (!h.tab || h.tab === state.tab)){ history.back(); return; }
+  if(h.tab && h.tab !== state.tab && TABS.some(x => x.id === h.tab)){
+    state.tab = h.tab; state.reorg = false; ecritSS(h.tab);
+    render(); window.scrollTo(0,0);
+    return;
+  }
+  render();
+});
 
 function dessiner(){
   $("#tabs").innerHTML = TABS.map(t =>
@@ -1701,14 +1749,19 @@ function vuePrevision(){
   h += '<div class="sect" style="margin-top:24px"><h2>Mouvements planifiés d\'ici là</h2>' +
     '<span class="cnt">' + (mv.length + av.length) + '</span></div>';
   if(!mv.length && !av.length) return h + '<div class="vide">Rien de planifié d\'ici cette date.</div>' + quatre;
-  h += '<div class="ops">' + av.map(o => ligneOp(o, null, true)).join("") + mv.map(m => {
-    const pl = m.plan, mt = pl.type === "ajout" ? pl.montant : -pl.montant;
-    return '<button class="op prev" data-act="modifier-plan" data-id="' + pl.id + '">' +
+  // Opérations ponctuelles et récurrences regroupées, rangées ensemble par
+  // date : celle de l'opération, ou la prochaine échéance de la récurrence.
+  const lignes = av.map(o => ({ date:o.date, html:ligneOp(o, null, true) })).concat(mv.map(m => {
+    const pl = m.plan;
+    return { date:m.date, html:'<button class="op prev" data-act="modifier-plan" data-id="' + pl.id + '">' +
       '<span class="op-ic">' + svg(pl.type === "ajout" ? "plus" : "moins",15,2.1) + '</span>' +
-      '<span class="op-mid"><span class="op-lib">' + esc(pl.libelle || (pl.type === "ajout" ? "Ajout" : "Dépense")) + '</span>' +
-      '<span class="op-met">' + esc(frDate(m.date, true) + "  ·  " + nomProjet(pl.projet)) + '</span></span>' +
-      '<span class="op-mt ' + cl$(mt) + '">' + fmt(mt, true) + '</span></button>';
-  }).join("") + '</div>';
+      '<span class="op-mid"><span class="op-lib">' + esc(pl.libelle || (pl.type === "ajout" ? "Ajout" : "Dépense")) +
+        '<span class="tagrec">récurrence</span></span>' +
+      '<span class="op-met"><span>' + esc(frDate(m.date, true) + "  ·  " + nomProjet(pl.projet)) + '</span>  ·  ' +
+        '<span>' + m.n + (m.n > 1 ? " échéances" : " échéance") + '</span></span></span>' +
+      '<span class="op-mt ' + cl$(m.total) + '">' + fmt(m.total, true) + '</span></button>' };
+  })).sort((a,b) => a.date.localeCompare(b.date));
+  h += '<div class="ops">' + lignes.map(x => x.html).join("") + '</div>';
   return h + quatre;
 }
 
@@ -3240,6 +3293,8 @@ async function demarrer(){
 
   const ong = litSS();
   if(ong && TABS.some(x => x.id === ong)) state.tab = ong;
+  // Après un rafraîchissement, l'entrée courante reprend l'onglet affiché.
+  try{ history.replaceState({ tab:state.tab }, ""); }catch(e){}
 
   state.neuf = DB.meta.vue !== VERSION;
   const n = materialiser();
