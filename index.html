@@ -224,6 +224,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-off
 .emopick button{width:34px;height:34px;border-radius:9px;border:1px solid var(--trait);font-size:17px;
   display:grid;place-items:center;background:var(--carte)}
 .emopick button.on{border-color:var(--acc);background:var(--accF)}
+.champ input.emolibre{margin-top:8px}
+.champ input.emolibre.on{border-color:var(--acc);background:var(--accF)}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .aide{font-size:12px;color:var(--gris2);margin-top:6px}
 
@@ -344,9 +346,13 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.5.0";
+const VERSION = "2.6.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.6.0", d:"2026-11-28", t:"Émoticônes du quotidien", l:[
+    "Nouvelle sélection d'émoticônes, pensée pour la maison et la vie de famille : couverts, lit, nounours, bague, et bien d'autres.",
+    "Un champ libre permet de taper n'importe quelle émoticône depuis le clavier quand la sélection ne suffit pas."
+  ]},
   { v:"2.5.0", d:"2026-11-23", t:"Retour et mouvements regroupés", l:[
     "Prévision : chaque récurrence tient sur une ligne dans les mouvements planifiés, à la date de sa prochaine échéance, avec le total des échéances d'ici la date choisie.",
     "Le bouton retour du téléphone referme la fiche ou la fenêtre ouverte, puis revient à l'onglet précédent ; il ne quitte l'application qu'une fois revenu au premier onglet."
@@ -572,7 +578,7 @@ const DICO = {
   "Historique":"History", "prévu":"planned", "Réinitialiser les filtres":"Clear filters",
   // formulaires
   "Montant":"Amount", "Libellé":"Description", "facultatif":"optional", "Date":"Date",
-  "Projet":"Project", "Émoticône":"Emoji", "Titre":"Title", "Aucune":"None",
+  "Projet":"Project", "Émoticône":"Emoji", "Ou tape la tienne depuis le clavier":"Or type your own from the keyboard", "Titre":"Title", "Aucune":"None",
   "Tout le solde":"Whole balance", "Depuis":"From", "Vers":"To",
   "Ajouter de l'argent":"Add money", "Dépenser":"Spend money",
   "Modifier l'opération":"Edit entry", "Modifier le projet":"Edit project",
@@ -1866,14 +1872,55 @@ function vueProjet(p){
    Une fois ouverte, la fenêtre n'est plus redessinée : les champs gardent
    ce que tu tapes. Les actions internes écrivent directement dans le DOM.
    ============================================================ */
+/* Des pictogrammes de projets concrets du quotidien, rangés par thème :
+   la maison pièce par pièce, la cuisine, la famille, la santé, les achats,
+   les déplacements, les loisirs, l'argent. Ce qui manque se tape au clavier. */
 const EMOJIS = [
-  "🏠","🚗","🍽️","✈️","🎁","💡","🛒","📚","🎮","🏥","👶","🐾","💼","🎓","🎬","☕","🧾","💰","🔧","🌱",
-  "🏦","💳","💶","🪙","📈","🎯","🛠️","🪑","🛋️","🧺","🚿","🔌","📱","💻","🎧","📷","🚲","🛵","⛽","🅿️",
-  "🍕","🍔","🍎","🥐","🍷","🎂","🍿","🧁","🏋️","⚽","🎾","🏔️","🏖️","⛺","🎪","🎨","🎸","🎲","🃏","🧩",
-  "😀","😎","🥰","🤩","🤗","😇","🙂","😴","🤑","🥳","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💖","💫",
-  "⭐","✨","🔥","🌈","🍀","🌸","🌞","🌙","🎄","🎃","🐶","🐱","🦊","🐼","🦉","🐢","🦋","🌊","⛰️","🗝️",
-  "🔒","🛡️","⏳","📌","🧭"
+  // maison et travaux
+  "🏠","🏡","🛏️","🛋️","🪑","🚪","🪟","🛁","🚿","🚽","🧺","🧹","🧽","🧼","🪴","🌳","🏊","🔑",
+  "🧰","🔧","🔨","🪛","🛠️","🎨","🖼️","💡","🔌","🔥","💧","📦",
+  // cuisine et courses
+  "🍴","🍽️","🥘","🍳","🛒","🥖","🍎","🥦","🧀","🍷","☕","🎂",
+  // famille et enfants
+  "👨‍👩‍👧‍👦","👶","🍼","🧸","🎒","✏️","📚","🎓","🧩","🎮","🎁","🎈","🎉","💐","💒",
+  // santé et soin
+  "🏥","💊","🩺","🦷","👓","💇","💄","🧴",
+  // vêtements et bijoux
+  "👕","👗","👟","👜","💍","💎","⌚",
+  // animaux
+  "🐶","🐱","🐾",
+  // déplacements et vacances
+  "🚗","⛽","🅿️","🚲","🛵","🚆","✈️","🧳","🏖️","⛺","⛷️",
+  // loisirs et sport
+  "⚽","🏋️","🎾","🎬","🎵","🎸","📷","📖",
+  // équipement
+  "📱","💻","📺","🖨️","🎧",
+  // argent et papiers
+  "💰","🐷","🏦","💳","💶","📈","🧾","📄","🛡️","⚖️","🗓️",
+  // fêtes et divers
+  "🎄","🎃","🐣","🎯","📌","⭐","❤️"
 ];
+
+/* Le choix de l'émoticône d'un projet ou d'un portefeuille : la sélection,
+   plus un champ libre où taper n'importe quelle émoticône du clavier. Seul le
+   premier caractère affiché est retenu, pour que la pastille reste lisible. */
+function premierGraphe(t){
+  t = (t || "").trim();
+  if(!t) return "";
+  try{ return new Intl.Segmenter(undefined, { granularity:"grapheme" }).segment(t)[Symbol.iterator]().next().value.segment; }
+  catch(e){ return Array.from(t)[0]; }
+}
+function choixEmoji(cur){
+  cur = cur || "";
+  const libre = cur && !EMOJIS.includes(cur) ? cur : "";
+  return '<div class="champ"><label>Émoticône <span style="color:var(--gris2)">facultatif</span></label>' +
+    '<input type="hidden" id="m-emoji" value="' + esc(cur) + '">' +
+    '<div class="emopick"><button data-act="emoji" data-id="" class="' + (!cur ? "on" : "") + '" title="Aucune">' + svg("croix",14,2) + '</button>' +
+    EMOJIS.map(e => '<button data-act="emoji" data-id="' + e + '" class="' + (cur === e ? "on" : "") + '">' + e + '</button>').join("") +
+    '</div>' +
+    '<input type="text" id="m-emoji-libre" class="emolibre' + (libre ? " on" : "") + '" autocomplete="off" autocorrect="off" spellcheck="false" ' +
+      'placeholder="Ou tape la tienne depuis le clavier" value="' + esc(libre) + '"></div>';
+}
 
 function champMontant(val, avecSolde, pid){
   return '<div class="champ"><label for="m-montant">Montant</label>' +
@@ -1937,11 +1984,7 @@ function vueModal(m){
     c = '<h3>' + (m.id ? "Modifier le projet" : "Nouveau projet") + '</h3>' +
       '<div class="champ"><label for="m-titre">Titre</label>' +
       '<input type="text" id="m-titre" autocomplete="off" placeholder="Loyer" value="' + esc(m.titre||"") + '"></div>' +
-      '<div class="champ"><label>Émoticône <span style="color:var(--gris2)">facultatif</span></label>' +
-      '<input type="hidden" id="m-emoji" value="' + esc(m.emoji||"") + '">' +
-      '<div class="emopick"><button data-act="emoji" data-id="" class="' + (!m.emoji ? "on" : "") + '" title="Aucune">' + svg("croix",14,2) + '</button>' +
-      EMOJIS.map(e => '<button data-act="emoji" data-id="' + e + '" class="' + (m.emoji === e ? "on" : "") + '">' + e + '</button>').join("") +
-      '</div></div>' +
+      choixEmoji(m.emoji) +
       (m.id ? "" : '<div class="champ"><label for="m-init">Solde initial <span style="color:var(--gris2)">facultatif</span></label>' +
         '<div class="mt-in"><input type="text" id="m-init" inputmode="decimal" autocomplete="off" placeholder="0,00">' +
         '<span class="mt-eur">€</span></div></div>') +
@@ -1991,11 +2034,7 @@ function vueModal(m){
     c = '<h3>' + (m.id ? "Modifier le portefeuille" : "Nouveau portefeuille") + '</h3>' +
       '<div class="champ"><label for="m-nom">Nom</label>' +
       '<input type="text" id="m-nom" autocomplete="off" placeholder="Perso" value="' + esc(m.nom || "") + '"></div>' +
-      '<div class="champ"><label>Émoticône <span style="color:var(--gris2)">facultatif</span></label>' +
-      '<input type="hidden" id="m-emoji" value="' + esc(m.emoji || "") + '">' +
-      '<div class="emopick"><button data-act="emoji" data-id="" class="' + (!m.emoji ? "on" : "") + '" title="Aucune">' + svg("croix",14,2) + '</button>' +
-      EMOJIS.map(e => '<button data-act="emoji" data-id="' + e + '" class="' + (m.emoji === e ? "on" : "") + '">' + e + '</button>').join("") +
-      '</div></div>' +
+      choixEmoji(m.emoji) +
       (m.id && pfs().length > 1 ? '<div class="btns" style="margin:16px 0 0">' +
         '<button class="btn dang wide" data-act="supprimer-pf" data-id="' + m.id + '">Supprimer</button></div>' : "") +
       boiteBoutons("Enregistrer", m.id ? "pf-enregistrer" : "pf-creer");
@@ -2306,6 +2345,8 @@ document.addEventListener("click", async ev => {
     const h = document.getElementById("m-emoji");
     if(h) h.value = id || "";
     el.parentNode.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.id === (id||"")));
+    const l = document.getElementById("m-emoji-libre");
+    if(l){ l.value = ""; l.classList.remove("on"); }
     return;
   }
   if(act === "projet-creer" || act === "projet-enregistrer"){
@@ -2573,6 +2614,19 @@ document.addEventListener("change", ev => {
 });
 /* La date de fin d'une récurrence se déduit de la date de début et du nombre
    d'occurrences : elle s'écrit toute seule pendant la saisie. */
+document.addEventListener("input", ev => {
+  if(ev.target.id !== "m-emoji-libre") return;
+  const e = premierGraphe(ev.target.value);
+  const h = document.getElementById("m-emoji");
+  if(h) h.value = e;
+  ev.target.classList.toggle("on", !!e);
+  // Une émoticône tapée qui figure dans la liste s'y allume aussi.
+  document.querySelectorAll(".emopick button").forEach(b => b.classList.toggle("on", b.dataset.id === e));
+});
+/* Le champ libre ne garde qu'un caractère : le reste disparaît en le quittant. */
+document.addEventListener("change", ev => {
+  if(ev.target.id === "m-emoji-libre") ev.target.value = premierGraphe(ev.target.value);
+});
 document.addEventListener("input", ev => {
   if(!ev.target.dataset || ev.target.dataset.live !== "plan") return;
   const fin = document.getElementById("m-fin");
