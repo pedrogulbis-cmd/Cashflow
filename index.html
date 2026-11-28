@@ -72,12 +72,14 @@ header.top{position:sticky;top:0;z-index:30;background:var(--voile);
   padding:11px 2px;border-bottom:1px solid var(--trait2)}
 .pfrow.on .pfn{color:var(--acc)}
 .pfcoche{width:26px;height:26px;flex:0 0 26px;border-radius:7px;display:grid;place-items:center;color:var(--acc)}
-.pfcoche.on{background:var(--acc);color:var(--surAcc)}
+
 .pfn{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .iconbtn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
   border:1px solid var(--trait);color:var(--texte);background:var(--carte)}
 .iconbtn:active{background:var(--fond2)}
 .iconbtn:disabled{opacity:.35;cursor:default}
+#pf-chip{background:var(--acc);border-color:var(--acc);color:var(--surAcc)}
+#pf-chip:active{filter:brightness(.9)}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--voile);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -360,7 +362,7 @@ const SCHEMA  = 3;
 const JOURNAL = [
   { v:"2.7.0", d:"2026-11-28", t:"Annuler et rétablir", l:[
     "Deux boutons dans l'entête annulent ou rétablissent la dernière modification : opération, projet, récurrence, portefeuille.",
-    "La case du portefeuille sélectionné prend la couleur d'accent."
+    "Le bouton de choix du portefeuille prend la couleur d'accent."
   ]},
   { v:"2.6.0", d:"2026-11-28", t:"Émoticônes du quotidien", l:[
     "Nouvelle sélection d'émoticônes, pensée pour la maison et la vie de famille : couverts, lit, nounours, bague, et bien d'autres.",
