@@ -71,10 +71,13 @@ header.top{position:sticky;top:0;z-index:30;background:var(--voile);
 .pfrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
   padding:11px 2px;border-bottom:1px solid var(--trait2)}
 .pfrow.on .pfn{color:var(--acc)}
+.pfcoche{width:26px;height:26px;flex:0 0 26px;border-radius:7px;display:grid;place-items:center;color:var(--acc)}
+.pfcoche.on{background:var(--acc);color:var(--surAcc)}
 .pfn{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .iconbtn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
   border:1px solid var(--trait);color:var(--texte);background:var(--carte)}
 .iconbtn:active{background:var(--fond2)}
+.iconbtn:disabled{opacity:.35;cursor:default}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--voile);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -320,6 +323,12 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
     </div>
     <button class="ver" id="ver-chip" data-act="journal-ouvrir" title="Voir les nouveautés"></button>
     <div class="top-sp"></div>
+    <button class="iconbtn" id="defaire-btn" data-act="defaire" aria-label="Annuler" title="Annuler" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+    <button class="iconbtn" id="refaire-btn" data-act="refaire" aria-label="Rétablir" title="Rétablir" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+    </button>
     <button class="iconbtn" id="pf-chip" data-act="portefeuilles" aria-label="Changer de portefeuille" title="Changer de portefeuille">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5 12 15l6-5.5"/></svg>
     </button>
@@ -346,9 +355,13 @@ html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
    SCHEMA  : structure des données. À incrémenter seulement quand le format
              change et qu'une migration devient nécessaire.
    Pour publier : incrémente VERSION, ajoute une entrée en tête de JOURNAL. */
-const VERSION = "2.6.0";
+const VERSION = "2.7.0";
 const SCHEMA  = 3;
 const JOURNAL = [
+  { v:"2.7.0", d:"2026-11-28", t:"Annuler et rétablir", l:[
+    "Deux boutons dans l'entête annulent ou rétablissent la dernière modification : opération, projet, récurrence, portefeuille.",
+    "La case du portefeuille sélectionné prend la couleur d'accent."
+  ]},
   { v:"2.6.0", d:"2026-11-28", t:"Émoticônes du quotidien", l:[
     "Nouvelle sélection d'émoticônes, pensée pour la maison et la vie de famille : couverts, lit, nounours, bague, et bien d'autres.",
     "Un champ libre permet de taper n'importe quelle émoticône depuis le clavier quand la sélection ne suffit pas."
@@ -578,7 +591,7 @@ const DICO = {
   "Historique":"History", "prévu":"planned", "Réinitialiser les filtres":"Clear filters",
   // formulaires
   "Montant":"Amount", "Libellé":"Description", "facultatif":"optional", "Date":"Date",
-  "Projet":"Project", "Émoticône":"Emoji", "Ou tape la tienne depuis le clavier":"Or type your own from the keyboard", "Titre":"Title", "Aucune":"None",
+  "Projet":"Project", "Émoticône":"Emoji", "Rétablir":"Redo", "Action annulée":"Undone", "Action rétablie":"Redone", "Ou tape la tienne depuis le clavier":"Or type your own from the keyboard", "Titre":"Title", "Aucune":"None",
   "Tout le solde":"Whole balance", "Depuis":"From", "Vers":"To",
   "Ajouter de l'argent":"Add money", "Dépenser":"Spend money",
   "Modifier l'opération":"Edit entry", "Modifier le projet":"Edit project",
@@ -939,6 +952,7 @@ let _fl, _cloud, _cloudQuand = 0;
    tes données, sinon chaque dépôt en appellerait un autre. */
 function planifier(interne){
   invalider();   // toute écriture rend les soldes en cache caducs
+  clearTimeout(annul.t); annul.t = setTimeout(consigner, 0);
   clearTimeout(_fl); _fl = setTimeout(ecouler, 150);
   if(interne) return;
   DB.meta.modifie = Date.now();
@@ -973,6 +987,60 @@ function sauverPf(x){ if(x) sale.portefeuilles.add(String(x.id)); sale.kv = true
 function supprimerPfDB(id){ delete DB.portefeuilles[id]; sale.supprPortefeuilles.add(String(id)); sale.kv = true; planifier(); }
 function supprimerOpDB(id){ delete DB.ops[id]; sale.supprOps.add(String(id)); sale.kv = true; planifier(); }
 function supprimerPlanDB(id){ delete DB.plans[id]; sale.supprPlans.add(String(id)); sale.kv = true; planifier(); }
+/* ---------- annuler / rétablir ----------
+   Les données (portefeuilles, projets, opérations, récurrences) sont
+   photographiées après chaque geste. Les écritures d'un même geste tombent
+   dans le même tour de boucle et ne font donc qu'une étape. Les réglages, les
+   filtres et le portefeuille affiché n'en font pas partie : changer de tri
+   ne s'annule pas. */
+const ANNUL_MAX = 50;
+const annul = { passe:[], futur:[], stable:null, t:0 };
+const TABLES = [["portefeuilles","supprPortefeuilles"], ["projets","supprProjets"], ["ops","supprOps"], ["plans","supprPlans"]];
+const photo = () => JSON.stringify({ portefeuilles:DB.portefeuilles, projets:DB.projets, ops:DB.ops, plans:DB.plans });
+function reposerAnnulation(){ annul.passe = []; annul.futur = []; annul.stable = photo(); majAnnulation(); }
+function consigner(){
+  clearTimeout(annul.t);
+  if(annul.stable === null) return;
+  const p = photo();
+  if(p === annul.stable) return;
+  annul.passe.push(annul.stable);
+  if(annul.passe.length > ANNUL_MAX) annul.passe.shift();
+  annul.futur = []; annul.stable = p;
+  majAnnulation();
+}
+function majAnnulation(){
+  const a = document.getElementById("defaire-btn"), r = document.getElementById("refaire-btn");
+  if(a) a.disabled = !annul.passe.length;
+  if(r) r.disabled = !annul.futur.length;
+}
+/* Remet les données dans l'état d'une photo, en n'écrivant que ce qui change. */
+function appliquerPhoto(json){
+  const d = JSON.parse(json);
+  TABLES.forEach(([t, suppr]) => {
+    const avant = DB[t], apres = d[t] || {};
+    Object.keys(avant).forEach(id => { if(!apres[id]) sale[suppr].add(String(id)); });
+    Object.keys(apres).forEach(id => {
+      sale[suppr].delete(String(id));
+      if(!avant[id] || JSON.stringify(avant[id]) !== JSON.stringify(apres[id])) sale[t].add(String(id));
+    });
+    DB[t] = apres;
+  });
+  if(!DB.portefeuilles[DB.settings.pf] && pfs()[0]) DB.settings.pf = pfs()[0].id;
+  annul.stable = json;   // avant planifier() : ce retour n'est pas un nouveau geste
+  sauver();
+}
+function deplacerDans(de, vers, msg){
+  consigner();   // un geste encore en attente compte avant de revenir en arrière
+  if(!de.length) return;
+  vers.push(annul.stable);
+  appliquerPhoto(de.pop());
+  corbeille = null; fermerToast();
+  state.modal = null;
+  if(state.projet && !DB.projets[state.projet]) state.projet = null;
+  majAnnulation(); toast(msg); render();
+}
+const defaire = () => deplacerDans(annul.passe, annul.futur, "Action annulée");
+const refaire = () => deplacerDans(annul.futur, annul.passe, "Action rétablie");
 function toutSalir(){
   Object.keys(DB.projets).forEach(id => sale.projets.add(id));
   Object.keys(DB.ops).forEach(id => sale.ops.add(id));
@@ -2016,7 +2084,7 @@ function vueModal(m){
         return '<div class="pfrow' + (x.id === PF() ? " on" : "") + '">' +
           '<button style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left" ' +
             'data-act="pf-choisir" data-id="' + x.id + '">' +
-            '<span style="width:26px;flex:0 0 26px;display:grid;place-items:center;color:var(--acc)">' +
+            '<span class="pfcoche' + (x.id === PF() ? " on" : "") + '">' +
               (x.id === PF() ? svg("check",16,2.2) : (x.emoji ? esc(x.emoji) : svg("bourse",15,1.7))) + '</span>' +
             '<span class="pfn"><span style="display:block">' + esc(x.nom) + '</span>' +
               '<span class="psub" style="display:block">' +
@@ -2268,6 +2336,8 @@ document.addEventListener("click", async ev => {
   }
 
   /* ---- annulation ---- */
+  if(act === "defaire"){ defaire(); return; }
+  if(act === "refaire"){ refaire(); return; }
   if(act === "annuler-suppr"){
     if(corbeille){
       const rev = corbeille.pf;
@@ -2636,6 +2706,12 @@ document.addEventListener("input", ev => {
   fin.textContent = frDate(plusMois(d, n-1), true);
 });
 document.addEventListener("keydown", ev => {
+  const saisie = /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName);
+  if((ev.ctrlKey || ev.metaKey) && !saisie && !state.modal){
+    const k = ev.key.toLowerCase();
+    if(k === "z" && !ev.shiftKey){ ev.preventDefault(); defaire(); return; }
+    if(k === "y" || (k === "z" && ev.shiftKey)){ ev.preventDefault(); refaire(); return; }
+  }
   if(ev.key === "Escape"){
     if(state.modal){ fermerModal(); return; }
     if(state.projet){ state.projet = null; render(); }
@@ -3352,6 +3428,7 @@ async function demarrer(){
 
   state.neuf = DB.meta.vue !== VERSION;
   const n = materialiser();
+  reposerAnnulation();
   render();
   majIcone();
   majQuota();
